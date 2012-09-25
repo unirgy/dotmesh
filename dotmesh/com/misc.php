@@ -39,6 +39,16 @@ class BUtil extends BClass
     * @var string
     */
     protected static $_hashSep = '$';
+    
+    /**
+    * Default character pool for random and sequence strings
+    * 
+    * Chars "c", "C" are ommited to avoid accidental obcene language
+    * Chars "0", "1", "I" are removed to avoid leading 0 and ambiguity in print
+    * 
+    * @var string
+    */
+    protected static $_defaultCharPool = '23456789abdefghijklmnopqrstuvwxyzABDEFGHJKLMNOPQRSTUVWXYZ';
 
     /**
     * Shortcut to help with IDE autocompletion
@@ -595,8 +605,11 @@ class BUtil extends BClass
     * @param int $strLen length of resulting string
     * @param string $chars allowed characters to be used
     */
-    public static function randomString($strLen=8, $chars='abcdefghijkmnopqrstuvwxyzABCDEFGHJKLMNOPQRSTUVWXYZ23456789')
+    public static function randomString($strLen=8, $chars=null)
     {
+        if (is_null($chars)) {
+            $chars = static::$_defaultCharPool;
+        }
         $charsLen = strlen($chars)-1;
         $str = '';
         for ($i=0; $i<$strLen; $i++) {
@@ -626,6 +639,29 @@ class BUtil extends BClass
         }
         return $pattern;
     }
+    
+    public static function nextStringValue($string='', $chars=null)
+    {
+        if (is_null($chars)) {
+            $chars = static::$_defaultCharPool; // avoid leading 0
+        }
+        $pos = strlen($string);
+        $lastChar = substr($chars, -1);
+        while (--$pos>=-1) {
+            if ($pos==-1) {
+                $string = $chars[0];
+                return $string;
+            } elseif ($string[$pos]===$lastChar) {
+                $string[$pos] = $chars[0];
+                continue;
+            } else {
+                $string[$pos] = $chars[strpos($chars, $string[$pos])+1];
+                return $string;
+            }
+        }
+        // should never get here
+        return $string;
+    }
 
     /**
     * Create or verify password hash using bcrypt
@@ -633,14 +669,15 @@ class BUtil extends BClass
     * @see http://bcrypt.sourceforge.net/
     * @param string $plain
     * @param string $hash
+    * @param string $prefix - 5 (SHA256) or 6 (SHA512)
     * @return boolean|string if $hash is null, return hash, otherwise return verification flag
     */
-    public static function bcrypt($plain, $hash=null)
+    public static function bcrypt($plain, $hash=null, $prefix=null)
     {
         $plain = substr($plain, 0, 55);
         if (is_null($hash)) {
-            $prefix = version_compare(phpversion(), '5.3.7', '>=') ? '2y' : '2a';
-            $cost = '10';
+            $prefix = !empty($prefix) ? $prefix : (version_compare(phpversion(), '5.3.7', '>=') ? '2y' : '2a');
+            $cost = ($prefix=='5' || $prefix=='6') ? 'rounds=5000' : '10';
             // speed up a bit salt generation, instead of:
             // $salt = static::randomString(22);
             $salt = substr(str_replace('+', '.', base64_encode(pack('N4', mt_rand(), mt_rand(), mt_rand(), mt_rand()))), 0, 22);
@@ -771,7 +808,7 @@ class BUtil extends BClass
     */
     public static function remoteHttp($method, $url, $data=array())
     {
-        $request = http_build_query($data);
+        $request = is_array($data) ? http_build_query($data) : $data;
         $timeout = 5;
         $userAgent = 'Mozilla/5.0';
         if ($method==='GET' && $data) {
@@ -1136,10 +1173,11 @@ class BData extends BClass implements ArrayAccess
 class BModelUser extends BModel
 {
     protected static $_sessionUser;
+    protected static $_sessionUserNamespace = 'user';
 
     public static function sessionUserId()
     {
-        $userId = BSession::i()->data('user_id');
+        $userId = BSession::i()->data(static::$_sessionUserNamespace.'_id');
         return $userId ? $userId : false;
     }
 
@@ -1196,7 +1234,10 @@ class BModelUser extends BModel
     {
         $this->set('last_login', BDb::now())->save();
 
-        BSession::i()->data('user', serialize($this));
+        BSession::i()->data(array(
+            static::$_sessionUserNamespace.'_id' => $this->id,
+            static::$_sessionUserNamespace => serialize($this->as_array()),
+        ));
         static::$_sessionUser = $this;
 
         if ($this->locale) {
@@ -1221,7 +1262,7 @@ class BModelUser extends BModel
 
     public static function logout()
     {
-        BSession::i()->data('user_id', false);
+        BSession::i()->data(static::$_sessionUserNamespace.'_id', false);
         static::$_sessionUser = null;
         BPubSub::i()->fire(__METHOD__.'.after');
     }

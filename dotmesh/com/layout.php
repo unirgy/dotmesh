@@ -1214,6 +1214,12 @@ class BViewHead extends BView
         $this->addMeta($name, $content, $httpEquiv);
         return $this;
     }
+    
+    public function canonical($href)
+    {
+        $this->addElement('link', 'canonical', array('tag'=>'<link rel="canonical" href="'.$href.'"/>'));
+        return $this;
+    }
 
     /**
     * Enable direct call of different item types as methods (js, css, icon, less)

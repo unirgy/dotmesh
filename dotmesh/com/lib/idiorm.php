@@ -1066,6 +1066,7 @@ exit;
 
             static::_log_query($query, $values);
 #$mem = memory_get_usage();
+#echo $query;
             $statement = static::$_db->prepare($query);
             $success = $statement->execute($values);
 #echo '('.(memory_get_usage()-$mem).') ';
