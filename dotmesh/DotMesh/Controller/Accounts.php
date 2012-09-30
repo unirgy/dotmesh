@@ -1,6 +1,6 @@
 <?php
 
-class DotMesh_Controller_Account extends DotMesh_Controler_Abstract
+class DotMesh_Controller_Accounts extends DotMesh_Controler_Abstract
 {
     public function action_setup()
     {
@@ -68,11 +68,55 @@ class DotMesh_Controller_Account extends DotMesh_Controler_Abstract
             BResponse::i()->redirect(BUtil::setUrlQuery($redirectUrl, $result));
         }
     }
+    
+    public function action_index()
+    {
+        if (!DotMesh_Model_User::isLoggedIn()) {
+            BResponse::i()->redirect(BApp::href());
+        }
+        BLayout::i()->applyLayout('/account');
+        BLayout::i()->view('account')->set('user', DotMesh_Model_User::i()->sessionUser());
+    }
+    
+    public function action_index__POST()
+    {
+        $r = BRequest::i();
+        $redirectUrl = $r->referrer() ? $r->referrer() : BApp::href();
+        try {
+            if (!DotMesh_Model_User::isLoggedIn()) {
+                throw new BException('Not logged in');
+            }
+            $user = DotMesh_Model_User::i()->sessionUser();
+            $user->updateFromPost($r->post('account'));
+            $result = array('status'=>'success', 'message'=>'Your account changes were saved');
+        } catch (BException $e) {
+            $result = array('status'=>'error', 'message'=>$e->getMessage());
+        } catch (Exception $e) {
+            $result = array('status'=>'error', 'message'=>$e->getMessage());
+        }
+        if ($r->xhr()) {
+            BResponse::i()->json($result);
+        } else {
+            BResponse::i()->redirect(BUtil::setUrlQuery($redirectUrl, $result));
+        }
+    }
+    
+    public function action_home()
+    {
+        BLayout::i()->applyLayout('/');
+        $hlp = DotMesh_Model_Post::i();
+        if (DotMesh_Model_User::isLoggedIn()) {
+            $orm = $hlp->myTimelineOrm();
+        } else {
+            $orm = $hlp->homeTimelineOrm();
+        }
+        $timeline = $hlp->fetchTimeline($orm);
+        BLayout::i()->view('timeline')->set('timeline', $timeline);
+    }
 
     public function action_signup()
     {
         BLayout::i()->applyLayout('/signup');
-        BResponse::i()->output();
     }
 
     public function action_signup__POST()
@@ -85,7 +129,7 @@ class DotMesh_Controller_Account extends DotMesh_Controler_Abstract
             } else {
                 $form = $r->post('signup');
             }
-            $user = Denteva_Model_User::i()->signup($form);
+            $user = DotMesh_Model_User::i()->signup($form)->login();
             $result = array('status'=>'success', 'message'=>'Sign up successful');
         } catch (BException $e) {
             $result = array('status'=>'error', 'message'=>$e->getMessage());

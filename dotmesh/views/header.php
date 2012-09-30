@@ -1,7 +1,16 @@
 <div>
-    <h1>DotMesh &trade;</h1>
+    <h1><a href="<?=BApp::href()?>">dotmesh &trade;</a></h1>
+    
+    <form name="top_search" method="get" action="<?=BApp::href('n/search')?>">
+        <fieldset>
+            <input type="text" name="q" required placeholder="Search terms"/>
+            <button type="submit"><?=$this->_('Search')?></button>
+        </fieldset>
+    </form>
+    
     <?php if (DotMesh_Model_User::i()->isLoggedIn()): ?>
-        <?=$this->_('Welcome, %s', DotMesh_Model_User::i()->sessionUser()->name)?>
+        <?=$this->_('Welcome, %s', DotMesh_Model_User::i()->sessionUser()->fullname())?> | 
+        <a href="<?=BApp::href('a/')?>"><?=$this->_('My Account')?></a> | 
         <a href="<?=BApp::href('a/logout')?>"><?=$this->_('Log Out')?></a>
     <?php else: ?>
         <form name="top_login" method="post" action="<?=BApp::href('a/login')?>">

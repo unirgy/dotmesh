@@ -4,6 +4,7 @@ class DotMesh_Model_Tag extends BModel
 {
     protected static $_origClass = __CLASS__;
     protected static $_table = 'dm_tag';
+    protected static $_cacheAuto = true;
     
     /**
     * Shortcut to help with IDE autocompletion
@@ -31,6 +32,8 @@ class DotMesh_Model_Tag extends BModel
             'p.echo_user_id is null or eu.is_blocked=0', // post is not echoed by globally blocked user
         ));
         if ($uId) {
+            $nodeBlock = DotMesh_Model_NodeBlock::table();
+            $userBlock = DotMesh_Model_UserBlocK::table();
             $orm->where(array(
                 "p.node_id not in (select block_node_id from {$nodeBlock} where user_id={$uId})", // post node is not blocked by user
                 "p.user_id not in (select block_user_id from {$userBlock} where user_id={$uId})", // post user is not blocked by user
@@ -42,7 +45,10 @@ class DotMesh_Model_Tag extends BModel
     
     public static function parseUri($uri) 
     {
-        $uri = str_replace('/u/', '/', $uri);
+        if (strpos($uri, '/')===false) { // local tag
+            return array(null, $uri);
+        }
+        $uri = str_replace('/t/', '/', $uri);
         $re = '|([a-zA-Z0-9][a-z0-9.-]+\.[a-zA-Z]{2,6})(\S*)/([a-zA-Z0-9_-]+)|';
         if (!preg_match($re, $uri, $m)) {
             return false;
@@ -50,10 +56,18 @@ class DotMesh_Model_Tag extends BModel
         return array($m[1].$m[2], $m[3]);
     }
     
+    public static function load($id, $field=null, $cache=false)
+    {
+        $model = parent::load($id, $field, $cache);
+        if ($model) $model->cacheStore('node_id,tagname');
+        return $model;
+    }
+    
     public static function find($uri, $create=false) 
     {
         list($nodeUri, $tagname) = static::parseUri($uri);
-        $node = DotMesh_Model_Node::i()->find($nodeUri, $create);
+        $nodeHlp = DotMesh_Model_Node::i();
+        $node = $nodeUri ? $nodeHlp->find($nodeUri, $create) : $nodeHlp->localNode();
         //$node->is_blocked?
         $data = array('node_id'=>$node->id, 'tagname'=>$tagname);
         $tag = static::load($data);

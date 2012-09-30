@@ -1087,6 +1087,38 @@ class BUtil extends BClass
         }
         return $source;
     }
+    
+    public static function timeAgo($ptime, $now=null)
+    {
+        if (!is_numeric($ptime)) {
+            $ptime = strtotime($ptime);
+        }
+        if (!$now) {
+            $now = time();
+        } elseif (!is_numeric($now)) {
+            $now = strtotime($now);
+        }  
+        $etime = $now - $ptime;
+        if ($etime < 1) {
+            return 'less than 1 second';
+        }
+        $a = array( 
+            12 * 30 * 24 * 60 * 60  =>  'year',
+            30 * 24 * 60 * 60       =>  'month',
+            24 * 60 * 60            =>  'day',
+            60 * 60                 =>  'hour',
+            60                      =>  'minute',
+            1                       =>  'second'
+        );
+        
+        foreach ($a as $secs => $str) {
+            $d = $etime / $secs;
+            if ($d >= 1) {
+                $r = round($d);
+                return $r . ' ' . $str . ($r > 1 ? 's' : '');
+            }
+        }
+    }
 }
 
 /**
@@ -1295,8 +1327,8 @@ class BModelUser extends BModel
             throw new Exception('Incomplete or invalid form data.');
         }
 
-        unset($r['id']);
-        $user = static::i()->create($r)->save();
+        $r = BUtil::maskFields($r, 'email,password');
+        $user = static::create($r)->save();
         if (($view = BLayout::i()->view('email/user-new-user'))) {
             $view->set('user', $user)->email();
         }

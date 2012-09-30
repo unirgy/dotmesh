@@ -493,7 +493,37 @@ class BRequest extends BClass
         }
         return false; // not csrf
     }
+    
+    /**
+    * Verify that HTTP_HOST or HTTP_ORIGIN
+    * 
+    * @param string $method (HOST|ORIGIN|OR|AND)
+    * @param string $explicitHost
+    * @return boolean
+    */
+    public static function verifyOriginHostIp($method='OR', $host=null)
+    {
+        $ip = static::ip();
+        if (!$host) {
+            $host = static::httpHost();
+        }
+        $origin = static::httpOrigin();
+        $hostMatches = $host && $method!='ORIGIN' ? in_array((array)gethostbynamel($host), $ip) : false;
+        $originMatches = $origin && $method!='HOST' ? in_array((array)gethostbynamel($origin), $ip) : false;
+        switch ($method) {
+            case 'HOST': return $hostMatches;
+            case 'ORIGIN': return $originMatches;
+            case 'AND': return $hostMatches && $originMatches;
+            case 'OR': return $hostMatches || $originMatches;
+        }
+        return false;
+    }
 
+    /**
+    * Get current request URL
+    * 
+    * @return string
+    */
     public static function currentUrl()
     {
         $webroot = rtrim(static::webRoot(), '/');

@@ -48,3 +48,31 @@ if ( window.XDomainRequest ) {
     });
 }
 })( jQuery );
+
+$(function() {
+    $('.timeline .image-link').each(function(idx, el) {
+        var span = $('<span class="image-inline"></span>').insertAfter(el);
+        var handle = $('<a href="#" class="image-expand">[+]</a>').appendTo(span);
+        var image;
+        handle.on('click', function(event) { 
+            span.toggleClass('shown'); 
+            if (!image) {
+                image = $('<img class="image-embed"/>').attr('src', $(el).data('src')).appendTo(span);
+            }
+            return false; 
+        });
+    });
+    $('.timeline .youtube-link').each(function(idx, el) {
+        var span = $('<span class="youtube-inline"></span>').insertAfter(el);
+        var handle = $('<a href="#" class="youtube-expand">[+]</a>').appendTo(span);
+        var video;
+        handle.on('click', function(event) { 
+            span.toggleClass('shown'); 
+            if (!video) {
+                video = $('<iframe class="youtube-player" type="text/html" width="440" height="280" frameborder="0"/>')
+                    .attr('src', $(el).data('src')).appendTo(span);
+            }
+            return false; 
+        });
+    });
+});

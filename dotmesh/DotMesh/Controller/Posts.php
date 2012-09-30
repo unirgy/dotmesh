@@ -1,6 +1,6 @@
 <?php
 
-class DotMesh_Controller_Post extends DotMesh_Controler_Abstract
+class DotMesh_Controller_Posts extends DotMesh_Controler_Abstract
 {
     public function action_index()
     {
@@ -8,23 +8,25 @@ class DotMesh_Controller_Post extends DotMesh_Controler_Abstract
         $hlp = DotMesh_Model_Post::i();
         $postname = $r->param('postname');
         if ($postname) {
-            $post = $hlp->load($postname, 'postname');
+            $post = DotMesh_Model_Node::i()->localNode()->post($postname);
             if (!$post) {
                 throw new BException('Invalid post identifier');
             }
         }
-        BLayout::i()->applyLayout('/post');
-        Blayout::i()->view('timeline')->set('timeline', DotMesh_Model_Post::i()->threadTimelineOrm()->find_many());
+        BLayout::i()->applyLayout('/thread');
+        $timeline = $hlp->fetchTimeline($post->threadTimelineOrm());
+        BLayout::i()->view('newpost')->set('post', $post);
+        Blayout::i()->view('timeline')->set('timeline', $timeline);
     }
     
     public function action_index__POST()
     {
         try {
+            $r = BRequest::i();
             $redirectUrl = BApp::href();
             if (!DotMesh_Model_User::isLoggedIn()) {
                 throw new BException('Not logged in');
             }
-            $r = BRequest::i();
             $hlp = DotMesh_Model_Post::i();
             $postname = $r->param('postname');
             if ($postname) {
@@ -39,8 +41,12 @@ class DotMesh_Controller_Post extends DotMesh_Controler_Abstract
                 if ($post) {
                     throw new BException('Invalid post action');
                 }
-                $post = $hlp->submitNewPost($r->post());
+                $data = $r->post();
+                $post = $hlp->submitNewPost($data);
                 $result = $post->result;
+                if ($post->thread_id) {
+                    $redirectUrl = $post->uri(true);
+                }
                 break;
             case 'star': case 'un-star':
                 $post->submitFeedback('star', $do=='star' ? 1 : 0);
@@ -55,8 +61,9 @@ class DotMesh_Controller_Post extends DotMesh_Controler_Abstract
                 $post->submitFeedback('score', $do=='score-down' ? -1 : 0);
                 break;
             case 'delete':
-                if (DotMesh_Model_User::sessionUserId()!==$post->user_id) {
-                    throw new BException('Post does not belong to logged in user');
+                $sessionUser = DotMesh_Model_User::sessionUser();
+                if ($sessionUser->id!==$post->user_id && !$sessionUser->is_admin) {
+                    throw new BException('Post does not belong to the logged in user');
                 }
                 $post->delete();
                 break;
@@ -73,6 +80,16 @@ class DotMesh_Controller_Post extends DotMesh_Controler_Abstract
         } else {
             BResponse::i()->redirect(BUtil::setUrlQuery($redirectUrl, $result));
         }
+    }
+    
+    public function action_reply()
+    {
+        
+    }
+    
+    public function action_reply__POST()
+    {
+        
     }
 
     public function action_json()

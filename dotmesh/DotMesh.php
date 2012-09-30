@@ -15,27 +15,30 @@ class DotMesh extends BClass
 {
     public static function bootstrap()
     {
+        BApp::m()->autoload();
+        
         BFrontController::i()
-            ->route('GET /', 'DotMesh_Controller.index')
-            ->route('GET /:term', 'DotMesh_Controller.catch_all')
+            ->route('GET /', 'DotMesh_Controller_Accounts.home')
+            ->route('GET /:term', 'DotMesh_Controller_Nodes.catch_all')
 
-
-            ->route('GET|POST /a/.action', 'DotMesh_Controller_Account')
-            ->route('GET|POST /n/.action', 'DotMesh_Controller_Node')
+            ->route('GET|POST /a/.action', 'DotMesh_Controller_Accounts')
+            ->route('GET|POST /n/.action', 'DotMesh_Controller_Nodes')
             
-            ->route('GET|POST|PUT|HEAD|OPTIONS /u/:username', 'DotMesh_Controller_User.index')
-            ->route('GET|POST|PUT|HEAD|OPTIONS /p/:postname', 'DotMesh_Controller_Post.index')
-            ->route('GET|POST|PUT|HEAD|OPTIONS /t/:tagname', 'DotMesh_Controller_Tag.index')
+            ->route('GET|POST|PUT|HEAD|OPTIONS /u/:username', 'DotMesh_Controller_Users.index')
+            ->route('GET|POST|PUT|HEAD|OPTIONS /p/:postname', 'DotMesh_Controller_Posts.index')
+            ->route('GET|POST|PUT|HEAD|OPTIONS /t/:tagname', 'DotMesh_Controller_Tags.index')
+            
+            ->route('GET|POST /p/:postname/reply', 'DotMesh_Controller_Posts.reply')
 
-            ->route('^(GET|POST|PUT|HEAD|OPTIONS) /u/([a-zA-Z0-9_]+)\.json$', 'DotMesh_Controller_User.json')
-            ->route('^(GET|POST|PUT|HEAD|OPTIONS) /p/([a-zA-Z0-9_]+)\.json$', 'DotMesh_Controller_Post.json')
-            ->route('^(GET|POST|PUT|HEAD|OPTIONS) /t/([a-zA-Z0-9_]+)\.json$', 'DotMesh_Controller_Tag.json')
+            ->route('^(GET|POST|PUT|HEAD|OPTIONS) /u/([a-zA-Z0-9_]+)\.json$', 'DotMesh_Controller_Users.json')
+            ->route('^(GET|POST|PUT|HEAD|OPTIONS) /p/([a-zA-Z0-9_]+)\.json$', 'DotMesh_Controller_Posts.json')
+            ->route('^(GET|POST|PUT|HEAD|OPTIONS) /t/([a-zA-Z0-9_]+)\.json$', 'DotMesh_Controller_Tags.json')
 
-            ->route('^GET /u/([a-zA-Z0-9_]+)\.rss$', 'DotMesh_Controller_User.rss')
-            ->route('^GET /p/([a-zA-Z0-9_]+)\.rss$', 'DotMesh_Controller_Post.rss')
-            ->route('^GET /t/([a-zA-Z0-9_]+)\.rss$', 'DotMesh_Controller_Tag.rss')
+            ->route('^GET /u/([a-zA-Z0-9_]+)\.rss$', 'DotMesh_Controller_Users.rss')
+            ->route('^GET /p/([a-zA-Z0-9_]+)\.rss$', 'DotMesh_Controller_Posts.rss')
+            ->route('^GET /t/([a-zA-Z0-9_]+)\.rss$', 'DotMesh_Controller_Tags.rss')
 
-            ->route('^GET /u/([a-zA-Z0-9_]+)\.(png|jpg|gif)$', 'DotMesh_Controller_User.thumb')
+            ->route('^GET /u/([a-zA-Z0-9_]+)\.(png|jpg|gif)$', 'DotMesh_Controller_Users.thumb')
         ;
 
         BLayout::i()
@@ -48,7 +51,7 @@ class DotMesh extends BClass
                     array('hook', 'header', 'views'=>array('header')),
                     array('hook', 'footer', 'views'=>array('footer')),
                     array('view', 'head', 'do'=>array(
-                        array('js', '{DotMesh}/css/dotmesh.css'),
+                        array('css', '{DotMesh}/css/dotmesh.css'),
                         array('js', '//ajax.googleapis.com/ajax/libs/jquery/1.8.1/jquery.min.js'),
                         //array('js', '{DotMesh}/js/jquery.min.js'),
                         array('js', '{DotMesh}/js/dotmesh.js'),
@@ -66,13 +69,17 @@ class DotMesh extends BClass
                     array('layout', 'base'),
                     array('hook', 'main', 'views'=>array('signup')),
                 ),
+                '/account' => array(
+                    array('layout', 'base'),
+                    array('hook', 'main', 'views'=>array('account')),
+                ),
                 '/search' => array(
                     array('layout', 'base'),
                     array('hook', 'main', 'views'=>array('search')),
                 ),
-                '/post' => array(
+                '/thread' => array(
                     array('layout', 'base'),
-                    array('hook', 'main', 'views'=>array('post')),
+                    array('hook', 'main', 'views'=>array('thread')),
                 ),
                 '/user' => array(
                     array('layout', 'base'),
