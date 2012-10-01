@@ -27,17 +27,17 @@ class DotMesh_Model_User extends BModelUser
         }
 
         $node = DotMesh_Model_Node::i()->localNode();
-        $r['private_key'] = BUtil::randomString(64);
+        $r['secret_key'] = BUtil::randomString(64);
         $user = $node->user($r['username']);
         if ($user) {
             if (!$user->password_hash) {
-                $r = BUtil::maskFields($r, 'email,firstname,lastname,private_key');
+                $r = BUtil::maskFields($r, 'email,firstname,lastname,secret_key');
                 $user->set($r)->setPassword($r['password'])->save();
             } else {
                 throw new Exception('User already registered');
             }
         } else {
-            $r = BUtil::maskFields($r, 'username,email,password,private_key,firstname,lastname,thumb_provider');
+            $r = BUtil::maskFields($r, 'username,email,password,secret_key,firstname,lastname,thumb_provider');
             $r['node_id'] = $node->id;
             $user = static::create($r)->save();
             if (($view = BLayout::i()->view('email/user-new-user'))) {
@@ -48,6 +48,26 @@ class DotMesh_Model_User extends BModelUser
             }
         }
         return $user;
+    }
+    
+    static public function authenticate($username, $password)
+    {
+        /** @var FCom_Admin_Model_User */
+        $user = static::orm()
+            ->where('node_id', DotMesh_Model_Node::i()->localNode()->id)
+            ->where(array('OR'=>array('username'=>$username, 'email'=>$username)))
+            ->find_one();
+        if (!$user || !$user->validatePassword($password)) {
+            return false;
+        }
+        return $user;
+    }
+    
+    public function beforeSave()
+    {
+        if (!parent::beforeSave()) return false;
+        $this->set('thumb_provider', 'gravatar', null);
+        return true;
     }
     
     public function sendEmailConfirmation()
@@ -109,7 +129,7 @@ class DotMesh_Model_User extends BModelUser
             $create = (array)$create;
             $create['node_id'] = $node->id;
             $create['username'] = $username;
-            unset($create['id'], $create['private_key'], $create['is_admin'], $create['is_confirmed'], $create['is_blocked']);
+            unset($create['id'], $create['secret_key'], $create['is_admin'], $create['is_confirmed'], $create['is_blocked']);
             $user = static::create($create)->save();
         }
         return $user;
@@ -162,7 +182,7 @@ class DotMesh_Model_User extends BModelUser
     
     public function generateRemoteSignature($node)
     {
-        return base64_encode(pack('H*', hash('sha512', $node->private_key.'|'.$this->private_key)));
+        return base64_encode(pack('H*', hash('sha512', $node->secret_key.'|'.$this->secret_key)));
     }
     
     public function validateRemoteSignature($node, $signature)

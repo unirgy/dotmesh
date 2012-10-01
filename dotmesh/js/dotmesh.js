@@ -75,4 +75,12 @@ $(function() {
             return false; 
         });
     });
+    $('.timeline .preview-expand').on('click', function(event) {
+        $(event.target).closest('.timeline-item').addClass('expanded');
+        return false;
+    });
+    $('.timeline .contents-collapse').on('click', function(event) {
+        $(event.target).closest('.timeline-item').removeClass('expanded');
+        return false;
+    });
 });

@@ -21,7 +21,20 @@ class DotMesh_Model_Node extends BModel
     public static function localNode()
     {
         if (is_null(static::$_localNode)) {
-            static::$_localNode = static::load(1);
+            $localNodeUri = BConfig::i()->get('modules/DotMesh/local_node_uri');
+            if ($localNodeUri) {
+                static::$_localNode = static::load($localNodeUri, 'uri');
+            } 
+            if (!static::$_localNode) {
+                $nodes = static::orm()->where('is_local', 1)->find_many();
+                $serverName = BRequest::i()->httpHost();
+                foreach ($nodes as $node) {
+                    if ($node->uri===$serverName || preg_match('#'.preg_quote($node->uri).'$#', $serverName)) {
+                        static::$_localNode = $node;
+                        break;
+                    }
+                }
+            }
         }
         return static::$_localNode;
     }
@@ -30,7 +43,7 @@ class DotMesh_Model_Node extends BModel
     {
         parent::afterCreate();
         $this->set('api_version', 1);
-        $this->set('private_key', BUtil::randomString(32), null);
+        $this->set('secret_key', BUtil::randomString(32), null);
     }
 
     public static function setup($form)
@@ -56,7 +69,7 @@ class DotMesh_Model_Node extends BModel
                 'username' => $form['username'],
                 'name' => $form['name'],
                 'email' => $form['email'],
-                'private_key' => BUtil::randomString(32),
+                'secret_key' => BUtil::randomString(32),
             ))->setPassword($form['password'])->save()->login();
 
             //BLayout::i()->view('email/user-new-user')->set('user', $user)->email();
@@ -93,7 +106,7 @@ class DotMesh_Model_Node extends BModel
         $node = static::load($uri, 'uri');
         if (!$node && $create) {
             $create = (array)$create;
-            unset($create['id'], $create['private_key'], $create['score'], $create['is_blocked']);
+            unset($create['id'], $create['secret_key'], $create['score'], $create['is_blocked']);
             $create['uri'] = $uri;
             $node = static::create($create)->save();
         }

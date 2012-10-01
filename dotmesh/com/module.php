@@ -491,6 +491,8 @@ class BModule extends BClass
     * @var array
     */
     static protected $_manifestCache = array();
+    
+    static protected $_defaultRunLevel = 'ONDEMAND';
 
     public $name;
     public $run_level;
@@ -553,6 +555,11 @@ class BModule extends BClass
     {
         return BClassRegistry::i()->instance(__CLASS__, $args, !$new);
     }
+    
+    public static function defaultRunLevel($runLevel)
+    {
+        static::$_defaultRunLevel = $runLevel;
+    }
 
     /**
     * Assign arguments as module parameters
@@ -583,7 +590,7 @@ class BModule extends BClass
             //$this->root_dir = BUtil::normalizePath($this->root_dir);
             //echo $this->root_dir."\n";
         }
-        $this->run_level = static::ONDEMAND; // disallow declaring run_level in manifest
+        $this->run_level = static::$_defaultRunLevel; // disallow declaring run_level in manifest
         /*
         if (!isset($this->run_level)) {
             $runLevel = BConfig::i()->get('request/module_run_level/'.$this->name);
@@ -809,10 +816,12 @@ class BModule extends BClass
             BDebug::debug('MODULE.BOOTSTRAP '.$includeFile);
             require_once ($includeFile);
         }
-        $start = BDebug::debug(BLocale::_('Start bootstrap for %s', array($this->name)));
-        call_user_func($this->bootstrap['callback']);
-        #$mod->run_status = BModule::LOADED;
-        BDebug::profile($start);
+        if (!empty($this->bootstrap['callback'])) {
+            $start = BDebug::debug(BLocale::_('Start bootstrap for %s', array($this->name)));
+            call_user_func($this->bootstrap['callback']);
+            #$mod->run_status = BModule::LOADED;
+            BDebug::profile($start);
+        }
         BDebug::debug(BLocale::_('End bootstrap for %s', array($this->name)));
         $this->run_status = BModule::LOADED;
         return $this;

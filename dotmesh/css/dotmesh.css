@@ -1,3 +1,7 @@
+.timeline .contents { display:none; }
+.timeline .expanded .preview { display:none; }
+.timeline .expanded .contents { display:block; }
+
 .timeline .hover-block, .timeline .hover-inline { display:none; }
 .timeline li:hover .hover-inline { display:inline !important; }
 .timeline li:hover .hover-block { display:block !important; }

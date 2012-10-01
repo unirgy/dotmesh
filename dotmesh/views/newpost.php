@@ -11,9 +11,9 @@
             <img src="<?=$user->thumbUri(50)?>" alt="<?=$this->q($user->fullname())?>" width="100" height="100"/>
         </a>
         <div><strong><?=$this->q($user->fullname())?></strong>
-        <textarea id="contents" name="contents"></textarea>
+        <textarea id="contents" name="contents"><?=$this->q($this->contents)?></textarea>
         <label for="is_private">Private?</label><input type="checkbox" name="is_private" id="is_private"/>
-        <label for="echo_twitter">Post on Twitter?</label><input type="checkbox" name="echo_twitter" id="echo_twitter"/>
+        <?=$this->hook('newpost-flags')?>
         <button type="submit" class="button" name="do" value="new">Post</button>
     </fieldset>
 </form>

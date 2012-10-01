@@ -1088,7 +1088,7 @@ class BUtil extends BClass
         return $source;
     }
     
-    public static function timeAgo($ptime, $now=null)
+    public static function timeAgo($ptime, $now=null, $long=false)
     {
         if (!is_numeric($ptime)) {
             $ptime = strtotime($ptime);
@@ -1115,7 +1115,7 @@ class BUtil extends BClass
             $d = $etime / $secs;
             if ($d >= 1) {
                 $r = round($d);
-                return $r . ' ' . $str . ($r > 1 ? 's' : '');
+                return $r . ($long ? ' ' . $str . ($r > 1 ? 's' : '') : $str[0]);
             }
         }
     }
@@ -1278,7 +1278,7 @@ class BModelUser extends BModel
         if ($this->timezone) {
             date_default_timezone_set($this->timezone);
         }
-        BPubSub::i()->fire(__METHOD__.'.after', array('user'=>$user));
+        BPubSub::i()->fire(__METHOD__.'.after', array('user'=>$this));
         return $this;
     }
 

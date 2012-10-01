@@ -1,0 +1,29 @@
+<?php 
+
+$config = array();
+
+$config['db']['host']         = 'localhost';
+$config['db']['username']     = 'root';
+$config['db']['password']     = '';
+$config['db']['dbname']       = 'dotmesh';
+$config['db']['table_prefix'] = '';
+#$config['db']['logging']      = 1;
+$config['db']['implicit_migration'] = 1;
+
+$config['web']['hide_script_name'] = 1;
+
+$config['cookie']['session_check_ip'] = 1;
+#$config['cookie']['session_handler'] = 'apc';
+#$config['cookie']['timeout'] = 3600;
+#$config['cookie']['domain'] = null;
+#$config['cookie']['path'] = null;
+
+$config['modules']['DotMesh']['thumb_root_path'] = 'dotmesh/thumbs';
+
+#$config['request']['module_run_level']['BMarkdownExtra'] = 'ONDEMAND';
+
+#$config['request']['module_run_level']['BTwitterAdapter'] = 'ONDEMAND';
+$config['modules']['BTwitterAdapter']['consumer_key'] = '';
+$config['modules']['BTwitterAdapter']['consumer_secret'] = '';
+
+return $config;

@@ -1,14 +1,11 @@
 <?php
 
+BModule::defaultRunLevel(BModule::REQUESTED);
+
 BModuleRegistry::i()->addModule('DotMesh', array(
     'version' => '0.1.0',
     'bootstrap' => array('callback'=>'DotMesh::bootstrap'),
-));
-
-BConfig::i()->add(array(
-    'request' => array(
-        'module_run_level' => array('DotMesh' => 'REQUIRED'),
-    ),
+    'migrate' => 'DotMesh_Migrate',
 ));
 
 class DotMesh extends BClass
@@ -166,5 +163,8 @@ class DotMesh_Model_UserBlock extends BModel
 
 class DotMesh_Migrate extends BClass
 {
-
+    public static function run()
+    {
+        
+    }
 }

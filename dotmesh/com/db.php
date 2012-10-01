@@ -1958,7 +1958,7 @@ class BModel extends Model
         }
 
         if (($cache =& static::$_cache[$this->_origClass()])) {
-            foreach ($cache as $k=>$cache) {
+            foreach ($cache as $k=>$c) {
                 $keyValue = $this->get($k);
                 if (!empty(static::$_cacheFlags[$k]['key_lower'])) $keyValue = strtolower($keyValue);
                 unset($cache[$k][$keyValue]);

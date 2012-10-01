@@ -106,7 +106,9 @@ class DotMesh_Model_Post extends BModel
     public function homeTimelineOrm()
     {
         $orm = static::timelineOrm();
-        $orm->where('p.is_private', 0);
+        $localNode = DotMesh_Model_Node::i()->localNode();
+        $orm->where('p.is_private', 0)
+            ->where('p.node_id', $localNode->id);
         return $orm;
     }
     
@@ -163,7 +165,7 @@ class DotMesh_Model_Post extends BModel
             "p.id={$threadId} or p.thread_id={$threadId}",
             "p.user_id={$pubUserId} or p.echo_user_id={$pubUserId}",
             "p.is_private=0".($uId ? " or p.id in (select post_id from {$postUser} where user_id={$uId})" : ''),
-        )));
+        )))->select("(p.id={$threadId})", 'expanded');
         
         return $orm;
     }
@@ -211,7 +213,7 @@ class DotMesh_Model_Post extends BModel
     public static function submitNewPost($r)
     {
         $contentLines = explode("\n", trim($r['contents']));
-        $preview = sizeof($contentLines)>1 ? $contentLines[0] : BUtil::previewText($r['contents'], 140);
+        $preview = sizeof($contentLines)>1 ? $contentLines[0] : substr($r['contents'], 0, 140);
         
         $localNode = DotMesh_Model_Node::localNode();
         $data = array(
@@ -234,6 +236,8 @@ class DotMesh_Model_Post extends BModel
         $post = static::create($data)->save();
         
         $post->collectUsersAndTags();
+        
+        BPubSub::i()->fire(__METHOD__.'.after', array('post'=>$post));
         
         return $post;
     }
@@ -389,6 +393,8 @@ class DotMesh_Model_Post extends BModel
         static::_formatDotMeshLinks($contents);
         static::_formatImageLinks($contents);
         static::_formatYouTubeLinks($contents);
+        
+        //$contents = nl2br($contents);
         
         BPubSub::i()->fire(__METHOD__, array('contents'=>&$contents, 'preview'=>$preview));
         
