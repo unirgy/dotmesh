@@ -1,3 +1,4 @@
+<?php defined('DOTMESH_ROOT_DIR') || die ?>
 <?php $user = $this->user ?>
 <div class="site-main clearfix">
 	<div class="user-profile-block">

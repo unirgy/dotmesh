@@ -3,10 +3,12 @@
 
 /* Generic exception class
  */
+ if (!class_exists('OAuthException')) {
 class OAuthException extends Exception {
   // pass
 }
-
+ }
+ 
 class OAuthConsumer {
   public $key;
   public $secret;

@@ -769,7 +769,8 @@ class BORM extends ORMWrapper
      * Set up the database connection used by the class.
      * Use BPDO for nested transactions
      */
-    protected static function _setup_db() {
+    protected static function _setup_db() 
+    {
         if (!is_object(static::$_db)) {
             $connection_string = static::$_config['connection_string'];
             $username = static::$_config['username'];
@@ -778,7 +779,15 @@ class BORM extends ORMWrapper
             if (empty($driver_options[PDO::MYSQL_ATTR_INIT_COMMAND])) { //ADDED
                 $driver_options[PDO::MYSQL_ATTR_INIT_COMMAND] = "SET NAMES utf8";
             }
-            $db = new BPDO($connection_string, $username, $password, $driver_options); //UPDATED
+            try { //ADDED: hide connection details from the error if not in DEBUG mode
+                $db = new BPDO($connection_string, $username, $password, $driver_options); //UPDATED
+            } catch (PDOException $e) { 
+                if (BDebug::is('DEBUG')) {
+                    throw $e;
+                } else {
+                    throw new PDOException('Could not connect to database');
+                }
+            }
             $db->setAttribute(PDO::ATTR_ERRMODE, static::$_config['error_mode']);
             static::set_db($db);
         }
@@ -789,7 +798,8 @@ class BORM extends ORMWrapper
      * This is public in case the ORM should use a ready-instantiated
      * PDO object as its database connection.
      */
-    public static function set_db($db, $config=null) {
+    public static function set_db($db, $config=null) 
+    {
         if (!is_null($config)) {
             static::$_config = array_merge(static::$_config, $config);
         }

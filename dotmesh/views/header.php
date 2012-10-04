@@ -1,3 +1,4 @@
+<?php defined('DOTMESH_ROOT_DIR') || die ?>
 <?php
 $node = DotMesh_Model_Node::i()->localNode();
 $user = DotMesh_Model_User::i()->sessionUser();

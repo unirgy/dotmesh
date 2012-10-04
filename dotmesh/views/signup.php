@@ -1,3 +1,4 @@
+<?php defined('DOTMESH_ROOT_DIR') || die ?>
 <h2><?=$this->_('Sign Up')?></h2>
 <form name="signup" method="post" action="<?=BApp::href('a/signup')?>">
     <fieldset>

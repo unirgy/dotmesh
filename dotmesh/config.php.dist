@@ -8,7 +8,7 @@ $config['db']['password']     = '';
 $config['db']['dbname']       = 'dotmesh';
 $config['db']['table_prefix'] = '';
 #$config['db']['logging']      = 1;
-$config['db']['implicit_migration'] = 1;
+#$config['db']['implicit_migration'] = 1;
 
 $config['web']['hide_script_name'] = 1;
 

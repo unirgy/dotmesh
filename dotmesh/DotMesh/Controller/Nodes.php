@@ -2,11 +2,47 @@
 
 class DotMesh_Controller_Nodes extends DotMesh_Controler_Abstract
 {
-    public function action_noroute()
+    public function action_404()
     {
         BLayout::i()->applyLayout('404');
     }
     
+    public function action_503()
+    {
+        BLayout::I()->applyLayout('503');
+    }
+        
+    public function action_setup()
+    {
+        if (DotMesh_Model_Node::i()->localNode()) {
+            BResponse::i()->redirect(BApp::href());
+        }
+        $r = BRequest::i();
+        BLayout::i()->view('setup')->set(array(
+            'node_uri' => trim($r->httpHost().'/'.$r->webRoot(), '/'),
+            'is_https' => $r->https(),
+            'is_modrewrite' => $r->modRewriteEnabled(),
+        ));
+        BLayout::i()->applyLayout('/setup');
+    }
+
+    public function action_setup__POST()
+    {
+        $redirectUrl = BApp::href();
+        try {
+            if (DotMesh_Model_Node::i()->localNode()) {
+                BResponse::i()->redirect(BApp::href());
+            }
+            $form = BRequest::i()->post('setup');
+            $node = DotMesh_Model_Node::i()->setup($form);
+        } catch (BException $e) {
+            $result = array('status'=>'error', 'message'=>$e->getMessage());
+        } catch (Exception $e) {
+            $result = array('status'=>'error', 'message'=>$e->getMessage());
+        }
+        BResponse::i()->redirect(BUtil::setUrlQuery($redirectUrl, $result));
+    }
+
     public function action_index()
     {
         $hlp = DotMesh_Model_Post::i();

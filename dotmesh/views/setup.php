@@ -1,5 +1,14 @@
+<?php defined('DOTMESH_ROOT_DIR') || die ?>
+<?php if (!BConfig::i()->get('modules/DotMesh/configured')): ?>
+
+<h2><?=$this->_('Please configure config.php using directions in the file')?></h2>
+
+<?php return; endif ?>
+
+
+
 <h2><?=$this->_('Setup the node and admin user')?></h2>
-<form name="setup" method="post" action="<?=BApp::href('a/setup')?>">
+<form name="setup" method="post" action="<?=BApp::href('n/setup')?>">
     <fieldset>
         <label for="node_uri"><?=$this->_('This Node URI')?></label>
         <input type="text" required id="node_uri" name="setup[node_uri]" title="Format: yourserver.com/optional/path" placeholder="yourserver.com/path_to_dotmesh" value="<?=$this->node_uri?>"/>

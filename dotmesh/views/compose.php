@@ -1,3 +1,4 @@
+<?php defined('DOTMESH_ROOT_DIR') || die ?>
 <?php $user = DotMesh_Model_User::i()->sessionUser() ?>
 <section class="new-post-block <?=!empty($user->preferences['default_private']) ? 'private-post' : '' ?> clearfix">
 	<aside class="new-post-block-left">

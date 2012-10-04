@@ -1,12 +1,16 @@
 <?php
 
-BModule::defaultRunLevel(BModule::REQUESTED);
+if (defined('DOTMESH_CONFIGURED')) {
+    BModule::defaultRunLevel(BModule::REQUESTED);
+}
 
 BModuleRegistry::i()->addModule('DotMesh', array(
     'version' => '0.1.0',
     'bootstrap' => array('callback'=>'DotMesh::bootstrap'),
     'migrate' => 'DotMesh_Migrate',
 ));
+
+BConfig::i()->set('request/module_run_level/DotMesh', 'REQUIRED');
 
 class DotMesh extends BClass
 {
@@ -15,7 +19,7 @@ class DotMesh extends BClass
         BApp::m()->autoload();
         
         BFrontController::i()
-            ->route('_ /noroute', 'DotMesh_Controller_Nodes.noroute', array(), null, false)
+            ->route('_ /noroute', 'DotMesh_Controller_Nodes.404', array(), null, false)
             
             ->route('GET /', 'DotMesh_Controller_Accounts.home')
             ->route('GET /:term', 'DotMesh_Controller_Nodes.catch_all')
@@ -63,6 +67,10 @@ class DotMesh extends BClass
                 '404' => array(
                     array('layout', 'base'),
                     array('hook', 'main', 'views'=>array('404')),
+                ),
+                '503' => array(
+                    array('layout', 'base'),
+                    array('hook', 'main', 'views'=>array('503')),
                 ),
                 'xhr-timeline' => array(
                     array('root', 'timeline'),
@@ -118,8 +126,19 @@ class DotMesh_Controler_Abstract extends BActionController
             return false;
         }
         $r = BRequest::i();
-        if (!DotMesh_Model_Node::i()->localNode() && $r->rawPath()!=='/a/setup') {
-            BResponse::i()->redirect(BApp::href('a/setup'));
+        if (!($r->method()==='GET' && $r->rawPath()==='/n/setup')) {
+            if (!defined('DOTMESH_CONFIGURED')) {
+                BResponse::i()->redirect(BApp::href('n/setup'));
+            }
+            try {
+                BMigrate::i()->migrateModules(true);
+            } catch (PDOException $e) {
+                $this->forward('503', 'DotMesh_Controller_Nodes', array('exception'=>$e));
+                return false;
+            }
+            if (!DotMesh_Model_Node::i()->localNode()) {
+                BResponse::i()->redirect(BApp::href('n/setup'));
+            }
         }
         if (($guest = $r->get('guest_uri'))) {
             DotMesh_Model_User::i()->acceptGuest($guest, $r->get('guest_signature'));

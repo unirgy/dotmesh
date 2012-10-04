@@ -1,3 +1,4 @@
+<?php defined('DOTMESH_ROOT_DIR') || die ?>
 <div class="site-main clearfix">
 	<?php $user = DotMesh_Model_User::i()->sessionUser(); ?>
 		<?=$this->view('compose')?>
