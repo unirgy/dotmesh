@@ -649,7 +649,7 @@ class BUtil extends BClass
         $lastChar = substr($chars, -1);
         while (--$pos>=-1) {
             if ($pos==-1) {
-                $string = $chars[0];
+                $string = $chars[0].$string;
                 return $string;
             } elseif ($string[$pos]===$lastChar) {
                 $string[$pos] = $chars[0];
@@ -938,7 +938,10 @@ class BUtil extends BClass
             return;
         }
         if (!is_dir($dir)) {
-            mkdir($dir, 0777, true);
+            @$res = mkdir($dir, 0777, true);
+            if (!$res) {
+                BDebug::warning("Can't create directory: ".$dir);
+            }
         }
     }
 
@@ -1523,6 +1526,8 @@ class BDebug extends BClass
 
     static protected $_verboseBacktrace = array();
 
+    static protected $_collectedErrors = array();
+
     /**
     * Contructor, remember script start time for delta timestamps
     *
@@ -1734,32 +1739,50 @@ class BDebug extends BClass
 
     public static function alert($msg, $stackPop=0)
     {
+        self::i()->collectError($msg);
         return self::trigger(self::ALERT, $msg, $stackPop+1);
     }
 
     public static function critical($msg, $stackPop=0)
     {
+        self::i()->collectError($msg);
         return self::trigger(self::CRITICAL, $msg, $stackPop+1);
     }
 
     public static function error($msg, $stackPop=0)
     {
+        self::i()->collectError($msg);
         return self::trigger(self::ERROR, $msg, $stackPop+1);
     }
 
     public static function warning($msg, $stackPop=0)
     {
+        self::i()->collectError($msg);
         return self::trigger(self::WARNING, $msg, $stackPop+1);
     }
 
     public static function notice($msg, $stackPop=0)
     {
+        self::i()->collectError($msg);
         return self::trigger(self::NOTICE, $msg, $stackPop+1);
     }
 
     public static function info($msg, $stackPop=0)
     {
+        self::i()->collectError($msg);
         return self::trigger(self::INFO, $msg, $stackPop+1);
+    }
+
+    public function collectError($msg, $type=self::ERROR)
+    {
+        self::$_collectedErrors[$type][] = $msg;
+    }
+
+    public function getCollectedErrors($type=self::ERROR)
+    {
+        if (!empty(self::$_collectedErrors[$type])) {
+            return self::$_collectedErrors[$type];
+        }
     }
 
     public static function debug($msg, $stackPop=0)

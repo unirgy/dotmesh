@@ -7,18 +7,23 @@ class DotMesh_Controller_Posts extends DotMesh_Controler_Abstract
         $r = BRequest::i();
         $hlp = DotMesh_Model_Post::i();
         $postname = $r->param('postname');
-        if ($postname) {
-            $post = DotMesh_Model_Node::i()->localNode()->post($postname);
-            if (!$post) {
-                throw new BException('Invalid post identifier');
-            }
+        $post = DotMesh_Model_Node::i()->localNode()->post($postname);
+        if (!$post) {
+            $this->forward(true);
+            return;
         }
-        BLayout::i()->applyLayout('/thread');
+
         $timeline = $hlp->fetchTimeline($post->threadTimelineOrm());
-        BLayout::i()->view('newpost')->set('post', $post);
         Blayout::i()->view('timeline')->set('timeline', $timeline);
+
+        if ($r->xhr()) {
+            BLayout::i()->applyLayout('xhr-timeline');
+        } else {
+            BLayout::i()->applyLayout('/thread');
+            BLayout::i()->view('compose')->set('post', $post);
+        }
     }
-    
+
     public function action_index__POST()
     {
         try {
@@ -47,19 +52,9 @@ class DotMesh_Controller_Posts extends DotMesh_Controler_Abstract
                 if ($post->thread_id) {
                     $redirectUrl = $post->uri(true);
                 }
+                $result['message'] = 'Your post has been submited';
                 break;
-            case 'star': case 'un-star':
-                $post->submitFeedback('star', $do=='star' ? 1 : 0);
-                break;
-            case 'report': case 'un-report':
-                $post->submitFeedback('report', $do=='report' ? 1 : 0);
-                break;
-            case 'score-up': case 'un-score-up':
-                $post->submitFeedback('score', $do=='score-up' ? 1 : 0);
-                break;
-            case 'score-down': case 'un-score-down':
-                $post->submitFeedback('score', $do=='score-down' ? -1 : 0);
-                break;
+
             case 'delete':
                 $sessionUser = DotMesh_Model_User::sessionUser();
                 if ($sessionUser->id!==$post->user_id && !$sessionUser->is_admin) {
@@ -68,8 +63,12 @@ class DotMesh_Controller_Posts extends DotMesh_Controler_Abstract
                 $post->delete();
                 break;
             }
+            foreach (explode(',','echo,star,report,vote_up,vote_down') as $f) {
+                if (($fb = $r->post($f))) {
+                    $post->submitFeedback($f, $fb);
+                }
+            }
             $result['status'] = 'success';
-            $result['message'] = 'Your post has been submited';
         } catch (BException $e) {
             $result = array('status'=>'error', 'message'=>$e->getMessage());
         } catch (Exception $e) {
@@ -81,20 +80,55 @@ class DotMesh_Controller_Posts extends DotMesh_Controler_Abstract
             BResponse::i()->redirect(BUtil::setUrlQuery($redirectUrl, $result));
         }
     }
-    
+
     public function action_reply()
     {
-        
+
     }
-    
+
     public function action_reply__POST()
     {
-        
+
     }
 
-    public function action_json()
+    public function action_api1_json()
     {
+        try {
+            if (!DotMesh_Model_User::isLoggedIn()) {
+                throw new BException('Not logged in');
+            }
+            $request = BRequest::i()->json();
+            if (!$request) {
+                $request = BRequest::i()->post();
+            }
+            if (empty($request['type'])) {
+                throw new BException('Invalid request type');
+            }
+            $postname = BRequest::i()->param(2);
+            $post = DotMesh_Model_Post::i()->find($postname);
+            if (!$post) {
+                throw new BException('Invalid post');
+            }
+            switch ($request['type']) {
+            case 'feedback':
+                $post->submitFeedback($request['field'], $request['value']);
+                $result = array('status'=>'success', 'message'=>'Feedback submitted');
+                $orm = DotMesh_Model_PostFeedback::i()->orm()->where('post_id', $post->id);
+                foreach (explode(',','echo,star,flag,vote_up,vote_down') as $f) {
+                    $orm->select('(sum('.$f.'))', $f);
+                    $result['value'][$f] = (int)$post->feedback->$f;
+                }
+                $total = $orm->find_one();
+                foreach ($total->as_array() as $k=>$v) {
+                    $result['total'][$k] = $v ? $v : '';
+                }
+                break;
+            }
+        } catch (Exception $e) {
+            $result = array('status'=>'error', 'message'=>$e->getMessage());
+        }
 
+        BResponse::i()->json($result);
     }
 
     public function action_rss()

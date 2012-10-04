@@ -2,9 +2,23 @@
 
 class DotMesh_Controller_Nodes extends DotMesh_Controler_Abstract
 {
+    public function action_noroute()
+    {
+        BLayout::i()->applyLayout('404');
+    }
+    
     public function action_index()
     {
-        $this->forward('home', 'DotMesh_Controller_Accounts');
+        $hlp = DotMesh_Model_Post::i();
+        $orm = $hlp->publicTimelineOrm();
+        $timeline = $hlp->fetchTimeline($orm);
+        BLayout::i()->view('timeline')->set('timeline', $timeline);
+        
+        if (BRequest::i()->xhr()) {
+            BLayout::i()->applyLayout('xhr-timeline');
+        } else {
+            BLayout::i()->applyLayout('/public');
+        }
     }
     
     public function action_index__POST()
@@ -34,10 +48,15 @@ class DotMesh_Controller_Nodes extends DotMesh_Controler_Abstract
             $terms = explode(' ', $q);
             BResponse::i()->redirect($node->uri('t', true).substr($terms[0], 1));
         }
-        BLayout::i()->applyLayout('/search');
         $hlp = DotMesh_Model_Post::i();
         $timeline = $hlp->fetchTimeline($hlp->searchTimelineOrm($q));
         Blayout::i()->view('timeline')->set('timeline', $timeline);
+        
+        if ($r->xhr()) {
+            BLayout::i()->applyLayout('xhr-timeline');
+        } else {
+            BLayout::i()->applyLayout('/search');
+        }
     }
     
     public function action_catch_all()

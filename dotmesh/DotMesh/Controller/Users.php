@@ -4,20 +4,30 @@ class DotMesh_Controller_Users extends DotMesh_Controler_Abstract
 {
     public function action_index()
     {
-        $username = BRequest::i()->param('username');
+        $r = BRequest::i();
+        $username = $r->param('username');
         $user = DotMesh_Model_Node::i()->localNode()->user($username);
+        if (!$user) {
+            $this->forward(true);
+            return;
+        }
         $timeline = DotMesh_Model_Post::i()->fetchTimeline($user->userTimelineOrm());
-        BLayout::i()->applyLayout('/user');
-        BLayout::i()->view('user')->set('user', $user);
         BLayout::i()->view('timeline')->set('timeline', $timeline);
+        
+        if ($r->xhr()) {
+            BLayout::i()->applyLayout('xhr-timeline');
+        } else {
+            BLayout::i()->applyLayout('/user');
+            BLayout::i()->view('user')->set('user', $user);
+        }
     }
     
-    public function action_json()
+    public function action_api1_json()
     {
 
     }
 
-    public function action_rss()
+    public function action_feed_rss()
     {
 
     }

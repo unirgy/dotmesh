@@ -4,18 +4,18 @@ class DotMesh_Model_User extends BModelUser
     protected static $_origClass = __CLASS__;
     protected static $_table = 'dm_user';
     protected static $_cacheAuto = true;
-    
+
     /**
     * Shortcut to help with IDE autocompletion
-    * 
+    *
     * @return DotMesh_Model_User
     */
     public static function i($new=false, array $args=array())
     {
         return BClassRegistry::i()->instance(__CLASS__, $args, !$new);
     }
-    
-    public static function signup($r)
+
+    public static function signup($r, $fields='')
     {
         $r = (array)$r;
         if (empty($r['username']) || empty($r['email'])
@@ -37,7 +37,8 @@ class DotMesh_Model_User extends BModelUser
                 throw new Exception('User already registered');
             }
         } else {
-            $r = BUtil::maskFields($r, 'username,email,password,secret_key,firstname,lastname,thumb_provider');
+            $fields = ($fields ? ',' : '').'username,email,password,secret_key,firstname,lastname,thumb_provider';
+            $r = BUtil::maskFields($r, $fields);
             $r['node_id'] = $node->id;
             $user = static::create($r)->save();
             if (($view = BLayout::i()->view('email/user-new-user'))) {
@@ -49,7 +50,7 @@ class DotMesh_Model_User extends BModelUser
         }
         return $user;
     }
-    
+
     static public function authenticate($username, $password)
     {
         /** @var FCom_Admin_Model_User */
@@ -62,14 +63,23 @@ class DotMesh_Model_User extends BModelUser
         }
         return $user;
     }
-    
+
     public function beforeSave()
     {
         if (!parent::beforeSave()) return false;
         $this->set('thumb_provider', 'gravatar', null);
+        $this->set('preferences_data', BUtil::toJson((object)$this->preferences));
         return true;
     }
-    
+
+    public function afterLoad()
+    {
+        parent::afterLoad();
+        if ($this->preferences_data) {
+            $this->set('preferences', (array)BUtil::fromJson($this->preferences_data));
+        }
+    }
+
     public function sendEmailConfirmation()
     {
         BLayout::i()->view('email/user-confirm')->email();
@@ -81,25 +91,26 @@ class DotMesh_Model_User extends BModelUser
         $this->set('is_confirmed', 1)->save();
         return $this;
     }
-    
+
     public function userTimelineOrm($pubUserId=null)
     {
         $postUser = DotMesh_Model_PostUser::table();
-        
+
         if (!$pubUserId && $this->orm) $pubUserId = $this->id;
         $uId = (int)DotMesh_Model_User::sessionUserId();
         $orm = DotMesh_Model_Post::i()->timelineOrm();
-        
+
         $orm->where(array('AND'=>array(
             "p.user_id={$pubUserId} or p.echo_user_id={$pubUserId}",
             "p.is_private=0".($uId ? " or p.id in (select post_id from {$postUser} where user_id={$uId})" : ''),
         )));
-        
+
         return $orm;
     }
-        
-    public static function parseUri($uri) 
+
+    public static function parseUri($uri)
     {
+        $uri = trim($uri, '/');
         if (strpos($uri, '/')===false) { // local user
             return array(null, $uri);
         }
@@ -110,15 +121,17 @@ class DotMesh_Model_User extends BModelUser
         }
         return array($m[1].$m[2], $m[3]);
     }
-    
+
     public static function load($id, $field=null, $cache=false)
     {
         $model = parent::load($id, $field, $cache);
-        if ($model) $model->cacheStore('node_id,username');
+        if ($model) {
+            $model->cacheStore('node_id,username');
+        }
         return $model;
     }
 
-    public static function find($uri, $create=false) 
+    public static function find($uri, $create=false)
     {
         list($nodeUri, $username) = static::parseUri($uri);
         $nodeHlp = DotMesh_Model_Node::i();
@@ -134,7 +147,7 @@ class DotMesh_Model_User extends BModelUser
         }
         return $user;
     }
-    
+
     public function node($data=null, $reset=false)
     {
         if (!$this->node || $reset) {
@@ -147,20 +160,22 @@ class DotMesh_Model_User extends BModelUser
         }
         return $this->node;
     }
-    
+
     public function fullname()
     {
-        return $this->firstname.' '.$this->lastname;   
+        return $this->firstname.' '.$this->lastname;
     }
-    
+
     public function uri($full=false)
     {
         return $this->node()->uri('u', $full).$this->username;
     }
-    
+
     public function thumbUri($size=100)
     {
         switch ($this->thumb_provider) {
+        case 'link':
+            return $this->thumb_uri;
         case 'file': //TODO: implement resize on server
             $rootPath = BConfig::i()->get('modules/DotMesh/thumb_root_path');
             return BApp::href($rootPath).'/'.$this->thumb_filename;
@@ -168,7 +183,7 @@ class DotMesh_Model_User extends BModelUser
             return 'http://www.gravatar.com/avatar/'.md5($this->email).'?s='.$size.'&d=identicon';
         }
     }
-    
+
     public function saveThumb($tmpFile, $filename)
     {
         $rootPath = BConfig::i()->get('modules/DotMesh/thumb_root_path');
@@ -179,17 +194,17 @@ class DotMesh_Model_User extends BModelUser
         $this->set('thumb_filename', $prefix.'/'.$this->username.'-'.$filename);
         return $this;
     }
-    
+
     public function generateRemoteSignature($node)
     {
         return base64_encode(pack('H*', hash('sha512', $node->secret_key.'|'.$this->secret_key)));
     }
-    
+
     public function validateRemoteSignature($node, $signature)
     {
         return $this->generateRemoteSignature($node)===$signature;
     }
-    
+
     public function confirmRemoteSignature($signature)
     {
         $result = BUtil::fromJson(BUtil::remoteHttp('POST', $this->uri().'.json', array(
@@ -205,18 +220,39 @@ class DotMesh_Model_User extends BModelUser
 
     public function acceptGuest($username, $signature)
     {
-        
+
     }
-    
+
     public function updateFromPost($r)
     {
-        $this->set(BUtil::maskFields((array)$r, 'username,firstname,lastname,email'));
+        $this->set(BUtil::maskFields((array)$r, 'username,firstname,lastname,email,preferences,thumb_provider'));
         if (!empty($r['password'])) {
-            $this->setPassword($r['password']);   
+            $this->setPassword($r['password']);
         }
         if (!empty($_FILES['thumb']['tmp_name'])) {
             $this->saveThumb($_FILES['thumb']['tmp_name'], $_FILES['thumb']['name']);
         }
         $this->save();
+    }
+    
+    public function subscribersCnt()
+    {
+        $cnt = DotMesh_Model_UserSub::i()->orm()
+            ->where('sub_user_id', $this->id)->select('(count(*))', 'value')->find_one();
+        return $cnt ? $cnt->value : 0;
+    }
+    
+    public function subscribedToUsersCnt()
+    {
+        $cnt = DotMesh_Model_UserSub::i()->orm()
+            ->where('pub_user_id', $this->id)->select('(count(*))', 'value')->find_one();
+        return $cnt ? $cnt->value : 0;
+    }
+    
+    public function postsCnt()
+    {
+        $cnt = DotMesh_Model_Post::i()->orm()
+            ->where('user_id', $this->id)->where('is_private', 0)->select('(count(*))', 'value')->find_one();
+        return $cnt ? $cnt->value : 0;
     }
 }

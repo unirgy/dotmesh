@@ -1,4 +1,6 @@
-<h2><?=$this->_('Thread Timeline')?></h2>
-<a name="reply"></a>
-<?=$this->view('newpost')?>
-<?=$this->view('timeline')?>
+<div class="site-main col1-layout clearfix">
+	<a name="reply"></a>
+	<?=$this->view('compose')?>
+	<h2 class="timeline-block-title"><?=$this->_('Thread Timeline')?></h2>
+	<?=$this->view('timeline')?>
+</div>

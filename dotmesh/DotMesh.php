@@ -15,6 +15,8 @@ class DotMesh extends BClass
         BApp::m()->autoload();
         
         BFrontController::i()
+            ->route('_ /noroute', 'DotMesh_Controller_Nodes.noroute', array(), null, false)
+            
             ->route('GET /', 'DotMesh_Controller_Accounts.home')
             ->route('GET /:term', 'DotMesh_Controller_Nodes.catch_all')
 
@@ -27,15 +29,15 @@ class DotMesh extends BClass
             
             ->route('GET|POST /p/:postname/reply', 'DotMesh_Controller_Posts.reply')
 
-            ->route('^(GET|POST|PUT|HEAD|OPTIONS) /u/([a-zA-Z0-9_]+)\.json$', 'DotMesh_Controller_Users.json')
-            ->route('^(GET|POST|PUT|HEAD|OPTIONS) /p/([a-zA-Z0-9_]+)\.json$', 'DotMesh_Controller_Posts.json')
-            ->route('^(GET|POST|PUT|HEAD|OPTIONS) /t/([a-zA-Z0-9_]+)\.json$', 'DotMesh_Controller_Tags.json')
+            ->route('^(GET|POST|PUT|HEAD|OPTIONS) /u/([a-zA-Z0-9_]+)/api1\.json$', 'DotMesh_Controller_Users.api1_json')
+            ->route('^(GET|POST|PUT|HEAD|OPTIONS) /p/([a-zA-Z0-9_]+)/api1\.json$', 'DotMesh_Controller_Posts.api1_json')
+            ->route('^(GET|POST|PUT|HEAD|OPTIONS) /t/([a-zA-Z0-9_]+)/api1\.json$', 'DotMesh_Controller_Tags.api1_json')
 
-            ->route('^GET /u/([a-zA-Z0-9_]+)\.rss$', 'DotMesh_Controller_Users.rss')
-            ->route('^GET /p/([a-zA-Z0-9_]+)\.rss$', 'DotMesh_Controller_Posts.rss')
-            ->route('^GET /t/([a-zA-Z0-9_]+)\.rss$', 'DotMesh_Controller_Tags.rss')
+            ->route('^GET /u/([a-zA-Z0-9_]+)/feed\.rss$', 'DotMesh_Controller_Users.feed_rss')
+            ->route('^GET /p/([a-zA-Z0-9_]+)/feed\.rss$', 'DotMesh_Controller_Posts.feed_rss')
+            ->route('^GET /t/([a-zA-Z0-9_]+)/feed\.rss$', 'DotMesh_Controller_Tags.feed_rss')
 
-            ->route('^GET /u/([a-zA-Z0-9_]+)\.(png|jpg|gif)$', 'DotMesh_Controller_Users.thumb')
+            ->route('^GET /u/([a-zA-Z0-9_]+)/thumb\.(png|jpg|gif)$', 'DotMesh_Controller_Users.thumb')
         ;
 
         BLayout::i()
@@ -48,15 +50,30 @@ class DotMesh extends BClass
                     array('hook', 'header', 'views'=>array('header')),
                     array('hook', 'footer', 'views'=>array('footer')),
                     array('view', 'head', 'do'=>array(
+                        array('css', '{DotMesh}/css/normalize.css'),
+                        array('css', '{DotMesh}/css/main.css'),
                         array('css', '{DotMesh}/css/dotmesh.css'),
+                        array('js', '{DotMesh}/js/head.min.js'),
+                        array('js', '{DotMesh}/js/es5-shim.min.js'),
                         array('js', '//ajax.googleapis.com/ajax/libs/jquery/1.8.1/jquery.min.js'),
                         //array('js', '{DotMesh}/js/jquery.min.js'),
                         array('js', '{DotMesh}/js/dotmesh.js'),
                     )),
                 ),
+                '404' => array(
+                    array('layout', 'base'),
+                    array('hook', 'main', 'views'=>array('404')),
+                ),
+                'xhr-timeline' => array(
+                    array('root', 'timeline'),
+                ),
                 '/' => array(
                     array('layout', 'base'),
                     array('hook', 'main', 'views'=>array('home')),
+                ),
+                '/public' => array(
+                    array('layout', 'base'),
+                    array('hook', 'main', 'views'=>array('public')),
                 ),
                 '/setup' => array(
                     array('layout', 'base'),

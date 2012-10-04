@@ -7,10 +7,12 @@ class DotMesh_Model_Node extends BModel
     protected static $_cacheAuto = true;
 
     protected static $_localNode;
-    
+
+    protected static $_localConfig;
+
     /**
     * Shortcut to help with IDE autocompletion
-    * 
+    *
     * @return DotMesh_Model_Node
     */
     public static function i($new=false, array $args=array())
@@ -24,7 +26,7 @@ class DotMesh_Model_Node extends BModel
             $localNodeUri = BConfig::i()->get('modules/DotMesh/local_node_uri');
             if ($localNodeUri) {
                 static::$_localNode = static::load($localNodeUri, 'uri');
-            } 
+            }
             if (!static::$_localNode) {
                 $nodes = static::orm()->where('is_local', 1)->find_many();
                 $serverName = BRequest::i()->httpHost();
@@ -38,7 +40,7 @@ class DotMesh_Model_Node extends BModel
         }
         return static::$_localNode;
     }
-    
+
     public function afterCreate()
     {
         parent::afterCreate();
@@ -90,15 +92,15 @@ class DotMesh_Model_Node extends BModel
             BResponse::i()->redirect(BUtil::setUrlQuery($redirectUrl, $result));
         }
     }
-    
+
     public static function load($id, $field=null, $cache=false)
     {
         $model = parent::load($id, $field, $cache);
         $model->cacheStore('uri');
         return $model;
     }
-    
-    public static function find($uri, $create=false) 
+
+    public static function find($uri, $create=false)
     {
         if (strpos($uri, '?')!==false || strpos($uri, '#')!==false) {
             throw new BException('Invalid node URI');
@@ -112,17 +114,17 @@ class DotMesh_Model_Node extends BModel
         }
         return $node;
     }
-    
-    public function apiClient($request) 
+
+    public function apiClient($request)
     {
         $request['node'] = BUtil::maskFields(static::localNode()->as_array(), 'uri,api_version,is_https,is_rewrite');
         $result = BUtil::remoteHttp('POST', $this->uri.'/n/', $request);
         $info = BUtil::fromJson($result);
-        
+
         $this->api_version = $info->node->api_version;
         $this->is_https = $info->node->is_https;
         $this->is_modrewrite = $info->node->is_modrewrite;
-        
+
         if (!empty($request->ask_users)) {
             foreach ($request->ask_users as $username) {
                 if (empty($result->ask_users[$username])) {
@@ -138,7 +140,7 @@ class DotMesh_Model_Node extends BModel
         }
         return $this;
     }
-    
+
     public static function apiServer($request)
     {
         if (empty($request->node->uri)) {
@@ -152,7 +154,7 @@ class DotMesh_Model_Node extends BModel
         if ($remoteNode->is_blocked) {
             throw new BException('Node is blocked');
         }
-        
+
         $result = array();
         if (!empty($request->users)) {
             $hlp = DotMesh_Model_User::i();
@@ -166,7 +168,7 @@ class DotMesh_Model_Node extends BModel
                 $result['users'][] = array('username'=>$userData->username, 'status'=>'success');
             }
         }
-        
+
         if (!empty($request->ask_users)) {
             $localNode = static::localNode();
             foreach ($request->ask_users as $username) {
@@ -184,8 +186,8 @@ class DotMesh_Model_Node extends BModel
         }
         return $result;
     }
-    
-    public function uri($type=null, $full=false) 
+
+    public function uri($type=null, $full=false)
     {
         $uri = '';
         if ($full) {
@@ -197,19 +199,27 @@ class DotMesh_Model_Node extends BModel
         }
         return $uri;
     }
-    
-    public function user($username)
+
+    public function user($username, $field='username')
     {
-        return DotMesh_Model_User::i()->load(array('node_id'=>$this->id, 'username'=>$username));
+        return DotMesh_Model_User::i()->load(array('node_id'=>$this->id, $field=>$username));
     }
-    
+
     public function tag($tagname)
     {
         return DotMesh_Model_Tag::i()->load(array('node_id'=>$this->id, 'tagname'=>$tagname));
     }
-    
+
     public function post($postname)
     {
         return DotMesh_Model_Post::i()->load(array('node_id'=>$this->id, 'postname'=>$postname));
+    }
+
+    public static function config($key=null)
+    {
+        if (!static::$_localConfig) {
+            static::$_localConfig = BConfig::i()->get('modules/DotMesh');
+        }
+        return $key ? (!empty(static::$_localConfig[$key]) ? static::$_localConfig[$key] : null) : static::$_localConfig;
     }
 }

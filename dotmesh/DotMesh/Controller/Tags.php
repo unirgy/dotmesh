@@ -4,20 +4,30 @@ class DotMesh_Controller_Tags extends DotMesh_Controler_Abstract
 {
     public function action_index()
     {
-        $tagname = BRequest::i()->param('tagname');
+        $r = BRequest::i();
+        $tagname = $r->param('tagname');
         $tag = DotMesh_Model_Node::i()->localNode()->tag($tagname);
+        if (!$tag) {
+            $this->forward(true);
+            return;
+        }
         $timeline = DotMesh_Model_Post::i()->fetchTimeline($tag->tagTimelineOrm());
-        BLayout::i()->applyLayout('/tag');
-        BLayout::i()->view('tag')->set('tag', $tag);
         BLayout::i()->view('timeline')->set('timeline', $timeline);
+        
+        if ($r->xhr()) {
+            BLayout::i()->applyLayout('xhr-timeline');
+        } else {
+            BLayout::i()->applyLayout('/tag');
+            BLayout::i()->view('tag')->set('tag', $tag);
+        }
     }
     
-    public function action_json()
+    public function action_api1_json()
     {
 
     }
 
-    public function action_rss()
+    public function action_feed_rss()
     {
 
     }

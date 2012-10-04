@@ -5,7 +5,9 @@
     </head>
     <body>
         <?=$this->hook('header')?>
-        <?=$this->hook('main')?>
+        <div class="site-main-container">
+	        <?=$this->hook('main')?>
+	    </div>
         <?=$this->hook('footer')?>
     </body>
 </html>

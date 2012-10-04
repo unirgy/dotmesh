@@ -1,3 +1,4 @@
+/*
 .timeline .contents { display:none; }
 .timeline .expanded .preview { display:none; }
 .timeline .expanded .contents { display:block; }
@@ -16,3 +17,11 @@
 .timeline .youtube-inline iframe { display:none; }
 .timeline .youtube-inline.shown a.youtube-expand { }
 .timeline .youtube-inline.shown iframe { display:block; }
+*/
+
+.contents-collapse { display:none; }
+.expanded .preview-expand { display:none; }
+.expanded .contents-collapse { display:block; }
+
+
+.site-main-container { margin-top:30px; }

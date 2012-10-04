@@ -103,15 +103,20 @@ class DotMesh_Controller_Accounts extends DotMesh_Controler_Abstract
     
     public function action_home()
     {
-        BLayout::i()->applyLayout('/');
-        $hlp = DotMesh_Model_Post::i();
-        if (DotMesh_Model_User::isLoggedIn()) {
-            $orm = $hlp->myTimelineOrm();
-        } else {
-            $orm = $hlp->homeTimelineOrm();
+        if (!DotMesh_Model_User::i()->isLoggedIn()) {
+            $this->forward('index', 'DotMesh_Controller_Nodes');
+            return;
         }
+        $hlp = DotMesh_Model_Post::i();
+        $orm = $hlp->myTimelineOrm();
         $timeline = $hlp->fetchTimeline($orm);
         BLayout::i()->view('timeline')->set('timeline', $timeline);
+        
+        if (BRequest::i()->xhr()) {
+            BLayout::i()->applyLayout('xhr-timeline');
+        } else {
+            BLayout::i()->applyLayout('/');
+        }
     }
 
     public function action_signup()

@@ -895,7 +895,7 @@ class BORM extends ORMWrapper
         }
         return $fragment;
     }
-
+    
     protected function _add_result_column($expr, $alias=null) {
         if (!is_null($alias)) {
             $expr .= " AS " . $this->_quote_identifier($alias);
@@ -1947,11 +1947,10 @@ class BModel extends Model
 
     public function delete()
     {
-        if (!$this->beforeDelete()) {
-            return $this;
-        }
         try {
-            $this->beforeDelete();
+            if (!$this->beforeDelete()) {
+                return $this;
+            }
             BPubSub::i()->fire($this->_origClass().'::beforeDelete', array('model'=>$this));
         } catch(BModelException $e) {
             return $this;
@@ -1964,6 +1963,7 @@ class BModel extends Model
                 unset($cache[$k][$keyValue]);
             }
         }
+
         parent::delete();
 
         $this->afterDelete();
