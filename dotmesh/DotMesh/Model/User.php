@@ -92,6 +92,87 @@ class DotMesh_Model_User extends BModelUser
         return $this;
     }
 
+    public static function myTimelineOrm()
+    {
+        $nodeBlock = DotMesh_Model_NodeBlock::table();
+        $userBlock = DotMesh_Model_UserBlock::table();
+        $postUser = DotMesh_Model_PostUser::table();
+        $postTag = DotMesh_Model_PostTag::table();
+        $userSub = DotMesh_Model_UserSub::table();
+        $tagSub = DotMesh_Model_TagSub::table();
+
+        $uId = (int)static::sessionUserId();
+        $orm = DotMesh_Model_Post::i()->timelineOrm();
+
+        $orm->where(array('OR' => array(
+            "p.user_id={$uId} or p.echo_user_id={$uId}", // post is made or echoed by logged in user
+            'AND' => array(
+                'n.is_blocked=0', // post node is not globally blocked
+                'u.is_blocked=0', // post user is not globally blocked
+                'p.echo_user_id is null or eu.is_blocked=0', // post is not echoed by globally blocked user
+                "p.node_id not in (select block_node_id from {$nodeBlock} where user_id={$uId})", // post node is not blocked by user
+                "p.user_id not in (select block_user_id from {$userBlock} where user_id={$uId})", // post user is not blocked by user
+                'OR' => array(
+                    "p.id in (select post_id from {$postUser} where user_id={$uId})", // logged in user mentioned in the post
+                    'AND' => array(
+                        'p.is_private=0', // post is public
+                        'OR' => array( // post is by user or tag logged in user is subscribed to
+                            "p.user_id in (select pub_user_id from {$userSub} where sub_user_id={$uId})",
+                            "p.id in (select post_id from {$postTag} pt inner join {$tagSub} ts on ts.pub_tag_id=pt.tag_id where ts.sub_user_id={$uId})",
+                            'AND' => array( // or echoed by user i subscribed to and it's not blocked by me
+                                "p.echo_user_id in (select pub_user_id from {$userSub} where sub_user_id={$uId})",
+                                "p.echo_user_id not in (select block_user_id from {$userBlock} where user_id={$uId})",
+                            ),
+                        ),
+                    ),
+                ),
+            ),
+        )));
+
+        return $orm;
+    }
+
+    public function myFolderTimelineOrm($folder)
+    {
+        $postUser = DotMesh_Model_PostUser::table();
+        $postFeedback = DotMesh_Model_PostFeedback::table();
+
+        $uId = (int)static::sessionUserId();
+        $orm = DotMesh_Model_Post::i()->timelineOrm();
+
+        switch ($folder) {
+        case 'received':
+            $orm->where(array(
+                "p.id in (select post_id from {$postUser} where user_id={$uId})"
+            ));
+            break;
+
+        case 'sent':
+            $orm->where(array(
+                "p.user_id={$uId} or p.echo_user_id={$uId}")
+            );
+            break;
+
+        case 'private':
+            $orm->where(array(
+                'p.is_private=1',
+                'OR' => array(
+                    "p.id in (select post_id from {$postUser} where user_id={$uId})",
+                    "p.user_id={$uId}",
+                ),
+            ));
+            break;
+
+        case 'starred':
+            $orm->where(array(
+                "p.id in (select post_id from {$postFeedback} where user_id={$uId} and star=1)",
+            ));
+            break;
+        }
+
+        return $orm;
+    }
+
     public function userTimelineOrm($pubUserId=null)
     {
         $postUser = DotMesh_Model_PostUser::table();
@@ -102,7 +183,7 @@ class DotMesh_Model_User extends BModelUser
 
         $orm->where(array('AND'=>array(
             "p.user_id={$pubUserId} or p.echo_user_id={$pubUserId}",
-            "p.is_private=0".($uId ? " or p.id in (select post_id from {$postUser} where user_id={$uId})" : ''),
+            "p.is_private=0".($uId ? " or p.user_id={$uId} or p.id in (select post_id from {$postUser} where user_id={$uId})" : ''),
         )));
 
         return $orm;
@@ -195,6 +276,18 @@ class DotMesh_Model_User extends BModelUser
         return $this;
     }
 
+    public function feedUri($folder=null)
+    {
+        $params = array(
+            'u' => $this->username,
+            'p' => hash('sha256', $this->password_hash),
+        );
+        if (($s = BRequest::i()->get('s'))) {
+            $params['s'] = $s;
+        }
+        return BUtil::setUrlQuery(BApp::href('a/'.$folder).'/feed.rss', $params);
+    }
+
     public function generateRemoteSignature($node)
     {
         return base64_encode(pack('H*', hash('sha512', $node->secret_key.'|'.$this->secret_key)));
@@ -234,21 +327,21 @@ class DotMesh_Model_User extends BModelUser
         }
         $this->save();
     }
-    
+
     public function subscribersCnt()
     {
         $cnt = DotMesh_Model_UserSub::i()->orm()
             ->where('sub_user_id', $this->id)->select('(count(*))', 'value')->find_one();
         return $cnt ? $cnt->value : 0;
     }
-    
+
     public function subscribedToUsersCnt()
     {
         $cnt = DotMesh_Model_UserSub::i()->orm()
             ->where('pub_user_id', $this->id)->select('(count(*))', 'value')->find_one();
         return $cnt ? $cnt->value : 0;
     }
-    
+
     public function postsCnt()
     {
         $cnt = DotMesh_Model_Post::i()->orm()

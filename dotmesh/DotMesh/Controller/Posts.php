@@ -5,6 +5,7 @@ class DotMesh_Controller_Posts extends DotMesh_Controler_Abstract
     public function action_index()
     {
         $r = BRequest::i();
+        $layout = BLayout::i();
         $hlp = DotMesh_Model_Post::i();
         $postname = $r->param('postname');
         $post = DotMesh_Model_Node::i()->localNode()->post($postname);
@@ -13,14 +14,21 @@ class DotMesh_Controller_Posts extends DotMesh_Controler_Abstract
             return;
         }
 
+        BLayout::i()->view('head')->canonical($post->uri(true));
+
         $timeline = $hlp->fetchTimeline($post->threadTimelineOrm());
-        Blayout::i()->view('timeline')->set('timeline', $timeline);
+        $layout->view('timeline')->set('timeline', $timeline);
 
         if ($r->xhr()) {
-            BLayout::i()->applyLayout('xhr-timeline');
+            $layout->applyLayout('xhr-timeline');
         } else {
-            BLayout::i()->applyLayout('/thread');
-            BLayout::i()->view('compose')->set('post', $post);
+            $layout->applyLayout('/thread');
+            $layout->view('thread')->set('post', $post);
+            $layout->view('compose')->set('post', $post);
+            $layout->view('timeline')->set(array(
+                'title' => BLocale::i()->_("Thread timeline"),
+                'feed_uri' => $post->uri(true).'/feed.rss',
+            ));
         }
     }
 
@@ -81,17 +89,7 @@ class DotMesh_Controller_Posts extends DotMesh_Controler_Abstract
         }
     }
 
-    public function action_reply()
-    {
-
-    }
-
-    public function action_reply__POST()
-    {
-
-    }
-
-    public function action_api1_json()
+    public function action_api1_json__POST()
     {
         try {
             if (!DotMesh_Model_User::isLoggedIn()) {
@@ -104,7 +102,7 @@ class DotMesh_Controller_Posts extends DotMesh_Controler_Abstract
             if (empty($request['type'])) {
                 throw new BException('Invalid request type');
             }
-            $postname = BRequest::i()->param(2);
+            $postname = BRequest::i()->param('postname');
             $post = DotMesh_Model_Post::i()->find($postname);
             if (!$post) {
                 throw new BException('Invalid post');
@@ -131,7 +129,7 @@ class DotMesh_Controller_Posts extends DotMesh_Controler_Abstract
         BResponse::i()->json($result);
     }
 
-    public function action_rss()
+    public function action_feed_rss()
     {
 
     }

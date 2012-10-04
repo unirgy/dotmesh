@@ -1214,11 +1214,16 @@ class BViewHead extends BView
         $this->addMeta($name, $content, $httpEquiv);
         return $this;
     }
-    
+
     public function canonical($href)
     {
         $this->addElement('link', 'canonical', array('tag'=>'<link rel="canonical" href="'.$href.'"/>'));
         return $this;
+    }
+
+    public function rss($href)
+    {
+        $this->addElement('link', 'rss', array('tag'=>'<link rel="alternate" type="application/rss+xml" title="RSS" href="'.$href.'">'));
     }
 
     /**

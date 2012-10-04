@@ -25,7 +25,6 @@ class DotMesh_Model_Post extends BModel
             ->join('DotMesh_Model_User', array('u.id','=','p.user_Id'), 'u')
             ->left_outer_join('DotMesh_Model_User', array('eu.id','=','p.echo_user_id'), 'eu')
             ->left_outer_join('DotMesh_Model_Node', array('en.id','=','eu.node_id'), 'en')
-            ->order_by_desc('p.create_dt')
             ->select("(select concat(sum(echo),';',sum(star),';',sum(flag),';',sum(vote_up),';',sum(vote_down)) from {$fbTable} where post_id=p.id)", 'feedback_totals')
         ;
         if (($uId = (int)DotMesh_Model_User::sessionUserId())) {
@@ -67,17 +66,41 @@ class DotMesh_Model_Post extends BModel
 
         $pageNum = max(0, BRequest::i()->get('p')-1);
         $pageSize = BConfig::i()->get('modules/DotMesh/timeline_page_size');
-        $orm->offset($pageNum*$pageSize)->limit($pageSize);
+        $sort = BRequest::i()->get('s');
+        if ($sort) {
+            $fbTable = DotMesh_Model_PostFeedback::table();
+            switch ($sort) {
+            case 'hot':
+                $hotDate = date('Y-m-d', time()-86400*7); // voted up past 7 days
+                $sort = "(select sum(vote_up) from {$fbTable} where post_id=p.id and vote_up_dt>'{$hotDate}')";
+                break;
+            case 'best':
+                $sort = "(select sum(vote_up-vote_down) from {$fbTable} where post_id=p.id)";
+                break;
+            case 'worst':
+                $sort = "(select sum(vote_down-vote_up) from {$fbTable} where post_id=p.id)";
+                break;
+            case 'controversial':
+                $sort = "(select sum(vote_up+vote_down) from {$fbTable} where post_id=p.id)";
+                break;
+            default:
+                $sort = '';
+            }
+            if ($sort) {
+                $orm->order_by_desc($sort);
+            }
+        }
+        $orm->offset($pageNum*$pageSize)->limit($pageSize)->order_by_desc('p.create_dt');
         $data = (array)$orm->find_many();
 
         foreach ($data as $p) {
             $fbTotals = explode(';', $p->feedback_totals);
             $p->set(array(
-                'total_echos' => $fbTotals[0] ? $fbTotals[0] : '',
-                'total_stars' => $fbTotals[1] ? $fbTotals[1] : '',
-                'total_flags' => $fbTotals[2] ? $fbTotals[2] : '',
-                'total_vote_up' => $fbTotals[3] ? $fbTotals[3] : '',
-                'total_vote_down' => $fbTotals[4] ? $fbTotals[4] : '',
+                'total_echos' => !empty($fbTotals[0]) ? $fbTotals[0] : '',
+                'total_stars' => !empty($fbTotals[1]) ? $fbTotals[1] : '',
+                'total_flags' => !empty($fbTotals[2]) ? $fbTotals[2] : '',
+                'total_vote_up' => !empty($fbTotals[3]) ? $fbTotals[3] : '',
+                'total_vote_down' => !empty($fbTotals[4]) ? $fbTotals[4] : '',
             ));
             $node = $p->node(array(
                 'id' => $p->node_id,
@@ -129,46 +152,6 @@ class DotMesh_Model_Post extends BModel
         return $orm;
     }
 
-    public static function myTimelineOrm()
-    {
-        $nodeBlock = DotMesh_Model_NodeBlock::table();
-        $userBlock = DotMesh_Model_UserBlock::table();
-        $postUser = DotMesh_Model_PostUser::table();
-        $postTag = DotMesh_Model_PostTag::table();
-        $userSub = DotMesh_Model_UserSub::table();
-        $tagSub = DotMesh_Model_TagSub::table();
-
-        $uId = (int)DotMesh_Model_User::sessionUserId();
-        $orm = static::timelineOrm();
-
-        $orm->where(array('OR' => array(
-            "p.user_id={$uId} or p.echo_user_id={$uId}", // post is made or echoed by logged in user
-            'AND' => array(
-                'n.is_blocked=0', // post node is not globally blocked
-                'u.is_blocked=0', // post user is not globally blocked
-                'p.echo_user_id is null or eu.is_blocked=0', // post is not echoed by globally blocked user
-                "p.node_id not in (select block_node_id from {$nodeBlock} where user_id={$uId})", // post node is not blocked by user
-                "p.user_id not in (select block_user_id from {$userBlock} where user_id={$uId})", // post user is not blocked by user
-                'OR' => array(
-                    "p.id in (select post_id from {$postUser} where user_id={$uId})", // logged in user mentioned in the post
-                    'AND' => array(
-                        'p.is_private=0', // post is public
-                        'OR' => array( // post is by user or tag logged in user is subscribed to
-                            "p.user_id in (select pub_user_id from {$userSub} where sub_user_id={$uId})",
-                            "p.id in (select post_id from {$postTag} pt inner join {$tagSub} ts on ts.pub_tag_id=pt.tag_id where ts.sub_user_id={$uId})",
-                            'AND' => array( // or echoed by user i subscribed to and it's not blocked by me
-                                "p.echo_user_id in (select pub_user_id from {$userSub} where sub_user_id={$uId})",
-                                "p.echo_user_id not in (select block_user_id from {$userBlock} where user_id={$uId})",
-                            ),
-                        ),
-                    ),
-                ),
-            ),
-        )));
-
-        return $orm;
-    }
-
     public function threadTimelineOrm()
     {
         $postUser = DotMesh_Model_PostUser::table();
@@ -181,7 +164,7 @@ class DotMesh_Model_Post extends BModel
         $orm->where(array('AND'=>array(
             "p.id={$threadId} or p.thread_id={$threadId}",
             "p.user_id={$pubUserId} or p.echo_user_id={$pubUserId}",
-            "p.is_private=0".($uId ? " or p.id in (select post_id from {$postUser} where user_id={$uId})" : ''),
+            "p.is_private=0".($uId ? " or p.user_id={$uId} or p.id in (select post_id from {$postUser} where user_id={$uId})" : ''),
         )))->select("(p.id={$threadId})", 'expanded');
 
         return $orm;
@@ -529,8 +512,13 @@ class DotMesh_Model_Post extends BModel
 
         $where = array('post_id'=>$this->id, 'user_id'=>$userId);
         $data = array($type=>$value);
-        if ($type=='vote_up') $data['vote_down'] = 0;
-        if ($type=='vote_down') $data['vote_up'] = 0;
+        if ($type=='vote_up') {
+            $data['vote_down'] = 0;
+            $data['vote_up_dt'] = BDb::now();
+        }
+        if ($type=='vote_down') {
+            $data['vote_up'] = 0;
+        }
         $fb = DotMesh_Model_PostFeedback::i()->load($where);
         if (!$fb) {
             $fb = DotMesh_Model_PostFeedback::i()->create($where)->set($data)->save();

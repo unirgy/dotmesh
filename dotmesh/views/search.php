@@ -1,6 +1,5 @@
 <?php defined('DOTMESH_ROOT_DIR') || die ?>
-<div class="site-main clearfix">
+<div class="site-main timeline-col1-layout clearfix">
 	<?=$this->view('compose')?>
-	<h2 class="timeline-block-title">Timeline</h2>
 	<?=$this->view('timeline')?>
 </div>

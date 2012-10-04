@@ -39,13 +39,13 @@ class BUtil extends BClass
     * @var string
     */
     protected static $_hashSep = '$';
-    
+
     /**
     * Default character pool for random and sequence strings
-    * 
+    *
     * Chars "c", "C" are ommited to avoid accidental obcene language
     * Chars "0", "1", "I" are removed to avoid leading 0 and ambiguity in print
-    * 
+    *
     * @var string
     */
     protected static $_defaultCharPool = '23456789abdefghijklmnopqrstuvwxyzABDEFGHJKLMNOPQRSTUVWXYZ';
@@ -639,7 +639,7 @@ class BUtil extends BClass
         }
         return $pattern;
     }
-    
+
     public static function nextStringValue($string='', $chars=null)
     {
         if (is_null($chars)) {
@@ -1090,7 +1090,7 @@ class BUtil extends BClass
         }
         return $source;
     }
-    
+
     public static function timeAgo($ptime, $now=null, $long=false)
     {
         if (!is_numeric($ptime)) {
@@ -1100,12 +1100,12 @@ class BUtil extends BClass
             $now = time();
         } elseif (!is_numeric($now)) {
             $now = strtotime($now);
-        }  
+        }
         $etime = $now - $ptime;
         if ($etime < 1) {
-            return 'less than 1 second';
+            return $long ? 'less than 1 second' : '1s';
         }
-        $a = array( 
+        $a = array(
             12 * 30 * 24 * 60 * 60  =>  'year',
             30 * 24 * 60 * 60       =>  'month',
             24 * 60 * 60            =>  'day',
@@ -1113,7 +1113,7 @@ class BUtil extends BClass
             60                      =>  'minute',
             1                       =>  'second'
         );
-        
+
         foreach ($a as $secs => $str) {
             $d = $etime / $secs;
             if ($d >= 1) {
@@ -1243,7 +1243,7 @@ class BModelUser extends BModel
     {
         return BUtil::validateSaltedHash($password, $this->password_hash);
     }
-    
+
     public function beforeSave()
     {
         if (!parent::beforeSave()) return false;
@@ -1301,7 +1301,7 @@ class BModelUser extends BModel
         static::$_sessionUser = null;
         BPubSub::i()->fire(__METHOD__.'.after');
     }
-    
+
     public function recoverPassword($emailView='email/user-password-recover')
     {
         $this->set(array('token'=>BUtil::randomString(20)))->save();

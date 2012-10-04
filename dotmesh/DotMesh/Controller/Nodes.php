@@ -6,12 +6,12 @@ class DotMesh_Controller_Nodes extends DotMesh_Controler_Abstract
     {
         BLayout::i()->applyLayout('404');
     }
-    
+
     public function action_503()
     {
         BLayout::I()->applyLayout('503');
     }
-        
+
     public function action_setup()
     {
         if (DotMesh_Model_Node::i()->localNode()) {
@@ -45,19 +45,28 @@ class DotMesh_Controller_Nodes extends DotMesh_Controler_Abstract
 
     public function action_index()
     {
+        $layout = BLayout::i();
         $hlp = DotMesh_Model_Post::i();
         $orm = $hlp->publicTimelineOrm();
         $timeline = $hlp->fetchTimeline($orm);
-        BLayout::i()->view('timeline')->set('timeline', $timeline);
-        
+        $layout->view('timeline')->set('timeline', $timeline);
+
         if (BRequest::i()->xhr()) {
-            BLayout::i()->applyLayout('xhr-timeline');
+            $layout->applyLayout('xhr-timeline');
         } else {
-            BLayout::i()->applyLayout('/public');
+            $layout->applyLayout('/public');
+            $title = BLocale::i()->_('Public Timeline');
+            $layout->view('head')
+                ->addTitle($title)
+                ->rss(BApp::href('n/feed.rss'));
+            $layout->view('timeline')->set(array(
+                'title' => $title,
+                'feed_uri' => BApp::href('n/feed.rss'),
+            ));
         }
     }
-    
-    public function action_index__POST()
+
+    public function action_api1_json__POST()
     {
         try {
             $r = BRequest::i();
@@ -66,14 +75,15 @@ class DotMesh_Controller_Nodes extends DotMesh_Controler_Abstract
             }
             $result = DotMesh_Model_Node::i()->apiServer($r->json());
         } catch (Exception $e) {
-            $result = array('status'=>'error', 'message'=>$e->getMessage());   
+            $result = array('status'=>'error', 'message'=>$e->getMessage());
         }
         BResponse::i()->json($result);
     }
-    
+
     public function action_search()
     {
         $r = BRequest::i();
+        $layout = BLayout::i();
         $q = trim($r->get('q'));
         $node = DotMesh_Model_Node::i()->localNode();
         if ($q[0]==='+') {
@@ -86,15 +96,20 @@ class DotMesh_Controller_Nodes extends DotMesh_Controler_Abstract
         }
         $hlp = DotMesh_Model_Post::i();
         $timeline = $hlp->fetchTimeline($hlp->searchTimelineOrm($q));
-        Blayout::i()->view('timeline')->set('timeline', $timeline);
-        
+        $layout->view('head')->addTitle($q);
+        $layout->view('search')->set('term', $q);
+        $layout->view('timeline')->set('timeline', $timeline);
+
         if ($r->xhr()) {
-            BLayout::i()->applyLayout('xhr-timeline');
+            $layout->applyLayout('xhr-timeline');
         } else {
-            BLayout::i()->applyLayout('/search');
+            $layout->applyLayout('/search');
+            $layout->view('timeline')->set(array(
+                'title' => BLocale::i()->_('Searching for: %s', $this->term),
+            ));
         }
     }
-    
+
     public function action_catch_all()
     {
         $term = BRequest::i()->param('term', true);

@@ -4,11 +4,18 @@ $node = DotMesh_Model_Node::i()->localNode();
 $user = DotMesh_Model_User::i()->sessionUser();
 ?>
 <div class="site-header clearfix">
+    <?php if (($status = BRequest::i()->get('status'))): ?>
+    <div class="messages-container">
+        <ul class="messages">
+            <li class="<?=$this->q($status)?>"><?=$this->_(BRequest::i()->get('message'))?></li>
+        </ul>
+    </div>
+    <?php endif ?>
     <h1 class="dotmesh-logo"><a href="<?=BApp::href()?>">dotmesh &trade;</a></h1>
-   	<a href="<?=BApp::href('n/')?>" class="node-logo"><span class="icon"></span><?=$this->q($node->uri())?></a>
+   	<a href="<?=BApp::href('n/')?>" class="node-logo tiptip-title" title="<?=$this->_('Node Public Timeline')?>"><span class="icon"></span><?=$this->q($node->uri())?></a>
     <form class="server-search" name="top_search" method="get" action="<?=BApp::href('n/search')?>">
         <fieldset>
-            <input type="text" name="q" required placeholder="Search posts, users, tags"/>
+            <input type="text" name="q" required placeholder="Search posts, users, tags" class="tiptip-title" title="Examples: post term; +user; ^tag"/>
             <button type="submit"><?=$this->_('Search')?></button>
         </fieldset>
     </form>
@@ -21,25 +28,25 @@ $user = DotMesh_Model_User::i()->sessionUser();
     			<section class="popup">
     				<ol>
     					<li class="user-name"><?=$this->_('Hi %s', $user->firstname)?>!</li>
-    					<li class="link-received-posts"><a href="#"><span class="icon"></span>Received</a></li>
-    					<li class="link-sent-posts"><a href="#"><span class="icon"></span>Sent</a></li>
-                        <li class="link-private-posts"><a href="#"><span class="icon"></span>Private</a></li>
-                        <li class="link-starred-posts"><a href="#"><span class="icon"></span>Starred</a></li>
+    					<li class="link-received-posts"><a href="<?=BApp::href('a/received')?>"><span class="icon"></span>Received</a></li>
+    					<li class="link-sent-posts"><a href="<?=BApp::href('a/sent')?>"><span class="icon"></span>Sent</a></li>
+                        <li class="link-private-posts"><a href="<?=BApp::href('a/private')?>"><span class="icon"></span>Private</a></li>
+                        <li class="link-starred-posts"><a href="<?=BApp::href('a/starred')?>"><span class="icon"></span>Starred</a></li>
     					<li class="link-logout"><a href="<?=BApp::href('a/logout')?>"><span class="icon"></span><strong><?=$this->_('Log Out')?></strong></a></li>
     				</ol>
     			</section>
 	    	</div>
     		<ol class="buttons-group">
     			<li class="item-new-messages"><a href="#" class="title no-message">0</a></li>
-    			<li class="item-settings"><a href="<?=BApp::href('a/')?>" class="title icon"></a></li>
+    			<li class="item-settings"><a href="<?=BApp::href('a/')?>" class="title icon tiptip-title" title="<?=$this->_('My Account Settings')?>"></a></li>
     			<li class="item-new-post popup-parent">
     				<a href="#" class="title icon"></a>
     				<section class="popup private-post">
 						<form name="post" method="post" action="<?=BApp::href('p/')?>">
-	    					<textarea class="post-input" placeholder="What's happening now?"></textarea>
+	    					<textarea class="post-input" placeholder="<?=$this->_("What's happening now?")?>"></textarea>
 	    					<div class="clearfix"><label for="header_private_post" class="private-post-label"><input type="checkbox" id="header_private_post"/>Private post?</label>
 	    					<?=$this->hook('newpost-flags')?></div>
-	    					<button type="submit"><span>Post</span></button>
+	    					<button type="submit"><span><?=$this->_('Post')?></span></button>
 	    				</form>
     				</section>
     			</li>
@@ -97,8 +104,3 @@ $user = DotMesh_Model_User::i()->sessionUser();
     <?php endif ?>
 
 </div>
-    <?php if (($status = BRequest::i()->get('status'))): ?>
-        <ul class="messages">
-            <li class="<?=$this->q($status)?>"><?=$this->_(BRequest::i()->get('message'))?></li>
-        </ul>
-    <?php endif ?>

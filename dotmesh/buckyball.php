@@ -28,14 +28,14 @@ define('BUCKYBALL_ROOT_DIR', __DIR__);
 * Load all components immediately
 */
 
-require $comDir.'core.php';
-require $comDir.'lib/idiorm.php';
-require $comDir.'lib/paris.php';
-require $comDir.'db.php';
-require $comDir.'module.php';
-require $comDir.'controller.php';
-require $comDir.'layout.php';
-require $comDir.'misc.php';
+require_once $comDir.'core.php';
+require_once $comDir.'lib/idiorm.php';
+require_once $comDir.'lib/paris.php';
+require_once $comDir.'db.php';
+require_once $comDir.'module.php';
+require_once $comDir.'controller.php';
+require_once $comDir.'layout.php';
+require_once $comDir.'misc.php';
 
 /**
 * Minify all components into 1 compact file.

@@ -17,29 +17,32 @@ class DotMesh extends BClass
     public static function bootstrap()
     {
         BApp::m()->autoload();
-        
+
         BFrontController::i()
             ->route('_ /noroute', 'DotMesh_Controller_Nodes.404', array(), null, false)
-            
+
             ->route('GET /', 'DotMesh_Controller_Accounts.home')
             ->route('GET /:term', 'DotMesh_Controller_Nodes.catch_all')
 
             ->route('GET|POST /a/.action', 'DotMesh_Controller_Accounts')
             ->route('GET|POST /n/.action', 'DotMesh_Controller_Nodes')
-            
+
             ->route('GET|POST|PUT|HEAD|OPTIONS /u/:username', 'DotMesh_Controller_Users.index')
             ->route('GET|POST|PUT|HEAD|OPTIONS /p/:postname', 'DotMesh_Controller_Posts.index')
+            ->route('GET|POST|PUT|HEAD|OPTIONS /p/:postname/*seo-suffix', 'DotMesh_Controller_Posts.index')
             ->route('GET|POST|PUT|HEAD|OPTIONS /t/:tagname', 'DotMesh_Controller_Tags.index')
-            
-            ->route('GET|POST /p/:postname/reply', 'DotMesh_Controller_Posts.reply')
 
-            ->route('^(GET|POST|PUT|HEAD|OPTIONS) /u/([a-zA-Z0-9_]+)/api1\.json$', 'DotMesh_Controller_Users.api1_json')
-            ->route('^(GET|POST|PUT|HEAD|OPTIONS) /p/([a-zA-Z0-9_]+)/api1\.json$', 'DotMesh_Controller_Posts.api1_json')
-            ->route('^(GET|POST|PUT|HEAD|OPTIONS) /t/([a-zA-Z0-9_]+)/api1\.json$', 'DotMesh_Controller_Tags.api1_json')
+            ->route('GET|POST|PUT|HEAD|OPTIONS /n/api1.json', 'DotMesh_Controller_Nodes.api1_json')
+            ->route('GET|POST|PUT|HEAD|OPTIONS /a/api1.json', 'DotMesh_Controller_Accounts.api1_json')
+            ->route('GET|POST|PUT|HEAD|OPTIONS /u/:usernode/api1.json', 'DotMesh_Controller_Users.api1_json')
+            ->route('GET|POST|PUT|HEAD|OPTIONS /p/:postname/api1.json', 'DotMesh_Controller_Posts.api1_json')
+            ->route('GET|POST|PUT|HEAD|OPTIONS /t/:tagname/api1.json', 'DotMesh_Controller_Tags.api1_json')
 
-            ->route('^GET /u/([a-zA-Z0-9_]+)/feed\.rss$', 'DotMesh_Controller_Users.feed_rss')
-            ->route('^GET /p/([a-zA-Z0-9_]+)/feed\.rss$', 'DotMesh_Controller_Posts.feed_rss')
-            ->route('^GET /t/([a-zA-Z0-9_]+)/feed\.rss$', 'DotMesh_Controller_Tags.feed_rss')
+            ->route('GET /n/feed.rss', 'DotMesh_Controller_Nodes.feed_rss')
+            ->route('GET /a/:label/feed.rss', 'DotMesh_Controller_Accounts.feed_rss')
+            ->route('GET /u/:username/feed.rss', 'DotMesh_Controller_Users.feed_rss')
+            ->route('GET /p/:postname/feed.rss', 'DotMesh_Controller_Posts.feed_rss')
+            ->route('GET /t/:tagname/feed.rss', 'DotMesh_Controller_Tags.feed_rss')
 
             ->route('^GET /u/([a-zA-Z0-9_]+)/thumb\.(png|jpg|gif)$', 'DotMesh_Controller_Users.thumb')
         ;
@@ -54,12 +57,16 @@ class DotMesh extends BClass
                     array('hook', 'header', 'views'=>array('header')),
                     array('hook', 'footer', 'views'=>array('footer')),
                     array('view', 'head', 'do'=>array(
+                        array('setTitleReverse', true),
                         array('css', '{DotMesh}/css/normalize.css'),
                         array('css', '{DotMesh}/css/main.css'),
                         array('css', '{DotMesh}/css/dotmesh.css'),
                         array('js', '{DotMesh}/js/head.min.js'),
                         array('js', '{DotMesh}/js/es5-shim.min.js'),
                         array('js', '//ajax.googleapis.com/ajax/libs/jquery/1.8.1/jquery.min.js'),
+
+                        array('css', '{DotMesh}/css/tipTip.css'),
+                        array('js', '{DotMesh}/js/jquery.tipTip.min.js'),
                         //array('js', '{DotMesh}/js/jquery.min.js'),
                         array('js', '{DotMesh}/js/dotmesh.js'),
                     )),
@@ -75,9 +82,9 @@ class DotMesh extends BClass
                 'xhr-timeline' => array(
                     array('root', 'timeline'),
                 ),
-                '/' => array(
+                '/my' => array(
                     array('layout', 'base'),
-                    array('hook', 'main', 'views'=>array('home')),
+                    array('hook', 'main', 'views'=>array('my-posts')),
                 ),
                 '/public' => array(
                     array('layout', 'base'),
@@ -114,6 +121,18 @@ class DotMesh extends BClass
             ));
         ;
     }
+
+    public static function folderTitle($folder=null)
+    {
+        $titles = array(
+            'my' => 'My Timeline',
+            'received' => 'Received',
+            'sent' => 'Sent',
+            'private' => 'Private',
+            'starred' => 'Starred',
+        );
+        return $folder ? (!empty($titles[$folder]) ? $titles[$folder] : null) : $titles;
+    }
 }
 
 /************************************************************************/
@@ -140,6 +159,10 @@ class DotMesh_Controler_Abstract extends BActionController
                 BResponse::i()->redirect(BApp::href('n/setup'));
             }
         }
+        $localNode = DotMesh_Model_Node::i()->localNode();
+
+        BLayout::i()->view('head')->addTitle('DotMesh')->addTitle($localNode->uri());
+
         if (($guest = $r->get('guest_uri'))) {
             DotMesh_Model_User::i()->acceptGuest($guest, $r->get('guest_signature'));
         }
@@ -201,6 +224,6 @@ class DotMesh_Migrate extends BClass
 {
     public static function run()
     {
-        
+
     }
 }

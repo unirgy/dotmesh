@@ -134,4 +134,8 @@ $(function() {
 
     $('.timeline-loadmore').on('click mouseover', timelineNextPage);
     //$(window).on('scroll resize', checkNextPageAboveFold);
+
+    setTimeout(function() { $('.messages-container').fadeOut(); }, 2000);
+
+    $('.tiptip-title').tipTip({delay:0, fadeIn:0, fadeOut:100});
 });
