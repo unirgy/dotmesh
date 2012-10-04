@@ -4,11 +4,12 @@ $userId = DotMesh_Model_User::i()->sessionUserId();
 $localNodeId = DotMesh_Model_Node::i()->localNode()->id;
 if (!$this->timeline) return;
 $curSort = BRequest::i()->get('s');
-$sortUri = $this->q(BUtil::setUrlQuery(BRequest::i()->currentUrl(), array('s'=>'SORT')));
+$sortUri = $this->q(BUtil::setUrlQuery(BRequest::i()->currentUrl(), array('s'=>'SORT', 'status'=>null, 'message'=>null)));
+$now = strtotime(BDb::now());
 ?>
 
 <?php if (!BRequest::i()->xhr()): ?>
-        <div class="f-right" style="margin:10px 10px; font-size:12px;">
+        <div class="f-right tiptip-title" style="margin:10px 20px; font-size:12px;" title="<?=$this->_('Sort messages by')?>">
 <?php foreach (explode(',', ',hot,best,worst,controversial') as $s): ?>
             <?=$s ? ' | ' : ''?>
 <?php if ($curSort==$s): ?>
@@ -20,7 +21,9 @@ $sortUri = $this->q(BUtil::setUrlQuery(BRequest::i()->currentUrl(), array('s'=>'
         </div>
     <h2 class="timeline-block-title"><?=$this->q($this->title)?>
 <?php if ($this->feed_uri): ?>
-        <a href="<?=$this->feed_uri?>" class="rss-link"><img src="<?=BApp::src('DotMesh', 'img/rss-icon.png')?>"/></a>
+        <a href="<?=$this->feed_uri?>" class="rss-link tiptip-title" title="<?=$this->_('RSS Feed for the current timeline')?>">
+            <img src="<?=BApp::src('DotMesh', 'img/rss-icon.png')?>"/>
+        </a>
 <?php endif ?>
     </h2>
 <?php endif ?>
@@ -31,7 +34,7 @@ $sortUri = $this->q(BUtil::setUrlQuery(BRequest::i()->currentUrl(), array('s'=>'
         <a name="<?=$this->q($p->postname)?>"></a>
         <form name="timeline-form-<?=$p->id?>" method="post" action="<?=$p->uri(true)?>">
             <a href="<?=$this->q($uri)?>" class="avatar"><img src="<?=$p->user()->thumbUri(50)?>" width="50" height="50"/></a>
-            <a href="<?=$p->uri(true)?>" class="tiptip-title posted-on" title="<?=date('r', strtotime($p->create_dt)) ?>"><?=BUtil::timeAgo($p->create_dt) ?></a>
+            <a href="<?=$p->uri(true)?>" class="tiptip-title posted-on" title="<?=date('r', strtotime($p->create_dt)) ?>"><?=BUtil::timeAgo($p->create_dt, $now) ?></a>
             <?php if ($p->is_private): ?>
                 <span class="icon icon-private-post tiptip-title" title="<?=$this->_('Private Post')?>"></span>
             <?php endif ?>
@@ -46,8 +49,8 @@ $sortUri = $this->q(BUtil::setUrlQuery(BRequest::i()->currentUrl(), array('s'=>'
                 </div>
             </div>
 <?php if ($p->preview!=$p->contents): ?>
-                <a href="#" class="read-toggler preview-expand"><?=$this->_('Expand')?></a>
-                <a href="#" class="read-toggler contents-collapse"><?=$this->_('Collapse')?></a>
+            <a href="#" class="read-toggler preview-expand"><?=$this->_('Expand')?></a>
+            <a href="#" class="read-toggler contents-collapse"><?=$this->_('Collapse')?></a>
 <?php endif ?>
 <?php //print_r($p->as_array()); ?>
 			<div class="actions-group actions-group-1 always-visible">

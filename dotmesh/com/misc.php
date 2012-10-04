@@ -1103,7 +1103,7 @@ class BUtil extends BClass
         }
         $etime = $now - $ptime;
         if ($etime < 1) {
-            return $long ? 'less than 1 second' : '1s';
+            return $long ? 'less than 1 second' : '1s ('.$etime.')';
         }
         $a = array(
             12 * 30 * 24 * 60 * 60  =>  'year',

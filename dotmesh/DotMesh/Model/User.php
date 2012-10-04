@@ -348,4 +348,44 @@ class DotMesh_Model_User extends BModelUser
             ->where('user_id', $this->id)->where('is_private', 0)->select('(count(*))', 'value')->find_one();
         return $cnt ? $cnt->value : 0;
     }
+
+    public function isSubscribedToUser($user)
+    {
+        $userId = is_numeric($user) ? $user : $user->id;
+        $sub = DotMesh_Model_UserSub::i()->load(array('pub_user_id'=>$userId, 'sub_user_id'=>$this->id));
+        return $sub ? true : false;
+    }
+
+    public function isSubscribedToTag($tag)
+    {
+        $tagId = is_numeric($tag) ? $tag : $tag->id;
+        $sub = DotMesh_Model_UserSub::i()->load(array('pub_tag_id'=>$tagId, 'sub_user_id'=>$this->id));
+        return $sub ? true : false;
+    }
+
+    public function subscribeToUser($user, $updateTo=true)
+    {
+        if (is_numeric($user)) {
+            $userId = $user;
+        } elseif (is_string($user)) {
+            $userId = DotMesh_Node_User::i()->find($user);
+        } elseif (is_object($user)) {
+            $userId = $user;
+        } else {
+            $userId = null;
+        }
+        if (!$userId) {
+            throw new BException('Invalid user');
+        }
+        $userId = is_numeric($user) ? $user : $user->id;
+        $hlp = DotMesh_Model_UserSub::i();
+        $where = array('pub_user_id'=>$userId, 'sub_user_id'=>$this->id);
+        $curSub = $hlp->load($where);
+        if ($updateTo && !$curSub) {
+            $hlp->create($where)->save();
+        } elseif (!$updateTo && $curSub) {
+            $hlp->delete_many($where);
+        }
+        return $this;
+    }
 }

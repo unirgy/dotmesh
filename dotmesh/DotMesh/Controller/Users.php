@@ -28,6 +28,33 @@ class DotMesh_Controller_Users extends DotMesh_Controler_Abstract
         }
     }
 
+    public function action_index__POST()
+    {
+        try {
+            $r = BRequest::i();
+            $redirectUrl = $r->currentUrl();
+            $sessUser = DotMesh_Model_User::i()->sessionUser();
+            if (!$sessUser) {
+                throw new BException('Not logged in');
+            }
+            $subscribe = $r->post('subscribe');
+            if ($subscribe==='1') {
+                $sessUser->subscribeToUser($r->post('user_uri'), $subscribe);
+                $message = ($subscribe ? 'Subscribed to' : 'Unsubscribed from').' +%s';
+                $result = array('status'=>'success', 'message'=>BLocale::i()->_($message, $r->post('user_uri')));
+            }
+        } catch (BException $e) {
+            $result = array('status'=>'error', 'message'=>$e->getMessage());
+        } catch (Exception $e) {
+            $result = array('status'=>'error', 'message'=>$e->getMessage());
+        }
+        if ($r->xhr()) {
+            BResponse::i()->json($result);
+        } else {
+            BResponse::i()->redirect(BUtil::setUrlQuery($redirectUrl, $result));
+        }
+    }
+
     public function action_api1_json()
     {
 

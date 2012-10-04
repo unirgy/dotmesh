@@ -18,24 +18,25 @@ class DotMesh_Model_Post extends BModel
 
     public static function timelineOrm()
     {
-        $fbTable = DotMesh_Model_PostFeedback::table();
         $orm = static::orm('p')
             ->select('p.*')
             ->join('DotMesh_Model_Node', array('n.id','=','p.node_id'), 'n')
             ->join('DotMesh_Model_User', array('u.id','=','p.user_Id'), 'u')
             ->left_outer_join('DotMesh_Model_User', array('eu.id','=','p.echo_user_id'), 'eu')
             ->left_outer_join('DotMesh_Model_Node', array('en.id','=','eu.node_id'), 'en')
-            ->select("(select concat(sum(echo),';',sum(star),';',sum(flag),';',sum(vote_up),';',sum(vote_down)) from {$fbTable} where post_id=p.id)", 'feedback_totals')
         ;
         if (($uId = (int)DotMesh_Model_User::sessionUserId())) {
+            $fbTable = DotMesh_Model_PostFeedback::table();
             $orm->left_outer_join($fbTable, "pf.post_id=p.id and pf.user_id={$uId}", 'pf')
                 ->select(array('pf.echo', 'pf.star', 'pf.vote_up', 'pf.vote_down', 'pf.flag'));
         }
+
         return $orm;
     }
 
     public static function fetchTimeline($orm)
     {
+        $fbTable = DotMesh_Model_PostFeedback::table();
         $orm->select(array(
             'node_uri' => 'n.uri',
             'node_is_local' => 'n.is_local',
@@ -62,26 +63,28 @@ class DotMesh_Model_Post extends BModel
             'echo_node_is_local' => 'en.is_local',
             'echo_node_is_https' => 'en.is_https',
             'echo_node_is_rewrite' => 'en.is_rewrite',
+
+            'feedback_totals' => "(select concat(sum(ifnull(echo,0)),';',sum(ifnull(star,0)),';',sum(ifnull(flag,0)),
+                ';',sum(ifnull(vote_up,0)),';',sum(ifnull(vote_down,0))) from {$fbTable} where post_id=p.id)",
         ));
 
         $pageNum = max(0, BRequest::i()->get('p')-1);
         $pageSize = BConfig::i()->get('modules/DotMesh/timeline_page_size');
         $sort = BRequest::i()->get('s');
         if ($sort) {
-            $fbTable = DotMesh_Model_PostFeedback::table();
             switch ($sort) {
             case 'hot':
                 $hotDate = date('Y-m-d', time()-86400*7); // voted up past 7 days
-                $sort = "(select sum(vote_up) from {$fbTable} where post_id=p.id and vote_up_dt>'{$hotDate}')";
+                $sort = "(select sum(ifnull(vote_up,0)) from {$fbTable} where post_id=p.id and vote_up_dt>'{$hotDate}')";
                 break;
             case 'best':
-                $sort = "(select sum(vote_up-vote_down) from {$fbTable} where post_id=p.id)";
+                $sort = "(select sum(ifnull(vote_up,0)-ifnull(vote_down,0)) from {$fbTable} where post_id=p.id)";
                 break;
             case 'worst':
-                $sort = "(select sum(vote_down-vote_up) from {$fbTable} where post_id=p.id)";
+                $sort = "(select sum(ifnull(vote_down,0)-ifnull(vote_up,0)) from {$fbTable} where post_id=p.id)";
                 break;
             case 'controversial':
-                $sort = "(select sum(vote_up+vote_down) from {$fbTable} where post_id=p.id)";
+                $sort = "(select sum(ifnull(vote_up,0)+ifnull(vote_down,0)) from {$fbTable} where post_id=p.id)";
                 break;
             default:
                 $sort = '';
@@ -90,7 +93,7 @@ class DotMesh_Model_Post extends BModel
                 $orm->order_by_desc($sort);
             }
         }
-        $orm->offset($pageNum*$pageSize)->limit($pageSize)->order_by_desc('p.create_dt');
+        $orm->offset($pageNum*$pageSize)->limit($pageSize)->order_by_desc('p.is_pinned')->order_by_desc('p.create_dt');
         $data = (array)$orm->find_many();
 
         foreach ($data as $p) {
