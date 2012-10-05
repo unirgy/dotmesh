@@ -614,10 +614,10 @@ class BModule extends BClass
     * @var array
     */
     static protected $_env = array();
-    
+
     /**
     * Default module run_level
-    * 
+    *
     * @var string
     */
     static protected $_defaultRunLevel = 'ONDEMAND';
@@ -690,10 +690,10 @@ class BModule extends BClass
     {
         return BClassRegistry::i()->instance(__CLASS__, $args, !$new);
     }
-    
+
     /**
     * Set default run_level which new modules should initialize with
-    * 
+    *
     * @param string $runLevel
     */
     public static function defaultRunLevel($runLevel)

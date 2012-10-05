@@ -19,9 +19,9 @@ class DotMesh_Controller_Nodes extends DotMesh_Controler_Abstract
         }
         $r = BRequest::i();
         BLayout::i()->view('setup')->set(array(
-            'node_uri' => trim($r->httpHost().'/'.$r->webRoot(), '/'),
+            'node_uri' => trim($r->httpHost().$r->webRoot(), '/'),
             'is_https' => $r->https(),
-            'is_modrewrite' => $r->modRewriteEnabled(),
+            'is_rewrite' => $r->modRewriteEnabled(),
         ));
         BLayout::i()->applyLayout('/setup');
     }

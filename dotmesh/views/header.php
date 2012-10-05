@@ -12,6 +12,7 @@ $user = DotMesh_Model_User::i()->sessionUser();
     </div>
     <?php endif ?>
     <h1 class="dotmesh-logo"><a href="<?=BApp::href()?>">dotmesh &trade;</a></h1>
+<?php if ($node): ?>
    	<a href="<?=BApp::href('n/')?>" class="node-logo tiptip-title" title="<?=$this->_('Node Public Timeline')?>"><span class="icon"></span><?=$this->q($node->uri())?></a>
     <form class="server-search" name="top_search" method="get" action="<?=BApp::href('n/search')?>">
         <fieldset>
@@ -19,6 +20,7 @@ $user = DotMesh_Model_User::i()->sessionUser();
             <button type="submit"><?=$this->_('Search')?></button>
         </fieldset>
     </form>
+<?php endif ?>
 
     <?php if ($user): ?>
     	<nav class="header-links logged-in">
@@ -54,7 +56,7 @@ $user = DotMesh_Model_User::i()->sessionUser();
     			</li>
     		</ol>
        	</nav>
-    <?php else: ?>
+    <?php elseif ($node): ?>
     	<nav class="header-links logged-out">
     		<ul>
 	    		<li class="link-login popup-parent">

@@ -29,9 +29,10 @@ class DotMesh_Model_Node extends BModel
             }
             if (!static::$_localNode) {
                 $nodes = static::orm()->where('is_local', 1)->find_many();
-                $serverName = BRequest::i()->httpHost();
+                $r = BRequest::i();
+                $nodeName = $r->httpHost().$r->webRoot();
                 foreach ($nodes as $node) {
-                    if ($node->uri===$serverName || preg_match('#'.preg_quote($node->uri).'$#', $serverName)) {
+                    if ($node->uri===$nodeName || preg_match('#'.preg_quote($node->uri).'$#', $nodeName)) {
                         static::$_localNode = $node;
                         break;
                     }
@@ -45,14 +46,15 @@ class DotMesh_Model_Node extends BModel
     {
         parent::afterCreate();
         $this->set('api_version', 1);
-        $this->set('secret_key', BUtil::randomString(32), null);
+        $this->set('secret_key', BUtil::randomString(64), null);
     }
 
     public static function setup($form)
     {
         try {
             if (empty($form['node_uri'])
-                || empty($form['username']) || empty($form['email']) || empty($form['name'])
+                || empty($form['username']) || empty($form['email'])
+                //|| empty($form['firstname']) || empty($form['lastname'])
                 || empty($form['password']) || empty($form['password_confirm'])
                 || $form['password'] !== $form['password_confirm']
                 || !isset($form['is_https'])
@@ -64,14 +66,15 @@ class DotMesh_Model_Node extends BModel
                 'uri' => $form['node_uri'],
                 'is_local' => 1,
                 'is_https' => $form['is_https'],
-                'is_modrewrite' => $form['is_modrewrite'],
+                'is_rewrite' => $form['is_rewrite'],
             ))->save();
             $user = DotMesh_Model_User::i()->create(array(
                 'node_id' => $node->id,
                 'username' => $form['username'],
-                'name' => $form['name'],
+                'firstname' => !empty($form['firstname']) ? $form['firstname'] : '',
+                'lastname' => !empty($form['lastname']) ? $form['lastname'] : '',
                 'email' => $form['email'],
-                'secret_key' => BUtil::randomString(32),
+                'secret_key' => BUtil::randomString(64),
             ))->setPassword($form['password'])->save()->login();
 
             //BLayout::i()->view('email/user-new-user')->set('user', $user)->email();
