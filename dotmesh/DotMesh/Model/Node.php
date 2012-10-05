@@ -131,7 +131,7 @@ class DotMesh_Model_Node extends BModel
         $request['node'] = BUtil::maskFields(static::localNode()->as_array(), 'uri,api_version,is_https,is_rewrite');
         $response = BUtil::remoteHttp('POST', $this->uri(null, true).'/n/api1.json', BUtil::toJson($request));
         $result = BUtil::fromJson($response[0]);
-
+var_dump($result);
         if (!empty($result['node'])) {
             $this->set(BUtil::maskFields($result['node'], 'api_version,is_https,is_rewrite'))->save();
         }
@@ -145,8 +145,10 @@ class DotMesh_Model_Node extends BModel
                 if (empty($userData['remote_signature'])) {
                     continue; //TODO: how to handle?
                 }
-                $user = $this->user($username);
-                $user->set('remote_signature', $userData['remote_signature'])->save();
+                $userData = BUtil::maskFields($userData, 'firstname,lastname,remote_signature');
+                $userData['username'] = $username;
+                $user = DotMesh_Model_User::i()->find($this->uri().'/'.$username, $userData);
+                //$user->set('remote_signature', $userData['remote_signature'])->save();
             }
         }
         return $this;
