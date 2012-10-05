@@ -154,35 +154,38 @@ class DotMesh_Model_Node extends BModel
 
     public static function apiServer($request)
     {
-        if (empty($request->node->uri)) {
+        if (empty($request['node']['uri'])) {
             throw new BException('Invalid node data');
         }
-        $remoteHost = parse_url($request->node->uri, PHP_URL_HOST);
+        $uriArr = explode('/', $request['node']['uri'], 2);
+        $remoteHost = $uriArr[0];
         if (!BRequest::i()->verifyOriginHostIp('HOST', $remoteHost)) {
             throw new BException('Unauthorized node origin IP');
         }
-        $remoteNode = static::find($request->node->uri, $request->node);
+        $remoteNode = static::find($request['node']['uri'], $request['node']);
         if ($remoteNode->is_blocked) {
             throw new BException('Node is blocked');
         }
-
-        $result = array();
-        if (!empty($request->users)) {
+        $localNode = DotMesh_Model_Node::i()->localNode();
+        $result = array(
+            'node' => BUtil::maskFields($localNode->as_array(), 'uri,api_version,is_https,is_rewrite'),
+        );
+        if (!empty($request['users'])) {
             $hlp = DotMesh_Model_User::i();
-            foreach ($request->users as $userData) {
-                if (empty($userData->username)) {
+            foreach ($request['users'] as $userData) {
+                if (empty($userData['username'])) {
                     $result['users'][] = array('status'=>'error', 'message'=>'Invalid user data');
                     continue;
                 }
-                $userData->node_id = $remoteNode->id;
-                $user = $hlp->find($userData->username, $userData);
-                $result['users'][] = array('username'=>$userData->username, 'status'=>'success');
+                $userData['node_id'] = $remoteNode->id;
+                $user = $hlp->find($userData['username'], $userData);
+                $result['users'][] = array('username'=>$userData['username'], 'status'=>'success');
             }
         }
 
-        if (!empty($request->ask_users)) {
+        if (!empty($request['ask_users'])) {
             $localNode = static::localNode();
-            foreach ($request->ask_users as $username) {
+            foreach ($request['ask_users'] as $username) {
                 $user = $localNode->user($username);
                 if (!$user) {
                     $result['ask_users'][$username] = array('status'=>'error', 'message'=>'Not found');

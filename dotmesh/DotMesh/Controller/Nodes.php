@@ -83,10 +83,11 @@ class DotMesh_Controller_Nodes extends DotMesh_Controler_Abstract
     {
         try {
             $r = BRequest::i();
-            if (!$r->xhr()) {
-                BResponse::i()->redirect(BApp::href());
+            $data = $r->json();
+            if (!$data) {
+                $data = $r->post();
             }
-            $result = DotMesh_Model_Node::i()->apiServer($r->json());
+            $result = DotMesh_Model_Node::i()->apiServer($data);
         } catch (Exception $e) {
             $result = array('status'=>'error', 'message'=>$e->getMessage());
         }

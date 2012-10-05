@@ -76,7 +76,7 @@ class BRequest extends BClass
     {
         return !empty($_SERVER['HTTP_HOST']) ? $_SERVER['HTTP_HOST'] : null;
     }
-    
+
     /**
     * Origin host name from request headers
     *
@@ -493,10 +493,10 @@ class BRequest extends BClass
         }
         return false; // not csrf
     }
-    
+
     /**
     * Verify that HTTP_HOST or HTTP_ORIGIN
-    * 
+    *
     * @param string $method (HOST|ORIGIN|OR|AND)
     * @param string $explicitHost
     * @return boolean
@@ -508,8 +508,10 @@ class BRequest extends BClass
             $host = static::httpHost();
         }
         $origin = static::httpOrigin();
-        $hostMatches = $host && $method!='ORIGIN' ? in_array((array)gethostbynamel($host), $ip) : false;
-        $originMatches = $origin && $method!='HOST' ? in_array((array)gethostbynamel($origin), $ip) : false;
+        $hostIPs = gethostbynamel($host);
+        $hostMatches = $host && $method!='ORIGIN' ? in_array($ip, (array)$hostIPs) : false;
+        $originIPs = gethostbynamel($origin);
+        $originMatches = $origin && $method!='HOST' ? in_array($ip, (array)$originIPs) : false;
         switch ($method) {
             case 'HOST': return $hostMatches;
             case 'ORIGIN': return $originMatches;
@@ -521,7 +523,7 @@ class BRequest extends BClass
 
     /**
     * Get current request URL
-    * 
+    *
     * @return string
     */
     public static function currentUrl()
@@ -1104,10 +1106,10 @@ class BResponse extends BClass
         header('Strict-Transport-Security: max-age=500; includeSubDomains');
         return $this;
     }
-    
+
     /**
     * Enable CORS (Cross-Origin Resource Sharing)
-    * 
+    *
     * @param array $options
     * @return BResponse
     */
@@ -1509,7 +1511,7 @@ class BRouteNode
                 } elseif ($k0==='.') { // dynamic action
                     $this->params[++$paramId] = substr($k, 1);
                     $this->action_idx = $paramId;
-                    $part .= '([^/]*)';
+                    $part .= '([a-zA-Z][a-zA-Z0-9_]*)';
                 } else {
                     //$part .= preg_quote($a1[$i]);
                 }
@@ -1705,6 +1707,7 @@ class BRouteObserver
             $node->controller_name = $controllerName;
             $actionName = $this->callback[1];
         }
+#var_dump($controllerName, $actionName);
         /** @var BActionController */
         $controller = BClassRegistry::i()->instance($controllerName, array(), true);
         return $controller->dispatch($actionName, $this->args);
