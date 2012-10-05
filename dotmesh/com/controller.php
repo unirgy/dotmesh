@@ -1511,7 +1511,7 @@ class BRouteNode
                 } elseif ($k0==='.') { // dynamic action
                     $this->params[++$paramId] = substr($k, 1);
                     $this->action_idx = $paramId;
-                    $part .= '([a-zA-Z][a-zA-Z0-9_]*)';
+                    $part .= '([a-zA-Z0-9_]*)';
                 } else {
                     //$part .= preg_quote($a1[$i]);
                 }
