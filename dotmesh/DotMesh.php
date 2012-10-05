@@ -219,11 +219,3 @@ class DotMesh_Model_UserBlock extends BModel
     protected static $_origClass = __CLASS__;
     protected static $_table = 'dm_user_block';
 }
-
-class DotMesh_Migrate extends BClass
-{
-    public static function run()
-    {
-
-    }
-}

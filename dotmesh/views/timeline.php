@@ -9,9 +9,9 @@ $now = strtotime(BDb::now());
 ?>
 
 <?php if (!BRequest::i()->xhr()): ?>
-        <div class="f-right tiptip-title" style="margin:10px 20px; font-size:12px;" title="<?=$this->_('Sort messages by')?>">
+        <div class="sort-by tiptip-title" title="<?=$this->_('Sort messages by')?>">
 <?php foreach (explode(',', ',hot,best,worst,controversial') as $s): ?>
-            <?=$s ? ' | ' : ''?>
+            <?=$s ? '<span class="pipe">|</span>' : ''?>
 <?php if ($curSort==$s): ?>
             <strong><?=$s ? $s : 'recent'?></strong>
 <?php else: ?>
@@ -34,7 +34,7 @@ $now = strtotime(BDb::now());
     <li id="timeline-<?=$p->id?>" class="timeline-item clearfix <?=$p->expanded?'expanded':''?> <?=$p->is_private?'private':''?>">
         <a name="<?=$this->q($p->postname)?>"></a>
         <form name="timeline-form-<?=$p->id?>" method="post" action="<?=$p->uri(true)?>">
-            <a href="<?=$this->q($uri)?>" class="avatar"><img src="<?=$p->user()->thumbUri(50)?>" width="50" height="50"/></a>
+            <a href="<?=$this->q($uri)?>" class="avatar"><img src="<?=$this->q($p->user()->thumbUri(50))?>" width="50" height="50" alt="<?=$this->q($uri)?>"/></a>
             <a href="<?=$p->uri(true)?>" class="tiptip-title posted-on" title="<?=date('r', strtotime($p->create_dt)) ?>"><?=BUtil::timeAgo($p->create_dt, $now) ?></a>
             <?php if ($p->is_private): ?>
                 <span class="icon icon-private-post tiptip-title" title="<?=$this->_('Private Post')?>"></span>

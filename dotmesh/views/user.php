@@ -6,18 +6,20 @@ $isSubscribed = $sessUser->isSubscribedToUser($user);
 ?>
 <div class="site-main timeline-col1-layout clearfix">
 	<div class="user-profile-block">
-		<img src="<?=$user->thumbUri(130)?>" alt="<?=$this->q($user->fullname())?>" class="avatar"/>
+		<div class="avatar">
+			<img src="<?=$user->thumbUri(130)?>" alt="<?=$this->q($user->fullname())?>"/>
+	        <form method="post" name="user-actions" action="<?=$user->uri(true)?>">
+	            <fieldset>
+	                <input type="hidden" name="user_uri" value="<?=$user->uri()?>"/>
+	<?php if ($user->id!==$sessUser->id): ?>
+	                <button type="submit" name="subscribe" value="<?=$isSubscribed ? 0 : 1 ?>" class="subscription-state state-<?=$isSubscribed?'subscribed':'subscribe' ?>">
+	                    <span class="icon"></span><?=$isSubscribed ? 'Subscribed' : 'Subscribe' ?>
+	                </button>
+	<?php endif ?>
+	            </fieldset>
+	        </form>
+		</div>
 		<h1 class="user-url"><?=$this->q($user->uri())?></h1>
-        <form method="post" name="user-actions" action="<?=$user->uri(true)?>">
-            <fieldset>
-                <input type="hidden" name="user_uri" value="<?=$user->uri()?>"/>
-<?php if ($user->id!==$sessUser->id): ?>
-                <button type="submit" name="subscribe" value="<?=$isSubscribed ? 0 : 1 ?>">
-                    <?=$isSubscribed ? 'Unsubscribe' : 'Subscribe' ?>
-                </button>
-<?php endif ?>
-            </fieldset>
-        </form>
 		<table class="user-activity">
 			<thead>
 				<tr>

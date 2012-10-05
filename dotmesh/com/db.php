@@ -769,7 +769,7 @@ class BORM extends ORMWrapper
      * Set up the database connection used by the class.
      * Use BPDO for nested transactions
      */
-    protected static function _setup_db() 
+    protected static function _setup_db()
     {
         if (!is_object(static::$_db)) {
             $connection_string = static::$_config['connection_string'];
@@ -781,7 +781,7 @@ class BORM extends ORMWrapper
             }
             try { //ADDED: hide connection details from the error if not in DEBUG mode
                 $db = new BPDO($connection_string, $username, $password, $driver_options); //UPDATED
-            } catch (PDOException $e) { 
+            } catch (PDOException $e) {
                 if (BDebug::is('DEBUG')) {
                     throw $e;
                 } else {
@@ -798,7 +798,7 @@ class BORM extends ORMWrapper
      * This is public in case the ORM should use a ready-instantiated
      * PDO object as its database connection.
      */
-    public static function set_db($db, $config=null) 
+    public static function set_db($db, $config=null)
     {
         if (!is_null($config)) {
             static::$_config = array_merge(static::$_config, $config);
@@ -905,7 +905,7 @@ class BORM extends ORMWrapper
         }
         return $fragment;
     }
-    
+
     protected function _add_result_column($expr, $alias=null) {
         if (!is_null($alias)) {
             $expr .= " AS " . $this->_quote_identifier($alias);
@@ -923,7 +923,7 @@ class BORM extends ORMWrapper
         }
         return $this;
     }
-    
+
     /**
     * Return select sql statement built from the ORM object
     *
