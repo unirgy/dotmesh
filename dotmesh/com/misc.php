@@ -816,8 +816,7 @@ class BUtil extends BClass
         }
 
         if (function_exists('curl_init')) {
-            $ch = curl_init();
-            curl_setopt_array($ch, array(
+            $curlOpt = array(
                 CURLOPT_USERAGENT => $userAgent,
                 CURLOPT_URL => $url,
                 CURLOPT_ENCODING => '',
@@ -828,23 +827,30 @@ class BUtil extends BClass
                 CURLOPT_CONNECTTIMEOUT => $timeout,
                 CURLOPT_TIMEOUT => $timeout,
                 CURLOPT_MAXREDIRS => 10,
-            ));
+            );
             if (false) { // TODO: figure out cookies handling
                 $cookieDir = BConfig::i()->get('fs/storage_dir').'/cache';
                 BUtil::ensureDir($cookieDir);
                 $cookie = tempnam($cookieDir, 'CURLCOOKIE');
-                curl_setopt_array($ch, array(
+                $curlOpt += array(
                     CURLOPT_COOKIEJAR => $cookie,
                     CURLOPT_FOLLOWLOCATION => true,
-                ));
+                );
             }
-            if ($method==='POST' || $method==='PUT') {
-                curl_setopt_array($ch, array(
+
+            if ($method==='POST') {
+                $curlOpt += array(
                     CURLOPT_POSTFIELDS => $request,
-                    CURLOPT_POST => $method==='POST',
-                    CURLOPT_PUT => $method==='PUT',
-                ));
+                    CURLOPT_POST => 1,
+                );
+            } elseif ($method==='PUT') {
+                $curlOpt += array(
+                    CURLOPT_POSTFIELDS => $request,
+                    CURLOPT_PUT => 1,
+                );
             }
+            $ch = curl_init();
+            curl_setopt_array($ch, $curlOpt);
             $content = curl_exec($ch);
             //$response = curl_getinfo($ch);
             $response = array();

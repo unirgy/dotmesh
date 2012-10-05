@@ -28,11 +28,17 @@ class DotMesh_Model_Node extends BModel
                 static::$_localNode = static::load($localNodeUri, 'uri');
             }
             if (!static::$_localNode) {
-                $nodes = static::orm()->where('is_local', 1)->find_many();
                 $r = BRequest::i();
-                $nodeName = $r->httpHost().$r->webRoot();
+                $nodeName = trim($r->httpHost().$r->webRoot(), '/');
+
+                static::$_localNode = static::load($nodeName, 'uri');
+                if (static::$_localNode) {
+                    return static::$_localNode;
+                }
+
+                $nodes = static::orm()->where('is_local', 1)->find_many();
                 foreach ($nodes as $node) {
-                    if ($node->uri===$nodeName || preg_match('#'.preg_quote($node->uri).'$#', $nodeName)) {
+                    if (/*$node->uri===$nodeName || */preg_match('#'.preg_quote($node->uri).'$#', $nodeName)) {
                         static::$_localNode = $node;
                         break;
                     }
@@ -99,7 +105,9 @@ class DotMesh_Model_Node extends BModel
     public static function load($id, $field=null, $cache=false)
     {
         $model = parent::load($id, $field, $cache);
-        $model->cacheStore('uri');
+        if ($model) {
+            $model->cacheStore('uri');
+        }
         return $model;
     }
 
@@ -121,24 +129,24 @@ class DotMesh_Model_Node extends BModel
     public function apiClient($request)
     {
         $request['node'] = BUtil::maskFields(static::localNode()->as_array(), 'uri,api_version,is_https,is_rewrite');
-        $result = BUtil::remoteHttp('POST', $this->uri.'/n/', $request);
-        $info = BUtil::fromJson($result);
+        $response = BUtil::remoteHttp('POST', $this->uri(null, true).'/n/api1.json', BUtil::toJson($request));
+        $result = BUtil::fromJson($response[0]);
 
-        $this->api_version = $info->node->api_version;
-        $this->is_https = $info->node->is_https;
-        $this->is_modrewrite = $info->node->is_modrewrite;
+        if (!empty($result['node'])) {
+            $this->set(BUtil::maskFields($result['node'], 'api_version,is_https,is_rewrite'))->save();
+        }
 
-        if (!empty($request->ask_users)) {
-            foreach ($request->ask_users as $username) {
-                if (empty($result->ask_users[$username])) {
+        if (!empty($request['ask_users'])) {
+            foreach ($request['ask_users'] as $username) {
+                if (empty($result['ask_users'][$username])) {
                     continue; //TODO: how to handle?
                 }
-                $userData = $result->ask_users[$username];
-                if (empty($userData->remote_signature)) {
+                $userData = $result['ask_users'][$username];
+                if (empty($userData['remote_signature'])) {
                     continue; //TODO: how to handle?
                 }
                 $user = $this->user($username);
-                $user->set('remote_signature', $userData->remote_signature)->save();
+                $user->set('remote_signature', $userData['remote_signature'])->save();
             }
         }
         return $this;

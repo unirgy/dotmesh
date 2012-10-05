@@ -65,6 +65,19 @@ class DotMesh_Controller_Nodes extends DotMesh_Controler_Abstract
             ));
         }
     }
+    
+    public function action_test()
+    {
+        try {
+            $node = DotMesh_Model_Node::i()->find('secure.unirgy.com/dm', true);
+            $result = $node->apiClient(array(
+            
+            ));
+            echo "<pre>"; print_r($result); exit;
+        } catch (Exception $e) {
+            echo "<pre>"; print_r($e); exit;
+        }
+    }
 
     public function action_api1_json__POST()
     {
