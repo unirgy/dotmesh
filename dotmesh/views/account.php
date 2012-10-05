@@ -51,10 +51,14 @@
 					        <label for="firstname"><?=$this->_('First Name')?></label>
 					        <input type="text" required id="firstname" name="account[firstname]" title="First name" placeholder="Agent" value="<?=$this->q($u->firstname)?>"/>
 					  	</li>
-			    		<li>
-					        <label for="lastname"><?=$this->_('Last Name')?></label>
-					        <input type="text" required id="lastname" name="account[lastname]" title="Last name" placeholder="Smith" value="<?=$this->q($u->lastname)?>"/>
-					  	</li>
+                        <li>
+                            <label for="lastname"><?=$this->_('Last Name')?></label>
+                            <input type="text" required id="lastname" name="account[lastname]" title="Last name" placeholder="Smith" value="<?=$this->q($u->lastname)?>"/>
+                          </li>
+                        <li>
+                            <label for="short_bio"><?=$this->_('Short Bio')?></label>
+                            <textarea id="short_bio" name="account[short_bio]" title="Short Bio"><?=$this->q($u->short_bio)?></textarea>
+                          </li>
 			    	</ul>
 			    </fieldset>
 		  		<fieldset>

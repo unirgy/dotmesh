@@ -777,6 +777,11 @@ class BUtil extends BClass
         return $verifyHash===$knownHash;
     }
 
+    public static function sha512base64($str)
+    {
+        return base64_encode(pack('H*', hash('sha512', $str)));
+    }
+
     /**
     * Return only specific fields from source array
     *

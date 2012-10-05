@@ -7,6 +7,9 @@ class DotMesh_Controller_Users extends DotMesh_Controler_Abstract
         $r = BRequest::i();
         $layout = BLayout::i();
         $username = $r->param('username');
+        if (!$username) {
+            BResponse::i()->redirect(BApp::href().'?'.BRequest::i()->rawGet());
+        }
         $user = DotMesh_Model_Node::i()->localNode()->user($username);
         if (!$user) {
             $this->forward(true);

@@ -129,27 +129,52 @@ class DotMesh_Model_Node extends BModel
     public function apiClient($request)
     {
         $localNode = static::localNode();
+        $userHlp = DotMesh_Model_User::i();
 
         $request['node'] = BUtil::maskFields($localNode->as_array(), 'uri,api_version,is_https,is_rewrite');
 
         if (!empty($request['users'])) {
-            $users = DotMesh_Model_User::i()->orm('u')->where('node_id', $localNode->id)
-                ->where_in('username', $request['users'])->find_many();
             $usersData = array();
-            foreach ($users as $user) {
-                $user->remote_signature = $user->generateRemoteSignature($this);
-                $usersData[] = BUtil::maskFields($user->as_array(), 'username,firstname,lastname,remote_signature');
+            foreach ($request['users'] as $user) {
+                if (is_string($user)) {
+                    $user = $userHlp->find($user);
+                }
+                $userData = BUtil::maskFields($user->as_array(), 'username,firstname,lastname');
+                //TODO: implement sharing of remote users (security considerations?)
+                #if ($user->node()->is_local) {
+                    $userData['remote_signature'] = $user->generateRemoteSignature($this);
+                #} else {
+                #    $userData['node_uri'] = $user->node()->uri();
+                #}
+                $usersData[] = $userData;
             }
             $request['users'] = $usersData;
         }
 
+        if (!empty($request['posts'])) {
+            $postsData = array();
+            foreach ($request['posts'] as $post) {
+                if (is_string($post)) {
+                    $post = $localNode->post($post);
+                }
+                $postData = BUtil::maskFields($post->as_array(), 'postname,is_private,is_tweeted,create_dt');
+                $postData['user_uri'] = $post->user()->uri();
+                if ($post->echo_user_id) {
+                    $postData['echo_user_uri'] = $post->echoUser()->uri();
+                }
+                $postData['preview'] = $post->normalizePreviewUsersTags();
+                $postsData[] = $postData;
+            }
+            $request['posts'] = $postsData;
+        }
+
         $response = BUtil::remoteHttp('POST', $this->uri(null, true).'/n/api1.json', BUtil::toJson($request));
         $result = BUtil::fromJson($response[0]);
-var_dump($result);
         if (!empty($result['node'])) {
             $this->set(BUtil::maskFields($result['node'], 'api_version,is_https,is_rewrite'))->save();
         }
 
+        //TODO: improve performance by using user objects from request
         if (!empty($request['ask_users'])) {
             foreach ($request['ask_users'] as $username) {
                 if (empty($result['ask_users'][$username])) {
@@ -162,7 +187,7 @@ var_dump($result);
                 $userData = BUtil::maskFields($userData, 'firstname,lastname,remote_signature');
                 $userData['node_id'] = $this->id;
                 $userData['username'] = $username;
-                $user = DotMesh_Model_User::i()->find($username, $userData);
+                $user = $userHlp->find($username, $userData);
                 //$user->set('remote_signature', $userData['remote_signature'])->save();
             }
         }
@@ -184,6 +209,10 @@ var_dump($result);
         $remoteNode = static::find($request['node']['uri'], $request['node']);
         if ($remoteNode->is_blocked) {
             throw new BException('Node is blocked');
+        }
+
+        if (!empty($requst['node']['is_compromised'])) {
+            DotMesh_Model_User::i()->update_many(array('remote_signature'=>null), array('node_id'=>$remoteNode->id));
         }
 
         $localNode = DotMesh_Model_Node::i()->localNode();
@@ -295,6 +324,9 @@ var_dump($result);
             $uri .= $this->is_https ? 'https://' : 'http://';
         }
         $uri .= trim($this->uri,'/');
+        if (!$this->is_modrewrite) {
+            $uri .= '/dotmesh.php';
+        }
         if ($type) {
             $uri .= '/'.$type.'/';
         }

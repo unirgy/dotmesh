@@ -31,11 +31,14 @@ $now = strtotime(BDb::now());
 <?php if (!empty($this->timeline['rows'])): ?>
 <ul class="timeline">
 <?php foreach ((array)$this->timeline['rows'] as $p): $uri = $p->user()->uri(true); $name = $p->user()->fullname(); ?>
-    <li id="timeline-<?=$p->id?>" class="timeline-item clearfix <?=$p->expanded?'expanded':''?> <?=$p->is_private?'private':''?>">
+    <li id="timeline-<?=$p->id?>" class="timeline-item clearfix <?=$p->expanded?'expanded':''?> <?=$p->is_pinned?'pinned':''?> <?=$p->is_private?'private':''?>">
         <a name="<?=$this->q($p->postname)?>"></a>
         <form name="timeline-form-<?=$p->id?>" method="post" action="<?=$p->uri(true)?>">
             <a href="<?=$this->q($uri)?>" class="avatar"><img src="<?=$this->q($p->user()->thumbUri(50))?>" width="50" height="50" alt="<?=$this->q($uri)?>"/></a>
             <a href="<?=$p->uri(true)?>" class="tiptip-title posted-on" title="<?=date('r', strtotime($p->create_dt)) ?>"><?=BUtil::timeAgo($p->create_dt, $now) ?></a>
+            <?php if ($p->is_pinned): ?>
+                <span class="icon icon-pinned-post tiptip-title" title="<?=$this->_('Pinned Post')?>"></span>
+            <?php endif ?>
             <?php if ($p->is_private): ?>
                 <span class="icon icon-private-post tiptip-title" title="<?=$this->_('Private Post')?>"></span>
             <?php endif ?>
