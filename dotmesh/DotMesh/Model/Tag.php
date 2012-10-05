@@ -70,12 +70,14 @@ class DotMesh_Model_Tag extends BModel
     {
         list($nodeUri, $tagname) = static::parseUri($uri);
         $nodeHlp = DotMesh_Model_Node::i();
-        $node = $nodeUri ? $nodeHlp->find($nodeUri, $create) : $nodeHlp->localNode();
+        $node = $nodeUri ? $nodeHlp->find($nodeUri, (bool)$create) : $nodeHlp->localNode();
         //$node->is_blocked?
-        $data = array('node_id'=>$node->id, 'tagname'=>$tagname);
-        $tag = static::load($data);
+        $tag = static::load(array('node_id'=>$node->id, 'tagname'=>$tagname));
         if (!$tag && $create) {
-            $tag = static::create($data)->save();
+            $create = (array)$create;
+            $create['node_id'] = $node->id;
+            $create['tagname'] = $tagname;
+            $tag = static::create($create)->save();
         }
         return $tag;
     }
