@@ -264,11 +264,16 @@ class DotMesh_Model_Post extends BModel
         return $post;
     }
 
-    public static function receiveRemotePost($r)
+    public static function receiveRemotePost($data)
     {
-        $post = static::create(array(
-            //'node_id' => $r->node
-        ))->save();
+        BPubSub::i()->fire(__METHOD__.'.before', array('request'=>&$data));
+
+        $post = static::create($data)->save();
+
+        $post->collectUsersAndTags();
+
+        BPubSub::i()->fire(__METHOD__.'.after', array('request'=>$data, 'post'=>$post));
+
         return $post;
     }
 
@@ -545,6 +550,11 @@ class DotMesh_Model_Post extends BModel
         }
         $this->feedback = $fb;
         return $this;
+    }
+
+    public function distribute($remote=false)
+    {
+
     }
 }
 

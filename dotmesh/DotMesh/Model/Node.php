@@ -174,34 +174,38 @@ var_dump($result);
         if (empty($request['node']['uri'])) {
             throw new BException('Invalid node data');
         }
+
         $uriArr = explode('/', $request['node']['uri'], 2);
         $remoteHost = $uriArr[0];
         if (!BRequest::i()->verifyOriginHostIp('HOST', $remoteHost)) {
             throw new BException('Unauthorized node origin IP');
         }
+
         $remoteNode = static::find($request['node']['uri'], $request['node']);
         if ($remoteNode->is_blocked) {
             throw new BException('Node is blocked');
         }
+
         $localNode = DotMesh_Model_Node::i()->localNode();
         $result = array(
             'node' => BUtil::maskFields($localNode->as_array(), 'uri,api_version,is_https,is_rewrite'),
         );
+
+        $userHlp = DotMesh_Model_User::i();
+
         if (!empty($request['users'])) {
-            $hlp = DotMesh_Model_User::i();
             foreach ($request['users'] as $userData) {
                 if (empty($userData['username'])) {
                     $result['users'][] = array('status'=>'error', 'message'=>'Invalid user data');
                     continue;
                 }
                 $userData['node_id'] = $remoteNode->id;
-                $user = $hlp->find($userData['username'], $userData);
+                $user = $userHlp->find($userData['username'], $userData);
                 $result['users'][] = array('username'=>$userData['username'], 'status'=>'success');
             }
         }
 
         if (!empty($request['ask_users'])) {
-            $localNode = static::localNode();
             foreach ($request['ask_users'] as $username) {
                 $user = $localNode->user($username);
                 if (!$user) {
@@ -215,6 +219,72 @@ var_dump($result);
                 );
             }
         }
+
+        if (!empty($request['subscriptions'])) {
+            foreach ($request['subscriptions'] as $s) {
+                try {
+                    if (empty($s['type']) || empty($s['sub']) || empty($s['pub'])) {
+                        throw new BException('Incomplete request');
+                    }
+                    $subUser = $userHlp->find($s['sub']);
+                    if (!$subUser) {
+                        throw new BException('Invalid subscriber user');
+                        continue;
+                    }
+                    $updateTo = isset($s['subscribe']) ? (int)$s['subscribe'] : true;
+                    switch ($s['type']) {
+                    case 'user':
+                        $pubUser = $userHlp->find($s['pub']);
+                        if (!$pubUser || $pubUser->node_id!=$localNode->id) {
+                            throw new BException('Invalid publisher user');
+                        }
+                        $subUser->subscribeToUser($pubUser, $updateTo);
+                        $s['status'] = 'success';
+                        break;
+
+                    case 'tag':
+                        $pubTag = DotMesh_Model_Tag::i()->find($s['pub']);
+                        if (!$pubTag || $pubTag->node_id!=$localNode->id) {
+                            throw new BException('Invalid publisher tag');
+                        }
+                        $subUser->subscribeToTag($pubTag, $updateTo);
+                        $s['status'] = 'success';
+                        break;
+
+                    default:
+                        throw new BException('Invalid subscription type');
+                    }
+                } catch (Exception $e) {
+                    $s['status'] = 'error';
+                    $s['message'] = 'Incomplete request';
+                }
+                $result['subscriptions'][] = $s;
+            }
+        }
+
+        if (!empty($request['posts'])) {
+            foreach ($request['posts'] as $p) {
+                try {
+                    if (empty($p['postname']) || empty($p['user_uri']) || empty($p['preview']) || empty($p['create_dt'])) {
+                        throw new BException('Incomplete request');
+                    }
+                    $user = $userHlp->find($p['user_uri'], true);
+                    $data = BUtil::maskFields($p, 'postname,preview,create_dt,is_private,is_tweeted');
+                    $data['node_id'] = $remoteNode->id;
+                    $data['user_id'] = $user->id;
+                    if ($p['echo_user_uri']) {
+                        $echoUser = $userHlp->find($p['echo_user_uri'], true);
+                        $data['echo_user_id'] = $echoUser;
+                    }
+                    $post = DotMesh_Model_Post::i()->receiveRemotePost($data);
+                } catch (Exception $e) {
+                    $p['status'] = 'error';
+                    $p['message'] = 'Incomplete request';
+                }
+                $result['posts'][] = $p;
+            }
+        }
+
         return $result;
     }
 

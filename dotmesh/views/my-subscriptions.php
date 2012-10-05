@@ -26,3 +26,17 @@
     </ul>
     <a href="#" class="link-view-all"><?=$this->_('View All')?></a>
 </section>
+<h2 class="block-title"><?=$this->_('Subscribed To Me')?></h2>
+<section class="section-users">
+    <ul>
+<?php foreach ($user->subscribers() as $u): ?>
+        <li>
+            <a href="<?=$u->uri(true)?>">
+                <img src="<?=$u->thumbUri()?>" class="avatar">
+                <span class="node-name"><?=$u->node()->uri()?></span>
+                <span class="user-name"><?=$u->username?></span>
+            </a>
+        </li>
+<?php endforeach ?>
+    <a href="#" class="link-view-all"><?=$this->_('View All')?></a>
+</section>

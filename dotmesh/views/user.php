@@ -2,7 +2,7 @@
 <?php
 $sessUser = DotMesh_Model_User::i()->sessionUser();
 $user = $this->user;
-$isSubscribed = $sessUser->isSubscribedToUser($user);
+$isSubscribed = $sessUser && $sessUser->isSubscribedToUser($user);
 ?>
 <div class="site-main timeline-col1-layout clearfix">
 	<div class="user-profile-block">
@@ -11,7 +11,7 @@ $isSubscribed = $sessUser->isSubscribedToUser($user);
 	        <form method="post" name="user-actions" action="<?=$user->uri(true)?>">
 	            <fieldset>
 	                <input type="hidden" name="user_uri" value="<?=$user->uri()?>"/>
-	<?php if ($user->id!==$sessUser->id): ?>
+	<?php if ($sessUser && $user->id!==$sessUser->id): ?>
 	                <button type="submit" name="subscribe" value="<?=$isSubscribed ? 0 : 1 ?>" class="subscription-state state-<?=$isSubscribed?'subscribed':'subscribe' ?>">
 	                    <span class="icon"></span><?=$isSubscribed ? 'Subscribed' : 'Subscribe' ?>
 	                </button>
