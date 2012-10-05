@@ -216,12 +216,17 @@ class DotMesh_Model_User extends BModelUser
     {
         list($nodeUri, $username) = static::parseUri($uri);
         $nodeHlp = DotMesh_Model_Node::i();
-        $node = $nodeUri ? $nodeHlp->find($nodeUri, (bool)$create) : $nodeHlp->localNode();
+        if (is_array($create) && !empty($create['node_id'])) {
+            $nodeId = $create['node_id'];
+        } else {
+            $node = $nodeUri ? $nodeHlp->find($nodeUri, $create) : $nodeHlp->localNode();
+            $nodeId = $node->id;
+        }
         //$node->is_blocked?
-        $user = static::load(array('node_id'=>$node->id, 'username'=>$username));
+        $user = static::load(array('node_id'=>$nodeId, 'username'=>$username));
         if (!$user && $create) {
             $create = (array)$create;
-            $create['node_id'] = $node->id;
+            $create['node_id'] = $nodeId;
             $create['username'] = $username;
             unset($create['id'], $create['secret_key'], $create['is_admin'], $create['is_confirmed'], $create['is_blocked']);
             $user = static::create($create)->save();
