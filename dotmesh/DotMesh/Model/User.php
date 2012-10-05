@@ -290,6 +290,7 @@ class DotMesh_Model_User extends BModelUser
 
     public function generateRemoteSignature($node)
     {
+        //return hash('sha512', $node->secret_key.'|'.$this->secret_key);
         return base64_encode(pack('H*', hash('sha512', $node->secret_key.'|'.$this->secret_key)));
     }
 
