@@ -11,9 +11,11 @@ $isSubscribed = $sessUser->isSubscribedToUser($user);
         <form method="post" name="user-actions" action="<?=$user->uri(true)?>">
             <fieldset>
                 <input type="hidden" name="user_uri" value="<?=$user->uri()?>"/>
+<?php if ($user->id!==$sessUser->id): ?>
                 <button type="submit" name="subscribe" value="<?=$isSubscribed ? 0 : 1 ?>">
                     <?=$isSubscribed ? 'Unsubscribe' : 'Subscribe' ?>
                 </button>
+<?php endif ?>
             </fieldset>
         </form>
 		<table class="user-activity">

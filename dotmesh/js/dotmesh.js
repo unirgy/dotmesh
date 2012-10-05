@@ -109,14 +109,14 @@ $(function() {
 
     var timelineCurPage = 1, timelineLoading = false;
     function timelineNextPage() {
-        if (timelineLoading) return;
+        //if (timelineLoading) return;
         var el = $('.timeline-loadmore');
         var uri = el.data('uri-pattern');
         ++timelineCurPage;
         timelineLoading = true;
         el.addClass('loading');
         $.get(uri.replace(/p=PAGE/, 'p='+timelineCurPage), function(response, status, xhr) {
-            if (!response) {
+            if (!response.replace(/^\s+|\s+$/, '').length) {
                 el.hide();
             } else {
                 el.before(response);
@@ -126,9 +126,17 @@ $(function() {
         });
     }
     function checkNextPageAboveFold() {
-        var el = $('.timeline-loadmore'), et = el.offset().top, w = $(window), wt = w.scrollTop(), wh = w.height();
-        if (et < wt+wh) timelineNextPage();
-        if ($('.timeline-loadmore:visible').length) setTimeout(checkNextPageAboveFold, 500);
+        var el = $('.timeline-loadmore');
+        if (!el.length) {
+            return;
+        }
+        var et = el.offset().top, w = $(window), wt = w.scrollTop(), wh = w.height();
+        if (et < wt+wh) {
+            timelineNextPage();
+        }
+        if ($('.timeline-loadmore:visible').length) {
+            setTimeout(checkNextPageAboveFold, 200);
+        }
     }
     checkNextPageAboveFold();
 

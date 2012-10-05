@@ -21,15 +21,16 @@ $now = strtotime(BDb::now());
         </div>
     <h2 class="timeline-block-title"><?=$this->q($this->title)?>
 <?php if ($this->feed_uri): ?>
-        <a href="<?=$this->feed_uri?>" class="rss-link tiptip-title" title="<?=$this->_('RSS Feed for the current timeline')?>">
+        <a href="<?=BUtil::setUrlQuery($this->feed_uri, array('s'=>$curSort))?>" class="rss-link tiptip-title" title="<?=$this->_('RSS Feed for the current timeline')?>">
             <img src="<?=BApp::src('DotMesh', 'img/rss-icon.png')?>"/>
         </a>
 <?php endif ?>
     </h2>
 <?php endif ?>
 
+<?php if (!empty($this->timeline['rows'])): ?>
 <ul class="timeline">
-<?php foreach ((array)$this->timeline as $p): $uri = $p->user()->uri(true); $name = $p->user()->fullname(); ?>
+<?php foreach ((array)$this->timeline['rows'] as $p): $uri = $p->user()->uri(true); $name = $p->user()->fullname(); ?>
     <li id="timeline-<?=$p->id?>" class="timeline-item clearfix <?=$p->expanded?'expanded':''?> <?=$p->is_private?'private':''?>">
         <a name="<?=$this->q($p->postname)?>"></a>
         <form name="timeline-form-<?=$p->id?>" method="post" action="<?=$p->uri(true)?>">
@@ -77,10 +78,15 @@ $now = strtotime(BDb::now());
     </li>
 <?php endforeach ?>
 </ul>
+<?php endif ?>
 
 <?php if (!BRequest::i()->xhr()): ?>
 <div class="timeline-loadmore" data-uri-pattern="<?=BUtil::setUrlQuery(BRequest::currentUrl(), array('p'=>'PAGE'))?>">
     <div class="loadmore"><?=$this->_('Load more ...')?></div>
     <div class="loader"><img src="<?=BApp::src('DotMesh', 'img/ajax-loader.gif')?>"/><?=$this->_('Please wait, loading ...')?></div>
 </div>
+<?php endif ?>
+
+<?php if (!empty($this->timeline['rows']) && !empty($this->timeline['is_last_page'])): ?>
+<script>$('.timeline-loadmore').hide()</script>
 <?php endif ?>

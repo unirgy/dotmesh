@@ -18,7 +18,7 @@ class BTwitterAdapter extends BClass
                 'base' => array(
                     array('hook', 'login-after', 'views'=>array('twitter-login')),
                     array('hook', 'signup-after', 'views'=>array('twitter-login')),
-                    array('hook', 'newpost-flags', 'views'=>array('twitter-newpost')),
+                    array('hook', 'compose-flags', 'views'=>array('twitter-compose')),
                 ),
             ))
         ;
@@ -41,7 +41,7 @@ class BTwitterAdapter extends BClass
         }
         return static::$_connection;
     }
-    
+
     public static function onNewPostBefore($args)
     {
         $args['data']['is_tweeted'] = $args['request']['is_tweeted'] ? 1 : 0;
@@ -198,7 +198,10 @@ class BTwitterAdapter_Controller extends BActionController
                     exit;
                 }
                 $sess['twitter']['access_token'] = $accessToken;
-                $user->set('twitter_data', BUtil::toJson($twitterData))->save();
+                $user->set(array(
+                    'twitter_screenname' => $screenName,
+                    'twitter_data' => BUtil::toJson($twitterData),
+                ))->save();
                 break;
             }
 

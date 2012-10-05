@@ -28,4 +28,5 @@ $config['modules']['DotMesh']['timeline_page_size'] = 10;
 $config['modules']['BTwitterAdapter']['consumer_key'] = '';
 $config['modules']['BTwitterAdapter']['consumer_secret'] = '';
 
+#define('DOTMESH_CONFIGURED', 1);
 return $config;

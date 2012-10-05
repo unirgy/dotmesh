@@ -38,9 +38,9 @@ class DotMesh_Controller_Users extends DotMesh_Controler_Abstract
                 throw new BException('Not logged in');
             }
             $subscribe = $r->post('subscribe');
-            if ($subscribe==='1') {
-                $sessUser->subscribeToUser($r->post('user_uri'), $subscribe);
-                $message = ($subscribe ? 'Subscribed to' : 'Unsubscribed from').' +%s';
+            if (!is_null($subscribe)) {
+                $sessUser->subscribeToUser($r->post('user_uri'), (int)$subscribe);
+                $message = ((int)$subscribe ? 'Subscribed to' : 'Unsubscribed from').' +%s';
                 $result = array('status'=>'success', 'message'=>BLocale::i()->_($message, $r->post('user_uri')));
             }
         } catch (BException $e) {

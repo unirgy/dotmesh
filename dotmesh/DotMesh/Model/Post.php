@@ -94,9 +94,9 @@ class DotMesh_Model_Post extends BModel
             }
         }
         $orm->offset($pageNum*$pageSize)->limit($pageSize)->order_by_desc('p.is_pinned')->order_by_desc('p.create_dt');
-        $data = (array)$orm->find_many();
+        $rows = (array)$orm->find_many();
 
-        foreach ($data as $p) {
+        foreach ($rows as $p) {
             $fbTotals = explode(';', $p->feedback_totals);
             $p->set(array(
                 'total_echos' => !empty($fbTotals[0]) ? $fbTotals[0] : '',
@@ -143,7 +143,8 @@ class DotMesh_Model_Post extends BModel
                 ));
             }
         }
-        return $data;
+
+        return array('rows'=>$rows, 'is_last_page'=>sizeof($rows)<$pageSize);
     }
 
     public function publicTimelineOrm()
@@ -221,6 +222,7 @@ class DotMesh_Model_Post extends BModel
         $preview = sizeof($contentLines)>1 ? $contentLines[0] : substr($r['contents'], 0, 140);
 
         $localNode = DotMesh_Model_Node::i()->localNode();
+        $sessUser = DotMesh_Model_User::i()->sessionUser();
 
         $next = (string)$localNode->last_postname;
         for ($i=0; $i<10; $i++) {
@@ -236,10 +238,11 @@ class DotMesh_Model_Post extends BModel
             'node_id' => $localNode->id,
             'postname' => $next,
             'parent_post_id' => !empty($r['parent_post_id']) ? $r['parent_post_id'] : null,
-            'user_id' => DotMesh_Model_User::sessionUserId(),
+            'user_id' => $sessUser->id,
             'preview' => $preview,
             'contents' => $r['contents'],
             'is_private' => !empty($r['is_private']),
+            'is_pinned' => $sessUser->is_admin && !empty($r['is_pinned']),
         );
         if (!empty($r['inreplyto'])) {
             $threadPost = $localNode->post($r['inreplyto']);
@@ -457,7 +460,7 @@ class DotMesh_Model_Post extends BModel
             }
             $uri = htmlspecialchars($uri);
             $src = htmlspecialchars($m[2].$m[3].$m[4].$m[5]); // account for imgur and other cloud image services
-            return "{$m[1]}<a href=\"{$uri}\" class=\"image-link\" data-src=\"{$src}\">{$label}</a>";
+            return "{$m[1]}<a href=\"{$uri}\" class=\"image-link\" data-src=\"{$src}\" target=\"_blank\">{$label}</a>";
         }, $contents);
     }
 
@@ -468,7 +471,17 @@ class DotMesh_Model_Post extends BModel
             $uri = htmlspecialchars($m[2].$m[3].$m[5]);
             $label = 'youtu.be/'.$m[5];
             $src = $m[2].'www.youtube.com/embed/'.$m[5];
-            return "{$m[1]}<a href=\"{$uri}\" class=\"youtube-link\" data-src=\"{$src}\">{$label}</a>";
+            return "{$m[1]}<a href=\"{$uri}\" class=\"youtube-link\" data-src=\"{$src}\" target=\"_blank\">{$label}</a>";
+        }, $contents);
+    }
+
+    protected static function _formatWebLinks(&$contents)
+    {
+        $re = '`(^|\s)(https?://)?([a-zA-Z0-9][a-z0-9.-]+\.[a-zA-Z]{2,6})(\S+)`';
+        $contents = preg_replace_callback($re, function($m) {
+            $uri = htmlspecialchars(($m[2] ? $m[2] : 'http://').$m[3].$m[4]);
+            $label = htmlspecialchars($m[2].$m[3].$m[4]);
+            return "{$m[1]}<a href=\"{$uri}\" class=\"web-link\" target=\"_blank\">{$label}</a>";
         }, $contents);
     }
 
@@ -478,6 +491,7 @@ class DotMesh_Model_Post extends BModel
         static::_formatDotMeshLinks($contents);
         static::_formatImageLinks($contents);
         static::_formatYouTubeLinks($contents);
+        static::_formatWebLinks($contents);
 
         if (DotMesh_Model_Node::i()->config('contents_default_process')) {
             $contents = nl2br($contents);

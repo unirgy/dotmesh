@@ -40,8 +40,9 @@ $user = DotMesh_Model_User::i()->sessionUser();
     			<li class="item-new-messages"><a href="#" class="title no-message">0</a></li>
     			<li class="item-settings"><a href="<?=BApp::href('a/')?>" class="title icon tiptip-title" title="<?=$this->_('My Account Settings')?>"></a></li>
     			<li class="item-new-post popup-parent">
-    				<a href="#" class="title icon"></a>
-    				<section class="popup private-post">
+    				<a href="<?=BApp::href()?>" class="title icon tiptip-title" title="<?=$this->_('Compose New Post')?>"></a>
+<!--
+    				<section class="popup private-post" style="display:none">
 						<form name="post" method="post" action="<?=BApp::href('p/')?>">
 	    					<textarea class="post-input" placeholder="<?=$this->_("What's happening now?")?>"></textarea>
 	    					<div class="clearfix"><label for="header_private_post" class="private-post-label"><input type="checkbox" id="header_private_post"/>Private post?</label>
@@ -49,6 +50,7 @@ $user = DotMesh_Model_User::i()->sessionUser();
 	    					<button type="submit"><span><?=$this->_('Post')?></span></button>
 	    				</form>
     				</section>
+-->
     			</li>
     		</ol>
        	</nav>

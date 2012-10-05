@@ -328,17 +328,44 @@ class DotMesh_Model_User extends BModelUser
         $this->save();
     }
 
+    public function subscribers($limit=20)
+    {
+        $orm = static::orm('u')
+            ->join('DotMesh_Model_UserSub', array('us.sub_user_id','=','u.id'), 'us')
+            ->where('us.pub_user_id', $this->id)
+            ->limit($limit);
+        return $orm->find_many();
+    }
+
+    public function subscribedToUsers($limit=20)
+    {
+        $orm = static::orm('u')
+            ->join('DotMesh_Model_UserSub', array('us.pub_user_id','=','u.id'), 'us')
+            ->where('us.sub_user_id', $this->id)
+            ->limit($limit);
+        return $orm->find_many();
+    }
+
+    public function subscribedToTags($limit=20)
+    {
+        $orm = DotMesh_Model_Tag::i()->orm('t')
+            ->join('DotMesh_Model_TagSub', array('ts.pub_tag_id','=','t.id'), 'ts')
+            ->where('ts.sub_user_id', $this->id)
+            ->limit($limit);
+        return $orm->find_many();
+    }
+
     public function subscribersCnt()
     {
         $cnt = DotMesh_Model_UserSub::i()->orm()
-            ->where('sub_user_id', $this->id)->select('(count(*))', 'value')->find_one();
+            ->where('pub_user_id', $this->id)->select('(count(*))', 'value')->find_one();
         return $cnt ? $cnt->value : 0;
     }
 
     public function subscribedToUsersCnt()
     {
         $cnt = DotMesh_Model_UserSub::i()->orm()
-            ->where('pub_user_id', $this->id)->select('(count(*))', 'value')->find_one();
+            ->where('sub_user_id', $this->id)->select('(count(*))', 'value')->find_one();
         return $cnt ? $cnt->value : 0;
     }
 
@@ -359,27 +386,56 @@ class DotMesh_Model_User extends BModelUser
     public function isSubscribedToTag($tag)
     {
         $tagId = is_numeric($tag) ? $tag : $tag->id;
-        $sub = DotMesh_Model_UserSub::i()->load(array('pub_tag_id'=>$tagId, 'sub_user_id'=>$this->id));
+        $sub = DotMesh_Model_TagSub::i()->load(array('pub_tag_id'=>$tagId, 'sub_user_id'=>$this->id));
         return $sub ? true : false;
     }
 
     public function subscribeToUser($user, $updateTo=true)
     {
-        if (is_numeric($user)) {
-            $userId = $user;
-        } elseif (is_string($user)) {
-            $userId = DotMesh_Node_User::i()->find($user);
-        } elseif (is_object($user)) {
-            $userId = $user;
-        } else {
-            $userId = null;
+        if (is_string($user)) {
+            $user = DotMesh_Model_User::i()->find($user);
         }
-        if (!$userId) {
+        if (!$user) {
             throw new BException('Invalid user');
         }
-        $userId = is_numeric($user) ? $user : $user->id;
+        if (is_object($user)) {
+            $userId = $user->id;
+        } elseif (is_numeric($user)) {
+            $userId = $user;
+        } else {
+            throw new BException('Invalid user');
+        }
+        if ($userId===$this->id) {
+            throw new BException('Can not subscribe to yourself');
+        }
         $hlp = DotMesh_Model_UserSub::i();
         $where = array('pub_user_id'=>$userId, 'sub_user_id'=>$this->id);
+        $curSub = $hlp->load($where);
+        if ($updateTo && !$curSub) {
+            $hlp->create($where)->save();
+        } elseif (!$updateTo && $curSub) {
+            $hlp->delete_many($where);
+        }
+        return $this;
+    }
+
+    public function subscribeToTag($tag, $updateTo=true)
+    {
+        if (is_string($tag)) {
+            $tag = DotMesh_Model_Tag::i()->find($tag);
+        }
+        if (!$tag) {
+            throw new BException('Invalid tag');
+        }
+        if (is_object($tag)) {
+            $tagId = $tag->id;
+        } elseif (is_numeric($tag)) {
+            $tagId = $tag;
+        } else {
+            throw new BException('Invalid tag');
+        }
+        $hlp = DotMesh_Model_TagSub::i();
+        $where = array('pub_tag_id'=>$tagId, 'sub_user_id'=>$this->id);
         $curSub = $hlp->load($where);
         if ($updateTo && !$curSub) {
             $hlp->create($where)->save();
