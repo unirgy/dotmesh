@@ -128,7 +128,21 @@ class DotMesh_Model_Node extends BModel
 
     public function apiClient($request)
     {
-        $request['node'] = BUtil::maskFields(static::localNode()->as_array(), 'uri,api_version,is_https,is_rewrite');
+        $localNode = static::localNode();
+
+        $request['node'] = BUtil::maskFields($localNode->as_array(), 'uri,api_version,is_https,is_rewrite');
+
+        if (!empty($request['users'])) {
+            $users = DotMesh_Model_User::i()->orm('u')->where('node_id', $localNode->id)
+                ->where_in('username', $request['users'])->find_many();
+            $usersData = array();
+            foreach ($users as $user) {
+                $user->remote_signature = $user->generateRemoteSignature($this);
+                $usersData[] = BUtil::maskFields($user->as_array(), 'username,firstname,lastname,remote_signature');
+            }
+            $request['users'] = $usersData;
+        }
+
         $response = BUtil::remoteHttp('POST', $this->uri(null, true).'/n/api1.json', BUtil::toJson($request));
         $result = BUtil::fromJson($response[0]);
 var_dump($result);
@@ -146,8 +160,9 @@ var_dump($result);
                     continue; //TODO: how to handle?
                 }
                 $userData = BUtil::maskFields($userData, 'firstname,lastname,remote_signature');
+                $userData['node_id'] = $this->id;
                 $userData['username'] = $username;
-                $user = DotMesh_Model_User::i()->find($this->uri().'/'.$username, $userData);
+                $user = DotMesh_Model_User::i()->find($username, $userData);
                 //$user->set('remote_signature', $userData['remote_signature'])->save();
             }
         }
