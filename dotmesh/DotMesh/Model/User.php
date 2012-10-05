@@ -399,7 +399,7 @@ class DotMesh_Model_User extends BModelUser
     public function subscribeToUser($user, $updateTo=true)
     {
         if (is_string($user)) {
-            $user = DotMesh_Model_User::i()->find($user);
+            $user = DotMesh_Model_User::i()->find($user, true);
         }
         if (!$user) {
             throw new BException('Invalid user');
@@ -417,11 +417,25 @@ class DotMesh_Model_User extends BModelUser
         $hlp = DotMesh_Model_UserSub::i();
         $where = array('pub_user_id'=>$userId, 'sub_user_id'=>$this->id);
         $curSub = $hlp->load($where);
+        if (!$user->node()->is_local && ($updateTo && !$curSub || !$updateTo && $curSub)) {
+            $sessUser = DotMesh_Model_User::i()->sessionUser();
+            $request = array(
+                'users' => array($sessUser),
+                'subscriptions' => array(
+                    array('type'=>'user', 'sub'=>$sessUser->uri(), 'pub'=>$user->uri(), 'subscribe'=>1),
+                ),
+            );
+            if (!$user->remote_signature) {
+                $request['ask_users'][] = $user->username;
+            }
+            $user->node()->apiClient($request);
+        }
         if ($updateTo && !$curSub) {
             $hlp->create($where)->save();
         } elseif (!$updateTo && $curSub) {
             $hlp->delete_many($where);
         }
+
         return $this;
     }
 

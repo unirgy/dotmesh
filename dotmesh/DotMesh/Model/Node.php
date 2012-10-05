@@ -133,10 +133,11 @@ class DotMesh_Model_Node extends BModel
         $request['node'] = BUtil::maskFields($localNode->as_array(), 'uri,api_version,is_https,is_rewrite');
 
         if (!empty($request['users'])) {
-            $users = DotMesh_Model_User::i()->orm('u')->where('node_id', $localNode->id)
-                ->where_in('username', $request['users'])->find_many();
             $usersData = array();
-            foreach ($users as $user) {
+            foreach ($request['users'] as $user) {
+                if (is_string($user)) {
+                    $user = $localNode->user($user);
+                }
                 $user->remote_signature = $user->generateRemoteSignature($this);
                 $usersData[] = BUtil::maskFields($user->as_array(), 'username,firstname,lastname,remote_signature');
             }
@@ -145,11 +146,12 @@ class DotMesh_Model_Node extends BModel
 
         $response = BUtil::remoteHttp('POST', $this->uri(null, true).'/n/api1.json', BUtil::toJson($request));
         $result = BUtil::fromJson($response[0]);
-var_dump($result);
+#var_dump($result);
         if (!empty($result['node'])) {
             $this->set(BUtil::maskFields($result['node'], 'api_version,is_https,is_rewrite'))->save();
         }
 
+        //TODO: improve performance by using user objects from request
         if (!empty($request['ask_users'])) {
             foreach ($request['ask_users'] as $username) {
                 if (empty($result['ask_users'][$username])) {
@@ -183,6 +185,11 @@ var_dump($result);
         if ($remoteNode->is_blocked) {
             throw new BException('Node is blocked');
         }
+
+        if (!empty($requst['node']['is_compromised'])) {
+            DotMesh_Model_User::i()->update_many(array('remote_signature'=>null), array('node_id'=>$remoteNode->id));
+        }
+
         $localNode = DotMesh_Model_Node::i()->localNode();
         $result = array(
             'node' => BUtil::maskFields($localNode->as_array(), 'uri,api_version,is_https,is_rewrite'),

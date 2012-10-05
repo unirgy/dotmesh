@@ -7,6 +7,9 @@ class DotMesh_Controller_Tags extends DotMesh_Controler_Abstract
         $r = BRequest::i();
         $layout = BLayout::i();
         $tagname = $r->param('tagname');
+        if (!$tagname) {
+            BResponse::i()->redirect(BApp::href().'?'.BRequest::i()->rawGet());
+        }
         $tag = DotMesh_Model_Node::i()->localNode()->tag($tagname);
         if (!$tag) {
             $this->forward(true);
@@ -40,7 +43,7 @@ class DotMesh_Controller_Tags extends DotMesh_Controler_Abstract
             $subscribe = $r->post('subscribe');
             if (!is_null($subscribe)) {
                 $sessUser->subscribeToTag($r->post('tag_uri'), (int)$subscribe);
-                $message = ((int)$subscribe ? 'Subscribed to' : 'Unsubscribed from').' +%s';
+                $message = ((int)$subscribe ? 'Subscribed to' : 'Unsubscribed from').' ^%s';
                 $result = array('status'=>'success', 'message'=>BLocale::i()->_($message, $r->post('tag_uri')));
             }
         } catch (BException $e) {

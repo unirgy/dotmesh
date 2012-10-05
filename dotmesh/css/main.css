@@ -201,7 +201,7 @@ button span {
 	-moz-border-radius:0 0 3px 3px;
 	-webkit-border-radius:0 0 3px 3px;
 	list-style:none;
-	padding:5px 15px; 
+	padding:5px 15px;
 	}
 .messages li.success { border-color:#246f0b; background:#cfeac6; color:#246f0b; }
 .messages li.error { border-color:#c81e1e; background:#f7d9d9; color:#c81e1e; }
@@ -325,12 +325,12 @@ a:hover { color:#0147b0; text-decoration:none; }
 .header-links.logged-out .popup section .or:after { position:absolute; top:8px; left:0; width:100%; content:' '; display:block; border-top:2px solid #ddd; }
 .header-links.logged-out .popup section .buttons-group { margin-bottom:8px; font-size:.9em; }
 .header-links.logged-out .popup section .buttons-group button { float:left; }
-.header-links.logged-out .popup section.top-registration-form { 
+.header-links.logged-out .popup section.top-registration-form {
 	border-radius:0 5px 5px 0;
 	-moz-border-radius:0 5px 5px 0;
 	-webkit-border-radius:0 5px 5px 0;
-	border-left:1px solid #ddd; 
-	background:#fff; 
+	border-left:1px solid #ddd;
+	background:#fff;
 	}
 
 /* Header Links - LOGGED IN */
@@ -415,8 +415,8 @@ a:hover { color:#0147b0; text-decoration:none; }
 	-webkit-box-shadow:0 5px 8px #96a6bc;
 	}
 .site-main.timeline-col1-layout { background:#ddd; }
-.page-main { 
-	position:relative; 
+.page-main {
+	position:relative;
 	font-size:.9em;
 	border-left:1px solid #bbb;
 	margin-left:231px;
@@ -447,6 +447,7 @@ a:hover { color:#0147b0; text-decoration:none; }
 	}
 .timeline .timeline-item .posted-on { float:right; font-size:.9em; }
 .timeline .timeline-item .icon-private-post { float:right; margin:-2px 2px 0 0; background-position:-265px -5px; }
+.timeline .timeline-item .icon-pinned-post { float:right; margin:-2px 2px 0 0; background-position:-265px -5px; }
 .timeline .timeline-item .avatar { float:left; margin-left:-85px; }
 .timeline .timeline-item .avatar img {
 	width:65px;
@@ -467,11 +468,17 @@ a:hover { color:#0147b0; text-decoration:none; }
 	border-width:1px 0;
 	}
 .timeline .timeline-item.private {
-	margin-top:-1px;
-	border:1px solid #9fadca;
-	border-width:1px 0;
-	background:#dce8fc !important;
-	}
+    margin-top:-1px;
+    border:1px solid #9fadca;
+    border-width:1px 0;
+    background:#dce8fc !important;
+    }
+.timeline .timeline-item.pinned {
+    /*margin-top:-1px;*/
+    /*border:1px solid #FFFFAA;*/
+    /*border-width:1px 0;*/
+    background:#FFFFEE !important;
+    }
 .timeline .expanded .preview { display:none; }
 .timeline .expanded .contents { display:block; }
 
@@ -508,7 +515,7 @@ a:hover { color:#0147b0; text-decoration:none; }
 .timeline .actions-group-1 button span { display:inline-block; }
 .timeline .actions-group-1 button .label { display:none; }
 .timeline .actions-group-1 button .icon { margin:-2px 0; }
-.timeline .actions-group-1 .total { 
+.timeline .actions-group-1 .total {
 	margin:-9px 5px 0 0;
 	padding-left:3px;
 	font-size:.95em;
@@ -603,8 +610,8 @@ body { background:url(../img/dotmesh_default_bkg.jpg); }
 	}
 .new-post-block .new-post-block-right h3 { margin-bottom:.3em; font-size:1em; }
 .new-post-block .new-post-block-right .avatar { float:left; margin-left:-138px; }
-.new-post-block .new-post-block-right .avatar img { 
-	width:85px; 
+.new-post-block .new-post-block-right .avatar img {
+	width:85px;
 	border-radius:3px;
 	-moz-border-radius:3px;
 	-webkit-border-radius:3px;
@@ -653,16 +660,16 @@ body { background:url(../img/dotmesh_default_bkg.jpg); }
 .col-left section ul { margin-bottom:5px; }
 .col-left section .link-view-all { padding:0 20px 20px; font-weight:bold; font-size:.9em; }
 .col-left section li { list-style:none; line-height:1.3; }
-.col-left section li a { 
+.col-left section li a {
 	display:block;
 	border-bottom:1px solid #ddd;
-	background:#fafafa; 
-	padding:6px 20px; 
+	background:#fafafa;
+	padding:6px 20px;
 	overflow:hidden;
-	list-style:none; 
+	list-style:none;
 	}
-.col-left section li a:hover { 
-	background:#fff; 
+.col-left section li a:hover {
+	background:#fff;
 	-webkit-transition:background-color 200ms linear;
 	-moz-transition:background-color 200ms linear;
 	-o-transition:background-color 200ms linear;
@@ -671,7 +678,7 @@ body { background:url(../img/dotmesh_default_bkg.jpg); }
 	}
 .col-left section li:last-child a { border-bottom:none; }
 .col-left section.section-users li a { padding-left:58px; }
-.col-left section.section-users li .avatar { 
+.col-left section.section-users li .avatar {
 	float:left;
 	margin:2px 5px 0 -38px;
 	border-radius:3px;
@@ -699,16 +706,16 @@ body { background:url(../img/dotmesh_default_bkg.jpg); }
 	}
 
 /* User Profile */
-.user-profile-block { 
+.user-profile-block {
 	position:relative;
-	border-bottom:1px solid #bbb; 
+	border-bottom:1px solid #bbb;
 	box-shadow:0 2px 2px #eee;
 	-moz-box-shadow:0 2px 2px #eee;
 	-webkit-box-shadow:0 2px 2px #eee;
-	padding:25px 25px 15px 180px; 
+	padding:25px 25px 15px 180px;
 	background:#fff;
 	}
-.user-profile-block .avatar { 
+.user-profile-block .avatar {
 	float:left;
 	margin-left:-155px;
 	width:130px;
@@ -723,7 +730,7 @@ body { background:url(../img/dotmesh_default_bkg.jpg); }
 .user-profile-block .avatar button { width:100%; }
 button.subscription-state { padding-right:10px; padding-left:10px; text-align:left; }
 button.subscription-state .icon { float:left; margin:-4px 4px -4px -2px; background-position:-187px -109px; }
-button.state-subscribed { 
+button.state-subscribed {
 	border-color:#307701;
 	background:#359f05;
 	background-image:linear-gradient(bottom, #267801 0%, #6db501 100%);
@@ -740,7 +747,7 @@ button.state-subscribed {
 		);
 	text-shadow:0 1px 2px #265a01;
 	}
-button.state-subscribed:hover { 
+button.state-subscribed:hover {
 	border-color:#b50000;
 	background:#c60200;
 	background-image:linear-gradient(bottom, #ab0200 0%, #e13500 100%);
@@ -792,7 +799,7 @@ button.state-subscribed:hover .icon { background-position:-213px -108px; }
 	text-indent:-999em;
 	}
 .page-my-account .avatar:hover .icon { background-position:-161px -109px; }
-.page-my-account .avatar img { 
+.page-my-account .avatar img {
 	width:200px;
 	border-radius:5px;
 	-moz-border-radius:5px;
