@@ -166,7 +166,7 @@ class DotMesh_Controler_Abstract extends BActionController
         }
         $localNode = DotMesh_Model_Node::i()->localNode();
         if ($localNode) {
-            BLayout::i()->view('head')->addTitle('DotMesh')->addTitle($localNode->uri());
+            BLayout::i()->view('head')->setTitle('DotMesh')->addTitle($localNode->uri());
         }
 
         if (($guest = $r->get('guest_uri'))) {
