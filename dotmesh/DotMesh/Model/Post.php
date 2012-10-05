@@ -303,12 +303,17 @@ class DotMesh_Model_Post extends BModel
     {
         list($nodeUri, $postname) = static::parseUri($uri);
         $nodeHlp = DotMesh_Model_Node::i();
-        $node = $nodeUri ? $nodeHlp->find($nodeUri, $create) : $nodeHlp->localNode();
+        if (is_array($create) && !empty($create['node_id'])) {
+            $nodeId = $create['node_id'];
+        } else {
+            $node = $nodeUri ? $nodeHlp->find($nodeUri, $create) : $nodeHlp->localNode();
+            $nodeId = $node->id;
+        }
         //$node->is_blocked?
-        $post = static::load(array('node_id'=>$node->id, 'postname'=>$postname));
+        $post = static::load(array('node_id'=>$nodeId, 'postname'=>$postname));
         if (!$post && $create) {
             $create = (array)$create;
-            $create['node_id'] = $node->id;
+            $create['node_id'] = $nodeId;
             $create['postname'] = $postname;
             unset($create['id']);
             $post = static::create($create)->save();
@@ -510,6 +515,16 @@ class DotMesh_Model_Post extends BModel
     public function contentsHtml()
     {
         return static::formatContentsHtml($this->contents);
+    }
+
+    public function normalizePreviewUsersTags()
+    {
+        $re = '`(^|\s)([&+^])([a-zA-Z0-9_-]+)`';
+        $localUri = DotMesh_Model_Node::i()->localNode()->uri();
+        $preview = preg_replace_callback($re, function($m) use($localUri) {
+            return $m[1].$m[2].$localUri.'/'.$m[3];
+        }, $this->preview);
+        return $preview;
     }
 
     public function submitFeedback($type, $value, $userId=null)

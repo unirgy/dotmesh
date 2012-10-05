@@ -293,15 +293,32 @@ class DotMesh_Model_User extends BModelUser
         return BUtil::setUrlQuery(BApp::href('a/'.$folder).'/feed.rss', $params);
     }
 
-    public function generateRemoteSignature($node)
+    /**
+    * Generate signature for remote user identification
+    *
+    * Use $agentIP==null for server2server communication
+    * Provide browser IP for double hash
+    *
+    * @param DotMesh_Model_Node $node
+    * @param string $agentIP
+    * @return string
+    */
+    public function generateRemoteSignature($node, $agentIP=null)
     {
         $localNode = DotMesh_Model_Node::i()->localNode();
-        return base64_encode(pack('H*', hash('sha512', $localNode->secret_key.'|'.$node->secret_key.'|'.$this->secret_key)));
+        $signature = BUtil::sha512base64($localNode->secret_key.'|'.$node->secret_key.'|'.$this->secret_key);
+        if ($agentIP) {
+            if (true===$agentIP) {
+                $agentIP = BRequest::i()->ip();
+            }
+            $signature = BUtil::sha512base64($agentIP.'|'.$signature);
+        }
+        return $signature;
     }
 
-    public function validateRemoteSignature($node, $signature)
+    public function validateRemoteSignature($node, $signature, $agentIP=null)
     {
-        return $this->generateRemoteSignature($node)===$signature;
+        return $this->generateRemoteSignature($node, $agentIP)===$signature;
     }
 
     public function confirmRemoteSignature($signature)
@@ -422,7 +439,7 @@ class DotMesh_Model_User extends BModelUser
             $request = array(
                 'users' => array($sessUser),
                 'subscriptions' => array(
-                    array('type'=>'user', 'sub'=>$sessUser->uri(), 'pub'=>$user->uri(), 'subscribe'=>1),
+                    array('type'=>'user', 'sub'=>$sessUser->uri(), 'pub'=>$user->uri(), 'subscribe'=>$updateTo),
                 ),
             );
             if (!$user->remote_signature) {
