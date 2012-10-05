@@ -26,17 +26,16 @@ class DotMesh extends BClass
 
             ->route('GET|POST /a/.action', 'DotMesh_Controller_Accounts')
             ->route('GET|POST /n/.action', 'DotMesh_Controller_Nodes')
-
-            ->route('GET|POST|PUT|HEAD|OPTIONS /u/:username', 'DotMesh_Controller_Users.index')
-            ->route('GET|POST|PUT|HEAD|OPTIONS /p/:postname', 'DotMesh_Controller_Posts.index')
-            ->route('GET|POST|PUT|HEAD|OPTIONS /p/:postname/*seo-suffix', 'DotMesh_Controller_Posts.index')
-            ->route('GET|POST|PUT|HEAD|OPTIONS /t/:tagname', 'DotMesh_Controller_Tags.index')
+            ->route('GET|POST /u/:username', 'DotMesh_Controller_Users.index')
+            ->route('GET|POST /p/:postname', 'DotMesh_Controller_Posts.index')
+            ->route('GET|POST /p/:postname/*seo-suffix', 'DotMesh_Controller_Posts.index')
+            ->route('GET|POST /t/:tagname', 'DotMesh_Controller_Tags.index')
 
             ->route('GET|POST|PUT|HEAD|OPTIONS /n/api1.json', 'DotMesh_Controller_Nodes.api1_json')
             ->route('GET|POST|PUT|HEAD|OPTIONS /a/api1.json', 'DotMesh_Controller_Accounts.api1_json')
-            ->route('GET|POST|PUT|HEAD|OPTIONS /u/:usernode/api1.json', 'DotMesh_Controller_Users.api1_json')
-            ->route('GET|POST|PUT|HEAD|OPTIONS /p/:postname/api1.json', 'DotMesh_Controller_Posts.api1_json')
-            ->route('GET|POST|PUT|HEAD|OPTIONS /t/:tagname/api1.json', 'DotMesh_Controller_Tags.api1_json')
+            ->route('GET|POST|PUT|DELETE|HEAD|OPTIONS /u/:usernode/api1.json', 'DotMesh_Controller_Users.api1_json')
+            ->route('GET|POST|PUT|DELETE|HEAD|OPTIONS /p/:postname/api1.json', 'DotMesh_Controller_Posts.api1_json')
+            ->route('GET|POST|PUT|DELETE|HEAD|OPTIONS /t/:tagname/api1.json', 'DotMesh_Controller_Tags.api1_json')
 
             ->route('GET /n/feed.rss', 'DotMesh_Controller_Nodes.feed_rss')
             ->route('GET /a/:label/feed.rss', 'DotMesh_Controller_Accounts.feed_rss')
@@ -61,13 +60,16 @@ class DotMesh extends BClass
                         array('css', '{DotMesh}/css/normalize.css'),
                         array('css', '{DotMesh}/css/main.css'),
                         array('css', '{DotMesh}/css/dotmesh.css'),
+
                         array('js', '{DotMesh}/js/head.min.js'),
                         array('js', '{DotMesh}/js/es5-shim.min.js'),
+
                         array('js', '//ajax.googleapis.com/ajax/libs/jquery/1.8.1/jquery.min.js'),
+                        //array('js', '{DotMesh}/js/jquery.min.js'),
 
                         array('css', '{DotMesh}/css/tipTip.css'),
                         array('js', '{DotMesh}/js/jquery.tipTip.min.js'),
-                        //array('js', '{DotMesh}/js/jquery.min.js'),
+
                         array('js', '{DotMesh}/js/dotmesh.js'),
                     )),
                 ),
@@ -145,23 +147,27 @@ class DotMesh_Controler_Abstract extends BActionController
             return false;
         }
         $r = BRequest::i();
-        if (!($r->method()==='GET' && $r->rawPath()==='/n/setup')) {
+        if ($r->rawPath()!=='/n/setup') {
             if (!defined('DOTMESH_CONFIGURED')) {
                 BResponse::i()->redirect(BApp::href('n/setup'));
             }
+            /*
             try {
                 BMigrate::i()->migrateModules(true);
             } catch (PDOException $e) {
                 $this->forward('503', 'DotMesh_Controller_Nodes', array('exception'=>$e));
                 return false;
             }
+            */
             if (!DotMesh_Model_Node::i()->localNode()) {
+#echo 1; exit;
                 BResponse::i()->redirect(BApp::href('n/setup'));
             }
         }
         $localNode = DotMesh_Model_Node::i()->localNode();
-
-        BLayout::i()->view('head')->addTitle('DotMesh')->addTitle($localNode->uri());
+        if ($localNode) {
+            BLayout::i()->view('head')->addTitle('DotMesh')->addTitle($localNode->uri());
+        }
 
         if (($guest = $r->get('guest_uri'))) {
             DotMesh_Model_User::i()->acceptGuest($guest, $r->get('guest_signature'));
@@ -208,6 +214,12 @@ class DotMesh_Model_PostUser extends BModel
     protected static $_table = 'dm_post_user';
 }
 
+class DotMesh_Model_PostFile extends BModel
+{
+    protected static $_origClass = __CLASS__;
+    protected static $_table = 'dm_post_file';
+}
+
 class DotMesh_Model_NodeBlock extends BModel
 {
     protected static $_origClass = __CLASS__;
@@ -218,12 +230,4 @@ class DotMesh_Model_UserBlock extends BModel
 {
     protected static $_origClass = __CLASS__;
     protected static $_table = 'dm_user_block';
-}
-
-class DotMesh_Migrate extends BClass
-{
-    public static function run()
-    {
-
-    }
 }

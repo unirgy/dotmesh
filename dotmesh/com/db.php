@@ -374,13 +374,47 @@ class BDb
         return !empty(static::$_config['dbname']) ? static::$_config['dbname'] : null;
     }
 
+    public static function ddlStart()
+    {
+        BDb::run(<<<EOT
+/*!40101 SET SQL_MODE=''*/;
+
+/*!40014 SET @OLD_UNIQUE_CHECKS=@@UNIQUE_CHECKS, UNIQUE_CHECKS=0 */;
+/*!40014 SET @OLD_FOREIGN_KEY_CHECKS=@@FOREIGN_KEY_CHECKS, FOREIGN_KEY_CHECKS=0 */;
+/*!40101 SET @OLD_SQL_MODE=@@SQL_MODE, SQL_MODE='NO_AUTO_VALUE_ON_ZERO' */;
+/*!40111 SET @OLD_SQL_NOTES=@@SQL_NOTES, SQL_NOTES=0 */;
+EOT
+        );
+    }
+
+    public static function ddlFinish()
+    {
+        BDb::run(<<<EOT
+/*!40101 SET SQL_MODE=@OLD_SQL_MODE */;
+/*!40014 SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS */;
+/*!40014 SET UNIQUE_CHECKS=@OLD_UNIQUE_CHECKS */;
+/*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
+EOT
+        );
+    }
+
     /**
     * Clear DDL cache
     *
     */
-    public static function ddlClearCache()
+    public static function ddlClearCache($fullTableName=null)
     {
-        static::$_tables = array();
+        if ($fullTableName) {
+            if (!static::dbName()) {
+                static::connect(static::$_defaultConnectionName);
+            }
+            $a = explode('.', $fullTableName);
+            $dbName = empty($a[1]) ? static::dbName() : $a[0];
+            $tableName = empty($a[1]) ? $fullTableName : $a[1];
+            static::$_tables[$dbName][$tableName] = null;
+        } else {
+            static::$_tables = array();
+        }
     }
 
     /**
@@ -494,17 +528,21 @@ class BDb
     public static function ddlTable($fullTableName, $fields, $options=null)
     {
         if (static::ddlTableExists($fullTableName)) {
-            static::ddlTableColumns($fullTableName, $fields);
+            static::ddlTableColumns($fullTableName, $fields, null, null, $options); // altering options is not implemented
         } else {
             $fieldsArr = array();
             foreach ($fields as $f=>$def) {
                 $fieldsArr[] = $f.' '.$def;
+            }
+            if (!empty($options['primary'])) {
+                $fieldsArr[] = "PRIMARY KEY ".$options['primary'];
             }
             $engine = !empty($options['engine']) ? $options['engine'] : 'InnoDB';
             $charset = !empty($options['charset']) ? $options['charset'] : 'utf8';
             $collate = !empty($options['collate']) ? $options['collate'] : 'utf8_general_ci';
             BORM::i()->raw_query("CREATE TABLE {$fullTableName} (".join(', ', $fieldsArr).")
                 ENGINE={$engine} DEFAULT CHARSET={$charset} COLLATE={$collate}", array())->execute();
+            static::ddlClearCache();
         }
         return true;
     }
@@ -552,7 +590,16 @@ class BDb
                     if (!empty($tableIndexes[$idx])) {
                         $alterArr[] = "DROP KEY `{$idx}`";
                     }
-                    $alterArr[] = "ADD KEY `{$idx}` {$def}";
+                    if (strpos($def, 'PRIMARY')===0) {
+                        $alterArr[] = "DROP PRIMARY KEY";
+                        $def = substr($def, 7);
+                        $alterArr[] = "ADD PRIMARY KEY `{$idx}` {$def}";
+                    } elseif (strpos($def, 'UNIQUE')===0) {
+                        $def = substr($def, 6);
+                        $alterArr[] = "ADD UNIQUE KEY `{$idx}` {$def}";
+                    } else {
+                        $alterArr[] = "ADD KEY `{$idx}` {$def}";
+                    }
                 }
             }
         }
@@ -562,7 +609,7 @@ class BDb
             // You cannot add a foreign key and drop a foreign key in separate clauses of a single ALTER TABLE statement.
             // Separate statements are required.
             $dropArr = array();
-            foreach ($indexes as $idx=>$def) {
+            foreach ($fks as $idx=>$def) {
                 if ($def==='DROP') {
                     if (!empty($tableFKs[$idx])) {
                         $dropArr[] = "DROP FOREIGN KEY `{$idx}`";
@@ -578,7 +625,9 @@ class BDb
                 BORM::i()->raw_query("ALTER TABLE {$fullTableName} ".join(", ", $dropArr), array())->execute();
             }
         }
-        return BORM::i()->raw_query("ALTER TABLE {$fullTableName} ".join(", ", $alterArr), array())->execute();
+        $result = BORM::i()->raw_query("ALTER TABLE {$fullTableName} ".join(", ", $alterArr), array())->execute();
+        static::ddlClearCache();
+        return $result;
     }
 
     /**
@@ -769,7 +818,7 @@ class BORM extends ORMWrapper
      * Set up the database connection used by the class.
      * Use BPDO for nested transactions
      */
-    protected static function _setup_db() 
+    protected static function _setup_db()
     {
         if (!is_object(static::$_db)) {
             $connection_string = static::$_config['connection_string'];
@@ -781,7 +830,7 @@ class BORM extends ORMWrapper
             }
             try { //ADDED: hide connection details from the error if not in DEBUG mode
                 $db = new BPDO($connection_string, $username, $password, $driver_options); //UPDATED
-            } catch (PDOException $e) { 
+            } catch (PDOException $e) {
                 if (BDebug::is('DEBUG')) {
                     throw $e;
                 } else {
@@ -798,7 +847,7 @@ class BORM extends ORMWrapper
      * This is public in case the ORM should use a ready-instantiated
      * PDO object as its database connection.
      */
-    public static function set_db($db, $config=null) 
+    public static function set_db($db, $config=null)
     {
         if (!is_null($config)) {
             static::$_config = array_merge(static::$_config, $config);
@@ -905,7 +954,7 @@ class BORM extends ORMWrapper
         }
         return $fragment;
     }
-    
+
     protected function _add_result_column($expr, $alias=null) {
         if (!is_null($alias)) {
             $expr .= " AS " . $this->_quote_identifier($alias);
@@ -923,7 +972,7 @@ class BORM extends ORMWrapper
         }
         return $this;
     }
-    
+
     /**
     * Return select sql statement built from the ORM object
     *

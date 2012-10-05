@@ -16,7 +16,7 @@
 			    		<li>
 					        <label for="thumb_provider"><?=$this->_('Avatar Type')?></label>
 					        <select id="thumb_provider" name="account[thumb_provider]">
-					<?php foreach (array('gravatar'=>'Gravatar', 'file'=>'Upload a file', 'link'=>'Web Link') as $k=>$v): ?>
+					<?php foreach (array('gravatar'=>'Gravatar', 'file'=>'File Upload', 'link'=>'Web Link') as $k=>$v): ?>
 					            <option value="<?=$k?>" <?=$u->thumb_provider==$k ? 'selected' : ''?>><?=$this->_($v)?></option>
 					<?php endforeach ?>
 					        </select>

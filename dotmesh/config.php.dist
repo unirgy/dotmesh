@@ -28,5 +28,12 @@ $config['modules']['DotMesh']['timeline_page_size'] = 10;
 $config['modules']['BTwitterAdapter']['consumer_key'] = '';
 $config['modules']['BTwitterAdapter']['consumer_secret'] = '';
 
+#if (!in_array($_SERVER['REMOTE_ADDR'], explode(',', '1.2.3.4'))) {
+#    echo "<h1>UNDER CONSTRUCTION</h1>";
+#    exit;
+#}
+
+#BDebug::mode('DEBUG');
 #define('DOTMESH_CONFIGURED', 1);
+
 return $config;
