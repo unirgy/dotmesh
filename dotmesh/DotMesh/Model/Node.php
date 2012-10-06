@@ -81,6 +81,7 @@ class DotMesh_Model_Node extends BModel
                 'lastname' => !empty($form['lastname']) ? $form['lastname'] : '',
                 'email' => $form['email'],
                 'secret_key' => BUtil::randomString(64),
+                'is_admin' => 1,
             ))->setPassword($form['password'])->save()->login();
 
             //BLayout::i()->view('email/user-new-user')->set('user', $user)->email();
@@ -324,7 +325,7 @@ class DotMesh_Model_Node extends BModel
             $uri .= $this->is_https ? 'https://' : 'http://';
         }
         $uri .= trim($this->uri,'/');
-        if (!$this->is_modrewrite) {
+        if ($full && !$this->is_rewrite) {
             $uri .= '/dotmesh.php';
         }
         if ($type) {

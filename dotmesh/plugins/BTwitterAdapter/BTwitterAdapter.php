@@ -44,7 +44,7 @@ class BTwitterAdapter extends BClass
 
     public static function onNewPostBefore($args)
     {
-        $args['data']['is_tweeted'] = $args['request']['is_tweeted'] ? 1 : 0;
+        $args['data']['is_tweeted'] = !empty($args['request']['is_tweeted']) ? 1 : 0;
     }
 
     public static function onNewPostAfter($args)

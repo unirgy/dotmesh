@@ -258,6 +258,7 @@ class DotMesh_Model_Post extends BModel
         $localNode->set('last_postname', $post->postname)->save();
 
         $post->collectUsersAndTags();
+        $post->distribute(true);
 
         BPubSub::i()->fire(__METHOD__.'.after', array('post'=>$post));
 
@@ -271,6 +272,7 @@ class DotMesh_Model_Post extends BModel
         $post = static::create($data)->save();
 
         $post->collectUsersAndTags();
+        $post->distribute();
 
         BPubSub::i()->fire(__METHOD__.'.after', array('request'=>$data, 'post'=>$post));
 
@@ -567,9 +569,56 @@ class DotMesh_Model_Post extends BModel
         return $this;
     }
 
-    public function distribute($remote=false)
+    public function distribute($sendRemote=false)
     {
+        $usersToSend = array();
 
+        if ($this->user()->node()->is_local) {
+            $usersToSend[$this->user_id] = $this->user();
+        }
+        if ($this->echo_user_id && $this->echoUser()->node()->is_local) {
+            $usersToSend[$this->echo_user_id] = $this->echoUser();
+        }
+
+        $remoteNodes = array();
+
+        $users = DotMesh_Model_User::i()->orm('u')
+            ->join('DotMesh_Model_PostUser', array('pu.user_id','=','u.id'), 'pu')
+            ->where('pu.post_id', $this->id)
+            ->find_many();
+        foreach ((array)$users as $user) {
+            $node = $user->node();
+            if ($node->is_local) {
+                if ($sendRemote) {
+                    $usersToSend[$user->id] = $user;
+                }
+//TODO: send email notifications
+            } elseif ($sendRemote) {
+                $remoteNodes[$node->id] = $node;
+            }
+        }
+
+        if (!$this->is_private) {
+            $tags = DotMesh_Model_Tag::i()->orm('t')
+                ->join('DotMesh_Model_PostTag', array('pt.tag_id','=','t.id'), 'pt')
+                ->where('pt.post_id', $this->id)
+                ->find_many();
+            foreach ((array)$tags as $tag) {
+                if ($tag->node()->is_local) {
+//TODO: send email notifications
+                } elseif ($sendRemote) {
+                    $remoteNodes[$node->id] = $node;
+                }
+            }
+        }
+
+        if (!empty($remoteNodes)) {
+            foreach ($remoteNodes as $node) {
+                $node->apiClient(array('users'=>$usersToSend, 'posts'=>array($this)));
+            }
+        }
+
+        return $this;
     }
 }
 

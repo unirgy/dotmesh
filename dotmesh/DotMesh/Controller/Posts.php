@@ -51,7 +51,7 @@ class DotMesh_Controller_Posts extends DotMesh_Controler_Abstract
             $do = $r->post('do');
             switch ($do) {
             case 'new':
-                if ($post) {
+                if (!empty($post)) {
                     throw new BException('Invalid post action');
                 }
                 $data = $r->post();
