@@ -302,9 +302,9 @@ class DotMesh_Model_Node extends BModel
                     $data = BUtil::maskFields($p, 'postname,preview,create_dt,is_private,is_tweeted');
                     $data['node_id'] = $remoteNode->id;
                     $data['user_id'] = $user->id;
-                    if ($p['echo_user_uri']) {
+                    if (!empty($p['echo_user_uri'])) {
                         $echoUser = $userHlp->find($p['echo_user_uri'], true);
-                        $data['echo_user_id'] = $echoUser;
+                        $data['echo_user_id'] = $echoUser->id;
                     }
                     $post = DotMesh_Model_Post::i()->receiveRemotePost($data);
                 } catch (Exception $e) {

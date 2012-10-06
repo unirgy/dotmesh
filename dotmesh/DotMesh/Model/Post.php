@@ -388,7 +388,7 @@ class DotMesh_Model_Post extends BModel
                     break;
                 case '^':
                     $tag = DotMesh_Model_Tag::i()->find($uri, true);
-                    $key = "t-{$this->id}-{$user->id}";
+                    $key = "t-{$this->id}-{$tag->id}";
                     if (empty($dups[$key])) {
                         DotMesh_Model_PostTag::i()->create(array('post_id'=>$this->id, 'tag_id'=>$tag->id))->save();
                         $dups[$key] = 1;
@@ -526,10 +526,11 @@ class DotMesh_Model_Post extends BModel
 
     public function normalizePreviewUsersTags()
     {
-        $re = '`(^|\s)([&+^])([a-zA-Z0-9_-]+)`';
+        //return $this->preview;
+        $re = '`(^|\s)([&+^])(?:([a-zA-Z0-9][a-z0-9.-]+\.[a-zA-Z]{2,6})(\S*)/)?([a-zA-Z0-9_-]+)`';
         $localUri = DotMesh_Model_Node::i()->localNode()->uri();
         $preview = preg_replace_callback($re, function($m) use($localUri) {
-            return $m[1].$m[2].$localUri.'/'.$m[3];
+            return $m[3] ? $m[0] : $m[1].$m[2].$localUri.'/'.$m[5];
         }, $this->preview);
         return $preview;
     }
@@ -604,7 +605,8 @@ class DotMesh_Model_Post extends BModel
                 ->where('pt.post_id', $this->id)
                 ->find_many();
             foreach ((array)$tags as $tag) {
-                if ($tag->node()->is_local) {
+                $node = $tag->node();
+                if ($node->is_local) {
 //TODO: send email notifications
                 } elseif ($sendRemote) {
                     $remoteNodes[$node->id] = $node;
