@@ -65,6 +65,19 @@ class DotMesh_Controller_Tags extends DotMesh_Controler_Abstract
 
     public function action_feed_rss()
     {
-
+        $r = BRequest::i();
+        $localNode = DotMesh_Model_Node::i()->localNode();
+        $hlp = DotMesh_Model_Post::i();
+        $localNode = DotMesh_Model_Node::i()->localNode();
+        $tag = $localNode->tag($r->param('tagname'));
+        if (!$tag) {
+            BResponse::i()->status(404, 'Invalid tag', true);
+        }
+        $orm = $tag->tagTimelineOrm();
+        $timeline = $hlp->fetchTimeline($orm);
+        BResponse::i()->contentType('text/xml')->set($hlp->toRss(array(
+            'title' => $tag->tagname.' :: Tag Timeline :: '.$localNode->uri(),
+            'link' => $tag->uri(true),
+        ), $timeline['rows']));
     }
 }

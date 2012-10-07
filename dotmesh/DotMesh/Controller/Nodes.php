@@ -58,10 +58,10 @@ class DotMesh_Controller_Nodes extends DotMesh_Controler_Abstract
             $title = BLocale::i()->_('Public Timeline');
             $layout->view('head')
                 ->addTitle($title)
-                ->rss(BApp::href('n/feed.rss'));
+                ->rss(BApp::href('n/public/feed.rss'));
             $layout->view('timeline')->set(array(
                 'title' => $title,
-                'feed_uri' => BApp::href('n/feed.rss'),
+                'feed_uri' => BApp::href('n/public/feed.rss'),
             ));
         }
     }
@@ -141,5 +141,24 @@ class DotMesh_Controller_Nodes extends DotMesh_Controler_Abstract
         } else {
             $this->forward(true);
         }
+    }
+
+    public function action_feed_rss()
+    {
+        $localNode = DotMesh_Model_Node::i()->localNode();
+        $hlp = DotMesh_Model_Post::i();
+        switch (BRequest::i()->param('label')) {
+        case 'public':
+            $orm = $hlp->publicTimelineOrm();
+            break;
+        default:
+            $this->forward(true);
+            return;
+        }
+        $timeline = $hlp->fetchTimeline($orm);
+        BResponse::i()->contentType('text/xml')->set($hlp->toRss(array(
+            'title' => 'Public Timeline :: '.$localNode->uri(),
+            'link' => BApp::href('n/'),
+        ), $timeline['rows']));
     }
 }

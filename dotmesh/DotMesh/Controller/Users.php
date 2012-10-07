@@ -65,7 +65,20 @@ class DotMesh_Controller_Users extends DotMesh_Controler_Abstract
 
     public function action_feed_rss()
     {
-
+        $r = BRequest::i();
+        $localNode = DotMesh_Model_Node::i()->localNode();
+        $hlp = DotMesh_Model_Post::i();
+        $localNode = DotMesh_Model_Node::i()->localNode();
+        $user = $localNode->user($r->param('username'));
+        if (!$user) {
+            BResponse::i()->status(404, 'Invalid user', true);
+        }
+        $orm = $user->userTimelineOrm();
+        $timeline = $hlp->fetchTimeline($orm);
+        BResponse::i()->contentType('text/xml')->set($hlp->toRss(array(
+            'title' => $user->username.' :: User Timeline :: '.$localNode->uri(),
+            'link' => $user->uri(true),
+        ), $timeline['rows']));
     }
 
     public function action_thumb()

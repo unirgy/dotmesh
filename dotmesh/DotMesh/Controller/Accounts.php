@@ -42,7 +42,7 @@ class DotMesh_Controller_Accounts extends DotMesh_Controler_Abstract
         }
     }
 
-    public function action_home()
+    public function action_my()
     {
         if (!DotMesh_Model_User::i()->isLoggedIn()) {
             $this->forward('index', 'DotMesh_Controller_Nodes');
@@ -123,7 +123,36 @@ class DotMesh_Controller_Accounts extends DotMesh_Controler_Abstract
 
     public function action_feed_rss()
     {
-
+        $r = BRequest::i();
+        if (!$r->get('u') || !$r->get('h')) {
+            BResponse::i()->status(401, 'Missing user name or password', true);
+        }
+        $localNode = DotMesh_Model_Node::i()->localNode();
+        $user = $localNode->user($r->get('u'));
+        if (!$user || $r->get('h')!==hash('sha256', $user->password_hash)) {
+            BResponse::i()->status(401, 'Invalid user or password', true);
+        }
+        $hlp = DotMesh_Model_Post::i();
+        $label = BRequest::i()->param('label');
+        switch ($label) {
+        case 'my':
+            $orm = DotMesh_Model_User::i()->myTimelineOrm($user->id);
+            $title = 'My Timeline :: '.$user->username.' :: '.$localNode->uri();
+            break;
+        case 'received': case 'sent': case 'private': case 'starred':
+            $orm = DotMesh_Model_User::i()->myFolderTimelineOrm($label, $user->id);
+            $title = ucwords($label).' :: '.$user->username.' :: '.$localNode->uri();
+            break;
+        default:
+            $this->forward(true);
+            return;
+        }
+        $timeline = $hlp->fetchTimeline($orm);
+        $rssXml = $hlp->toRss(array(
+            'title' => $title,
+            'link' => BApp::href('a/'.$label),
+        ), $timeline['rows']);
+        BResponse::i()->contentType('text/xml')->set($rssXml);
     }
 
     public function action_signup()
@@ -278,17 +307,17 @@ class DotMesh_Controller_Accounts extends DotMesh_Controler_Abstract
         }
         BResponse::i()->redirect(BApp::href());
     }
-    
+
     public function action_pub_users()
     {
         BLayout::i()->applyLayout('/pub_users');
     }
-    
+
     public function action_pub_tags()
     {
         BLayout::i()->applyLayout('/pub_tags');
     }
-    
+
     public function action_sub_users()
     {
         BLayout::i()->applyLayout('/sub_users');

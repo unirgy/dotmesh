@@ -86,12 +86,9 @@ $now = strtotime(BDb::now());
 <?php endif ?>
 
 <?php if (!BRequest::i()->xhr()): ?>
-<div class="timeline-loadmore" data-uri-pattern="<?=BUtil::setUrlQuery(BRequest::currentUrl(), array('p'=>'PAGE'))?>">
+<div class="timeline-loadmore" data-uri-pattern="<?=BUtil::setUrlQuery(BRequest::currentUrl(), array('p'=>'PAGE'))?>"
+    <?=!empty($this->timeline['rows']) && !empty($this->timeline['is_last_page']) ? 'style="display:none"' : ''?> >
     <div class="loadmore"><?=$this->_('Load more ...')?></div>
     <div class="loader"><img src="<?=BApp::src('DotMesh', 'img/ajax-loader.gif')?>"/><?=$this->_('Please wait, loading ...')?></div>
 </div>
-<?php endif ?>
-
-<?php if (!empty($this->timeline['rows']) && !empty($this->timeline['is_last_page'])): ?>
-<script>$('.timeline-loadmore').hide()</script>
 <?php endif ?>

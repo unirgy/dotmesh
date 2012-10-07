@@ -92,7 +92,7 @@ class DotMesh_Model_User extends BModelUser
         return $this;
     }
 
-    public static function myTimelineOrm()
+    public static function myTimelineOrm($uId=null)
     {
         $nodeBlock = DotMesh_Model_NodeBlock::table();
         $userBlock = DotMesh_Model_UserBlock::table();
@@ -101,7 +101,9 @@ class DotMesh_Model_User extends BModelUser
         $userSub = DotMesh_Model_UserSub::table();
         $tagSub = DotMesh_Model_TagSub::table();
 
-        $uId = (int)static::sessionUserId();
+        if (!$uId) {
+            $uId = (int)static::sessionUserId();
+        }
         $orm = DotMesh_Model_Post::i()->timelineOrm();
 
         $orm->where(array('OR' => array(
@@ -132,12 +134,14 @@ class DotMesh_Model_User extends BModelUser
         return $orm;
     }
 
-    public function myFolderTimelineOrm($folder)
+    public function myFolderTimelineOrm($folder, $uId=null)
     {
         $postUser = DotMesh_Model_PostUser::table();
         $postFeedback = DotMesh_Model_PostFeedback::table();
 
-        $uId = (int)static::sessionUserId();
+        if (!$uId) {
+            $uId = (int)static::sessionUserId();
+        }
         $orm = DotMesh_Model_Post::i()->timelineOrm();
 
         switch ($folder) {
@@ -285,7 +289,7 @@ class DotMesh_Model_User extends BModelUser
     {
         $params = array(
             'u' => $this->username,
-            'p' => hash('sha256', $this->password_hash),
+            'h' => hash('sha256', $this->password_hash),
         );
         if (($s = BRequest::i()->get('s'))) {
             $params['s'] = $s;

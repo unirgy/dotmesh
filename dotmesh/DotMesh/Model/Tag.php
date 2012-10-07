@@ -100,6 +100,21 @@ class DotMesh_Model_Tag extends BModel
         return $this->node()->uri('t', $full).$this->tagname;
     }
 
+    public function subscribersCnt()
+    {
+        $cnt = DotMesh_Model_TagSub::i()->orm()
+            ->where('pub_tag_id', $this->id)->select('(count(*))', 'value')->find_one();
+        return $cnt ? $cnt->value : 0;
+    }
+
+    public function postsCnt()
+    {
+        $cnt = DotMesh_Model_Post::i()->orm('p')
+            ->join('DotMesh_Model_PostTag', array('pt.post_id','=','p.id'), 'pt')
+            ->where('pt.tag_id', $this->id)->where('p.is_private', 0)->select('(count(*))', 'value')->find_one();
+        return $cnt ? $cnt->value : 0;
+    }
+
     public static function trendingTags()
     {
         return array();

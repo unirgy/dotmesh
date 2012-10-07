@@ -508,5 +508,20 @@ class DotMesh_Model_Post extends BModel
 
         return $this;
     }
+
+    public static function toRss($channel, $posts)
+    {
+        $channel['items'] = array();
+        foreach ($posts as $post) {
+            $descr = "By: {$post->user()->uri()}<br/>{$post->contents}";
+            $channel['items'][] = array(
+                'title' => $post->preview,
+                'description' => $descr,
+                'pubDate' => $post->create_dt,
+                'link' => $post->uri(true),
+            );
+        }
+        return BUtil::toRss($channel);
+    }
 }
 

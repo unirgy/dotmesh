@@ -43,7 +43,7 @@ class BUtil extends BClass
     /**
     * Default character pool for random and sequence strings
     *
-    * Chars "c", "C" are ommited to avoid accidental obcene language
+    * Chars "c", "C" are ommited to avoid accidental obscene language
     * Chars "0", "1", "I" are removed to avoid leading 0 and ambiguity in print
     *
     * @var string
@@ -187,6 +187,30 @@ class BUtil extends BClass
             }
         }
         return '"UNSUPPORTED TYPE"';
+    }
+
+    public static function toRss($data)
+    {
+        $lang = !empty($data['language']) ? $data['language'] : 'en-us';
+        $ttl = !empty($data['ttl']) ? (int)$data['ttl'] : 40;
+        $descr = !empty($data['description']) ? $data['description'] : $data['title'];
+        $xml = '<?xml version="1.0" encoding="UTF-8"?><rss version="2.0"><channel>'
+.'<title><![CDATA['.$data['title'].']]></title><link><![CDATA['.$data['link'].']]></link>'
+.'<description><![CDATA['.$descr.']]></description><language><![CDATA['.$lang.']]></language><ttl>'.$ttl.'</ttl>';
+        foreach ($data['items'] as $item) {
+            if (!is_numeric($item['pubDate'])) {
+                $item['pubDate'] =  strtotime($item['pubDate']);
+            }
+            if (empty($item['guid'])) {
+                $item['guid'] = $item['link'];
+            }
+            $xml .= '<item><title><![CDATA['.$item['title'].']]></title>'
+.'<description><![CDATA['.$item['description'].']]></description>'
+.'<pubDate>'.date('r', $item['pubDate']).'</pubDate>'
+.'<guid><![CDATA['.$item['guid'].']]></guid><link><![CDATA['.$item['link'].']]></link></item>';
+        }
+        $xml .= '</channel></rss>';
+        return $xml;
     }
 
     /**
@@ -428,7 +452,6 @@ class BUtil extends BClass
     *   - key.(before|after)
     *   - obj.(before|after).$object_property==$key
     *   - arr.(before|after).$item_array_key==$key
-    * @param mixed $key
     * @return array resulting array
     */
     static public function arrayInsert($array, $items, $where)
@@ -926,13 +949,13 @@ class BUtil extends BClass
     public static function globRecursive($pattern, $flags=0)
     {
         $files = glob($pattern, $flags);
-    if (!$files) $files = array();
-    $dirs = glob(dirname($pattern).'/*', GLOB_ONLYDIR|GLOB_NOSORT);
-    if ($dirs) {
-        foreach ($dirs as $dir) {
-            $files = array_merge($files, self::globRecursive($dir.'/'.basename($pattern), $flags));
+        if (!$files) $files = array();
+        $dirs = glob(dirname($pattern).'/*', GLOB_ONLYDIR|GLOB_NOSORT);
+        if ($dirs) {
+            foreach ($dirs as $dir) {
+                $files = array_merge($files, self::globRecursive($dir.'/'.basename($pattern), $flags));
+            }
         }
-    }
         return $files;
     }
 
@@ -1886,31 +1909,6 @@ class BDebug extends BClass
 }
 
 /**
-* Stub for cache class
-*/
-class BCache extends BClass
-{
-    /**
-    * Shortcut to help with IDE autocompletion
-    *
-    * @return BCache
-    */
-    public static function i($new=false, array $args=array())
-    {
-        return BClassRegistry::i()->instance(__CLASS__, $args, !$new);
-    }
-
-    /**
-    * Stub
-    *
-    */
-    public function init()
-    {
-
-    }
-}
-
-/**
 * Facility to handle l10n and i18n
 */
 class BLocale extends BClass
@@ -2200,9 +2198,9 @@ class BLocale extends BClass
             if (!empty($code)) {
                 $code .= ','."\n";
             }
-            $code .= "'$k' => '$v'";
+            $code .= "'{$k}' => '".addslashes($v)."'";
         }
-        $code = "<?php return array($code);";
+        $code = "<?php return array({$code});";
         file_put_contents($targetFile, $code);
     }
 
@@ -2530,5 +2528,27 @@ class BFtpClient extends BClass
             ftp_chdir($conn, '..');
         }
         return $errors;
+    }
+}
+
+/** @see http://www.php.net/manual/en/function.htmlentities.php#106535 */
+if( !function_exists( 'xmlentities' ) ) {
+    function xmlentities( $string ) {
+        $not_in_list = "A-Z0-9a-z\s_-";
+        return preg_replace_callback( "/[^{$not_in_list}]/" , 'get_xml_entity_at_index_0' , $string );
+    }
+    function get_xml_entity_at_index_0( $CHAR ) {
+        if( !is_string( $CHAR[0] ) || ( strlen( $CHAR[0] ) > 1 ) ) {
+            die( "function: 'get_xml_entity_at_index_0' requires data type: 'char' (single character). '{$CHAR[0]}' does not match this type." );
+        }
+        switch( $CHAR[0] ) {
+            case "'":    case '"':    case '&':    case '<':    case '>':
+                return htmlspecialchars( $CHAR[0], ENT_QUOTES );    break;
+            default:
+                return numeric_entity_4_char($CHAR[0]);                break;
+        }
+    }
+    function numeric_entity_4_char( $char ) {
+        return "&#".str_pad(ord($char), 3, '0', STR_PAD_LEFT).";";
     }
 }

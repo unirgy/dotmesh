@@ -21,7 +21,7 @@ class DotMesh extends BClass
         BFrontController::i()
             ->route('_ /noroute', 'DotMesh_Controller_Nodes.404', array(), null, false)
 
-            ->route('GET /', 'DotMesh_Controller_Accounts.home')
+            ->route('GET /', 'DotMesh_Controller_Accounts.my')
             ->route('GET /:term', 'DotMesh_Controller_Nodes.catch_all')
 
             ->route('GET|POST /a/.action', 'DotMesh_Controller_Accounts')
@@ -37,7 +37,7 @@ class DotMesh extends BClass
             ->route('GET|POST|PUT|DELETE|HEAD|OPTIONS /p/:postname/api1.json', 'DotMesh_Controller_Posts.api1_json')
             ->route('GET|POST|PUT|DELETE|HEAD|OPTIONS /t/:tagname/api1.json', 'DotMesh_Controller_Tags.api1_json')
 
-            ->route('GET /n/feed.rss', 'DotMesh_Controller_Nodes.feed_rss')
+            ->route('GET /n/:label/feed.rss', 'DotMesh_Controller_Nodes.feed_rss')
             ->route('GET /a/:label/feed.rss', 'DotMesh_Controller_Accounts.feed_rss')
             ->route('GET /u/:username/feed.rss', 'DotMesh_Controller_Users.feed_rss')
             ->route('GET /p/:postname/feed.rss', 'DotMesh_Controller_Posts.feed_rss')
