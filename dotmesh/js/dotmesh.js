@@ -1,52 +1,95 @@
 /**
+* This file is part of DotMesh.
+*
+* DotMesh is free software: you can redistribute it and/or modify
+* it under the terms of the GNU General Public License as published by
+* the Free Software Foundation, either version 3 of the License, or
+* any later version.
+*
+* Foobar is distributed in the hope that it will be useful,
+* but WITHOUT ANY WARRANTY; without even the implied warranty of
+* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+* GNU General Public License for more details.
+*
+* You should have received a copy of the GNU General Public License
+* along with DotMesh.  If not, see <http://www.gnu.org/licenses/>.
+*
+* @package DotMesh (tm)
+* @link http://dotmesh.org
+* @author Boris Gurvich <boris@unirgy.com>
+* @copyright (c) 2012 Boris Gurvich
+* @license http://www.gnu.org/licenses/gpl.txt
+*/
+
+/**
 * Enable CORS in IE8,9
 *
 * @see https://github.com/tlianza/ajaxHooks/blob/master/src/ajax/xdr.js
 */
-(function( jQuery ) {
+(function( $ ) {
 
-if ( window.XDomainRequest ) {
-    jQuery.ajaxTransport(function( s ) {
-        if ( s.crossDomain && s.async ) {
-            if ( s.timeout ) {
-                s.xdrTimeout = s.timeout;
-                delete s.timeout;
-            }
-            var xdr;
-            return {
-                send: function( _, complete ) {
-                    function callback( status, statusText, responses, responseHeaders ) {
-                        xdr.onload = xdr.onerror = xdr.ontimeout = xdr.onprogress = jQuery.noop;
-                        xdr = undefined;
-                        complete( status, statusText, responses, responseHeaders );
-                    }
-                    xdr = new XDomainRequest();
-                    xdr.open( s.type, s.url );
-                    xdr.onload = function() {
-                        callback( 200, "OK", { text: xdr.responseText }, "Content-Type: " + xdr.contentType );
-                    };
-                    xdr.onerror = function() {
-                        callback( 404, "Not Found" );
-                    };
-                    xdr.onprogress = function() {};
-                    if ( s.xdrTimeout ) {
-                        xdr.ontimeout = function() {
-                            callback( 0, "timeout" );
-                        };
-                        xdr.timeout = s.xdrTimeout;
-                    }
-                    xdr.send( ( s.hasContent && s.data ) || null );
-                },
-                abort: function() {
-                    if ( xdr ) {
-                        xdr.onerror = jQuery.noop();
-                        xdr.abort();
-                    }
+    if ( window.XDomainRequest ) {
+        $.ajaxTransport(function( s ) {
+            if ( s.crossDomain && s.async ) {
+                if ( s.timeout ) {
+                    s.xdrTimeout = s.timeout;
+                    delete s.timeout;
                 }
-            };
-        }
-    });
-}
+                var xdr;
+                return {
+                    send: function( _, complete ) {
+                        function callback( status, statusText, responses, responseHeaders ) {
+                            xdr.onload = xdr.onerror = xdr.ontimeout = xdr.onprogress = $.noop;
+                            xdr = undefined;
+                            complete( status, statusText, responses, responseHeaders );
+                        }
+                        xdr = new XDomainRequest();
+                        xdr.open( s.type, s.url );
+                        xdr.onload = function() {
+                            callback( 200, "OK", { text: xdr.responseText }, "Content-Type: " + xdr.contentType );
+                        };
+                        xdr.onerror = function() {
+                            callback( 404, "Not Found" );
+                        };
+                        xdr.onprogress = function() {};
+                        if ( s.xdrTimeout ) {
+                            xdr.ontimeout = function() {
+                                callback( 0, "timeout" );
+                            };
+                            xdr.timeout = s.xdrTimeout;
+                        }
+                        xdr.send( ( s.hasContent && s.data ) || null );
+                    },
+                    abort: function() {
+                        if ( xdr ) {
+                            xdr.onerror = $.noop();
+                            xdr.abort();
+                        }
+                    }
+                };
+            }
+        });
+    }
+
+    $.fn.setSelectionRange = function(from, to) {
+        this.each(function(idx, el) {
+            if (from=='end') {
+                from = el.tagName=='TEXTAREA' ? el.innerHTML.length : el.value.length;
+            }
+            if (!to) {
+                to = from;
+            }
+            if (el.setSelectionRange) {
+                el.setSelectionRange(from, to);
+            } else if (el.createTextRange) {
+                var range = el.createTextRange();
+                range.collapse(true);
+                range.moveEnd('character', to);
+                range.moveStart('character', from);
+                range.select();
+            }
+        });
+    }
 })( jQuery );
 
 $(function() {
@@ -91,7 +134,7 @@ $(function() {
             span.toggleClass('shown');
             if (!video) {
                 video = $('<iframe class="youtube-player" type="text/html" width="440" height="280" frameborder="0"/>')
-                    .attr('src', $(el).data('src')).appendTo(span);
+                .attr('src', $(el).data('src')).appendTo(span);
             }
             return false;
         });

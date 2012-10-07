@@ -4,3 +4,8 @@
 	<?=$this->view('compose')?>
 	<?=$this->view('timeline')?>
 </div>
+<script>
+$(function() {
+    $('#contents').focus().setSelectionRange('end');
+})
+</script>

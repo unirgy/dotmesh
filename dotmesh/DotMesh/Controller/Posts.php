@@ -1,5 +1,28 @@
 <?php
 
+/**
+* This file is part of DotMesh.
+*
+* DotMesh is free software: you can redistribute it and/or modify
+* it under the terms of the GNU General Public License as published by
+* the Free Software Foundation, either version 3 of the License, or
+* any later version.
+*
+* Foobar is distributed in the hope that it will be useful,
+* but WITHOUT ANY WARRANTY; without even the implied warranty of
+* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+* GNU General Public License for more details.
+*
+* You should have received a copy of the GNU General Public License
+* along with DotMesh.  If not, see <http://www.gnu.org/licenses/>.
+*
+* @package DotMesh (tm)
+* @link http://dotmesh.org
+* @author Boris Gurvich <boris@unirgy.com>
+* @copyright (c) 2012 Boris Gurvich
+* @license http://www.gnu.org/licenses/gpl.txt
+*/
+
 class DotMesh_Controller_Posts extends DotMesh_Controler_Abstract
 {
     public function action_index()
@@ -23,8 +46,15 @@ class DotMesh_Controller_Posts extends DotMesh_Controler_Abstract
             $layout->applyLayout('xhr-timeline');
         } else {
             $layout->applyLayout('/thread');
+            $sessUserId = DotMesh_Model_User::i()->sessionUserId();
+            $mentions = array('+'.$post->user()->uri());
+            foreach ($post->mentionedUsers() as $pUser) {
+                if ($pUser->id!=$sessUserId) {
+                    $mentions[] = '+'.$pUser->uri();
+                }
+            }
             $layout->view('thread')->set('post', $post);
-            $layout->view('compose')->set('post', $post);
+            $layout->view('compose')->set('post', $post)->set('contents', join(' ', $mentions).' ');
             $layout->view('timeline')->set(array(
                 'title' => BLocale::i()->_("Thread timeline"),
                 'feed_uri' => $post->uri(true).'/feed.rss',

@@ -25,13 +25,13 @@
 		            <img src="<?=$user->thumbUri(50)?>" alt="<?=$this->q($user->fullname())?>"/>
 		        </a>
 		        <strong class="username"><?=$this->q($user->fullname())?></strong>
-				<h3>Compose New Post</h3>
+				<h3><?=$this->_($this->post ? 'Compose Reply' : 'Compose New Post')?></h3>
 		        <div class="textarea">
 		        	<textarea id="contents" name="contents" class="post-input" required><?=$this->q($this->contents)?></textarea>
 		        </div>
 		        <div class="buttons-group">
                     <label for="is_private" class="private-post-label"><input type="checkbox" name="is_private" id="is_private"
-                        <?=!empty($user->preferences['default_private']) ? 'checked' : '' ?>/> Private?</label>
+                        <?=!empty($user->preferences['default_private']) || ($this->post && $this->post->is_private) ? 'checked' : '' ?>/> Private?</label>
 <?php if ($user->is_admin): ?>
                     <label for="is_pinned" class="pinned-post-label"><input type="checkbox" name="is_pinned" id="is_pinned"/> Pinned?</label>
 <?php endif ?>

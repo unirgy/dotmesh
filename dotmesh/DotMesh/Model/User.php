@@ -1,4 +1,28 @@
 <?php
+
+/**
+* This file is part of DotMesh.
+*
+* DotMesh is free software: you can redistribute it and/or modify
+* it under the terms of the GNU General Public License as published by
+* the Free Software Foundation, either version 3 of the License, or
+* any later version.
+*
+* Foobar is distributed in the hope that it will be useful,
+* but WITHOUT ANY WARRANTY; without even the implied warranty of
+* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+* GNU General Public License for more details.
+*
+* You should have received a copy of the GNU General Public License
+* along with DotMesh.  If not, see <http://www.gnu.org/licenses/>.
+*
+* @package DotMesh (tm)
+* @link http://dotmesh.org
+* @author Boris Gurvich <boris@unirgy.com>
+* @copyright (c) 2012 Boris Gurvich
+* @license http://www.gnu.org/licenses/gpl.txt
+*/
+
 class DotMesh_Model_User extends BModelUser
 {
     protected static $_origClass = __CLASS__;
@@ -361,6 +385,9 @@ class DotMesh_Model_User extends BModelUser
             ->join('DotMesh_Model_UserSub', array('us.sub_user_id','=','u.id'), 'us')
             ->where('us.pub_user_id', $this->id)
             ->limit($limit);
+        if (($p = BRequest::i()->get('p'))) {
+            $orm->offset($limit*($p-1));
+        }
         return $orm->find_many();
     }
 
@@ -370,6 +397,9 @@ class DotMesh_Model_User extends BModelUser
             ->join('DotMesh_Model_UserSub', array('us.pub_user_id','=','u.id'), 'us')
             ->where('us.sub_user_id', $this->id)
             ->limit($limit);
+        if (($p = BRequest::i()->get('p'))) {
+            $orm->offset($limit*($p-1));
+        }
         return $orm->find_many();
     }
 
@@ -379,6 +409,9 @@ class DotMesh_Model_User extends BModelUser
             ->join('DotMesh_Model_TagSub', array('ts.pub_tag_id','=','t.id'), 'ts')
             ->where('ts.sub_user_id', $this->id)
             ->limit($limit);
+        if (($p = BRequest::i()->get('p'))) {
+            $orm->offset($limit*($p-1));
+        }
         return $orm->find_many();
     }
 

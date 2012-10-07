@@ -13,6 +13,12 @@
 * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 * See the License for the specific language governing permissions and
 * limitations under the License.
+*
+* @package BuckyBall
+* @link http://github.com/unirgy/buckyball
+* @author Boris Gurvich <boris@unirgy.com>
+* @copyright (c) 2010-2012 Boris Gurvich
+* @license http://www.apache.org/licenses/LICENSE-2.0.html
 */
 
 /**

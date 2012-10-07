@@ -1,5 +1,28 @@
 <?php
 
+/**
+* This file is part of DotMesh.
+*
+* DotMesh is free software: you can redistribute it and/or modify
+* it under the terms of the GNU General Public License as published by
+* the Free Software Foundation, either version 3 of the License, or
+* any later version.
+*
+* Foobar is distributed in the hope that it will be useful,
+* but WITHOUT ANY WARRANTY; without even the implied warranty of
+* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+* GNU General Public License for more details.
+*
+* You should have received a copy of the GNU General Public License
+* along with DotMesh.  If not, see <http://www.gnu.org/licenses/>.
+*
+* @package DotMesh (tm)
+* @link http://dotmesh.org
+* @author Boris Gurvich <boris@unirgy.com>
+* @copyright (c) 2012 Boris Gurvich
+* @license http://www.gnu.org/licenses/gpl.txt
+*/
+
 class DotMesh_Controller_Accounts extends DotMesh_Controler_Abstract
 {
     public function action_index()
@@ -310,16 +333,46 @@ class DotMesh_Controller_Accounts extends DotMesh_Controler_Abstract
 
     public function action_pub_users()
     {
+        $user = DotMesh_Model_User::i()->sessionUser();
+        if (!$user) {
+            BReseponse::i()->redirect(BApp::href());
+        }
+        $limit = 10;
+        $rows = $user->subscribedToUsers($limit);
+        BLayout::i()->view('user-list')->set(array(
+            'title' => 'Subscribed to users',
+            'list' => array('rows'=>$rows, 'is_last_page'=>sizeof($rows)<$limit),
+        ));
         BLayout::i()->applyLayout('/pub_users');
     }
 
     public function action_pub_tags()
     {
+        $user = DotMesh_Model_User::i()->sessionUser();
+        if (!$user) {
+            BReseponse::i()->redirect(BApp::href());
+        }
+        $limit = 10;
+        $rows = $user->subscribedToTags($limit);
+        BLayout::i()->view('tag-list')->set(array(
+            'title' => 'Subscribed to tags',
+            'list' => array('rows'=>$rows, 'is_last_page'=>sizeof($rows)<$limit),
+        ));
         BLayout::i()->applyLayout('/pub_tags');
     }
 
     public function action_sub_users()
     {
+        $user = DotMesh_Model_User::i()->sessionUser();
+        if (!$user) {
+            BReseponse::i()->redirect(BApp::href());
+        }
+        $limit = 10;
+        $rows = $user->subscribers($limit);
+        BLayout::i()->view('user-list')->set(array(
+            'title' => 'Subscribers',
+            'list' => array('rows'=>$rows, 'is_last_page'=>sizeof($rows)<$limit),
+        ));
         BLayout::i()->applyLayout('/sub_users');
     }
 }
