@@ -1685,7 +1685,9 @@ class BRouteObserver
         $node = $this->route_node;
         BRequest::i()->initParams((array)$node->params_values);
         if (is_string($this->callback) && $node->action_name) {
-            $this->callback .= '.'.$node->action_name;
+            // prevent envoking action_index__POST methods directly
+            $actionNameArr = explode('__', $node->action_name, 2);
+            $this->callback .= '.'.$actionNameArr[0];
         }
         if (is_callable($this->callback)) {
             return call_user_func($this->callback, $this->args);
