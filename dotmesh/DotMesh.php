@@ -84,6 +84,10 @@ class DotMesh extends BClass
                 'xhr-timeline' => array(
                     array('root', 'timeline'),
                 ),
+                '/password_reset' => array(
+                    array('layout', 'base'),
+                    array('hook', 'main', 'views'=>array('password-reset')),
+                ),
                 '/my' => array(
                     array('layout', 'base'),
                     array('hook', 'main', 'views'=>array('my-posts')),
@@ -119,6 +123,18 @@ class DotMesh extends BClass
                 '/tag' => array(
                     array('layout', 'base'),
                     array('hook', 'main', 'views'=>array('tag')),
+                ),
+                '/pub_users' => array(
+                    array('layout', 'base'),
+                    array('hook', 'main', 'views'=>array('user-list')),
+                ),
+                '/sub_users' => array(
+                    array('layout', 'base'),
+                    array('hook', 'main', 'views'=>array('user-list')),
+                ),
+                '/pub_tags' => array(
+                    array('layout', 'base'),
+                    array('hook', 'main', 'views'=>array('tag-list')),
                 ),
             ));
         ;
@@ -179,6 +195,125 @@ class DotMesh_Controler_Abstract extends BActionController
     {
         parent::afterDispatch();
         BResponse::i()->output();
+    }
+}
+
+/************************************************************************/
+
+class DotMesh_Util extends BClass
+{
+    public static function formatHtml($contents, $type=null)
+    {
+        static::_formatTwitterLinks($contents);
+        static::_formatDotMeshLinks($contents);
+        static::_formatImageLinks($contents);
+        static::_formatYouTubeLinks($contents);
+        static::_formatWebLinks($contents);
+
+        if (DotMesh_Model_Node::i()->config('contents_default_process')) {
+            $contents = nl2br($contents);
+        }
+
+        BPubSub::i()->fire(__METHOD__, array('contents'=>&$contents, 'type'=>$type));
+
+        return $contents;
+    }
+
+    protected static function _formatTwitterLinks(&$contents)
+    {
+        $re = '`(^|\s)([@#])([a-zA-Z0-9_]+)`';
+        $contents = preg_replace_callback($re, function($m) {
+            $str = $m[2].$m[3];
+            switch ($m[2]) {
+            case '@':
+                return $m[1].'<a href="https://twitter.com/'.urlencode($m[3]).'">'.htmlspecialchars($str).'</a>';
+            case '#':
+                return $m[1].'<a href="https://twitter.com/#!/search/?q='.urlencode($str).'">'.htmlspecialchars($str).'</a>';
+            }
+        }, $contents);
+    }
+
+    protected static function _formatDotMeshLinks(&$contents)
+    {
+        $re = '`(^|\s)([&+^])(?:([a-zA-Z0-9][a-z0-9.-]+\.[a-zA-Z]{2,6})(\S*)/)?([a-zA-Z0-9_-]+)`';
+        $contents = preg_replace_callback($re, function($m) {
+            $uri = trim($m[3].$m[4].'/'.$m[5], '/');
+            switch ($m[2]) {
+            case '&': case '+':
+                $user = DotMesh_Model_User::i()->find($uri);
+                if ($user) {
+                    $fullUri = $user->uri(true);
+                } elseif ($m[3]) {
+                    $node = DotMesh_Model_Node::i()->find($m[3].$m[4]);
+                    if ($node) {
+                        $fullUri = $node->uri('u', true).$m[5];
+                    } else {
+                        $fullUri = 'http://'.$uri;
+                    }
+                } else {
+                    $node = DotMesh_Model_Node::i()->localNode();
+                    $uri = $node->uri(false).'/'.$m[5];
+                    $fullUri = $node->uri('u', true).$m[5];
+                }
+                return "{$m[1]}{$m[2]}<a href=\"{$fullUri}\">{$uri}</a>";
+            case '^':
+                $tag = DotMesh_Model_Tag::i()->find($uri);
+                if ($tag) {
+                    $fullUri = $tag->uri(true);
+                } elseif ($m[3]) {
+                    $node = DotMesh_Model_Node::i()->find($m[3].$m[4]);
+                    if ($node) {
+                        $fullUri = $node->uri('t', true).$m[5];
+                    } else {
+                        $fullUri = 'http://'.$uri;
+                    }
+                } else {
+                    $node = DotMesh_Model_Node::i()->localNode();
+                    $uri = $node->uri(false).'/'.$m[5];
+                    $fullUri = $node->uri('t', true).$m[5];
+                }
+                return "{$m[1]}{$m[2]}<a href=\"{$fullUri}\">{$uri}</a>";
+            }
+        }, $contents);
+    }
+
+    protected static function _formatImageLinks(&$contents)
+    {
+        $re = '`(^|\s)(https?://)?([a-zA-Z0-9][a-z0-9.-]+\.[a-zA-Z]{2,6})(\S+\.)(png|jpg|gif)`';
+        $contents = preg_replace_callback($re, function($m) {
+            $uri = $m[2].$m[3].$m[4].$m[5];
+            if (strlen($uri)<=30) {
+                $label = htmlspecialchars($uri);
+            } else {
+                $parsed = parse_url($uri);
+                $filename = pathinfo($parsed['path'], PATHINFO_BASENAME);
+                $label = htmlspecialchars($parsed['host'].'/.../'.$filename);
+            }
+            $uri = htmlspecialchars($uri);
+            $src = htmlspecialchars($m[2].$m[3].$m[4].$m[5]); // account for imgur and other cloud image services
+            return "{$m[1]}<a href=\"{$uri}\" class=\"image-link\" data-src=\"{$src}\" target=\"_blank\">{$label}</a>";
+        }, $contents);
+    }
+
+    protected static function _formatYouTubeLinks(&$contents)
+    {
+        $re = '`(^|\s)(https?://)?(youtu\.be/|(www\.)?youtube\.com/watch\?v=)([a-zA-Z0-9_.-]+)(\S*)`';
+        $contents = preg_replace_callback($re, function($m) {
+            $uri = htmlspecialchars(($m[2] ? $m[2] : 'http://').$m[3].$m[5]);
+            $label = 'youtu.be/'.$m[5];
+            $src = ($m[2] ? $m[2] : 'http://').'www.youtube.com/embed/'.$m[5];
+            return "{$m[1]}<a href=\"{$uri}\" class=\"youtube-link\" data-src=\"{$src}\" target=\"_blank\">{$label}</a>";
+        }, $contents);
+    }
+
+    protected static function _formatWebLinks(&$contents)
+    {
+        $re = '`(^|\s)(https?://)?([a-zA-Z0-9][a-z0-9.-]+\.[a-zA-Z]{2,6})(\S+)`';
+        $contents = preg_replace_callback($re, function($m) {
+            $uri = htmlspecialchars(($m[2] ? $m[2] : 'http://').$m[3].$m[4]);
+            $label = htmlspecialchars($m[2].$m[3].$m[4]);
+            return "{$m[1]}<a href=\"{$uri}\" class=\"web-link\" target=\"_blank\">{$label}</a>";
+        }, $contents);
     }
 }
 

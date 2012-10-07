@@ -25,7 +25,7 @@
         </li>
 <?php endforeach ?>
     </ul>
-    <a href="#" class="link-view-all"><?=$this->_('View All')?></a>
+    <a href="<?=BApp::href('a/pub_users')?>" class="link-view-all"><?=$this->_('View All')?></a>
 </section>
 <section class="section-tags">
     <header>^ <?=$this->_('Tags')?></header>
@@ -48,7 +48,7 @@
         </li>
 <?php endforeach ?>
     </ul>
-    <a href="#" class="link-view-all"><?=$this->_('View All')?></a>
+    <a href="<?=BApp::href('a/pub_tags')?>" class="link-view-all"><?=$this->_('View All')?></a>
 </section>
 <h2 class="block-title"><?=$this->_('Subscribed To Me')?></h2>
 <section class="section-users">
@@ -62,5 +62,5 @@
             </a>
         </li>
 <?php endforeach ?>
-    <a href="#" class="link-view-all"><?=$this->_('View All')?></a>
+    <a href="<?=BApp::href('a/sub_users')?>" class="link-view-all"><?=$this->_('View All')?></a>
 </section>

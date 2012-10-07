@@ -70,6 +70,7 @@ class DotMesh_Model_Node extends BModel
             $node = DotMesh_Model_Node::i()->create(array(
                 'id' => 1,
                 'uri' => $form['node_uri'],
+                'support_email' => $form['support_email'],
                 'is_local' => 1,
                 'is_https' => $form['is_https'],
                 'is_rewrite' => $form['is_rewrite'],

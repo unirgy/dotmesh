@@ -1315,7 +1315,7 @@ class BModelUser extends BModel
 
     public function recoverPassword($emailView='email/user-password-recover')
     {
-        $this->set(array('token'=>BUtil::randomString(20)))->save();
+        $this->set(array('password_nonce'=>BUtil::randomString(20)))->save();
         if (($view = BLayout::i()->view($emailView))) {
             $view->set('user', $this)->email();
         }
@@ -1324,7 +1324,7 @@ class BModelUser extends BModel
 
     public function resetPassword($password, $emailView='email/user-password-reset')
     {
-        $this->set(array('token'=>null))->setPassword($password)->save()->login();
+        $this->set(array('password_nonce'=>null))->setPassword($password)->save()->login();
         if (($view = BLayout::i()->view($emailView))) {
             $view->set('user', $this)->email();
         }

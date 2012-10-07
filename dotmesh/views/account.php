@@ -27,7 +27,7 @@
 					  	</li>
 			    		<li>
 					        <label for="thumb"><?=$this->_('Avatar web link')?></label>
-					        <input type="url" id="thumb_uri" name="account[thumb_uri]" title="Avatar web link"/>
+					        <input type="url" id="thumb_uri" name="account[thumb_uri]" title="Avatar web link" value="<?=$this->q($u->thumb_uri)?>"/>
 					  	</li>
 					</ul>
 		  		</fieldset>
@@ -41,7 +41,7 @@
 					        <input type="text" required id="username" name="account[username]" pattern="^[a-zA-Z][a-zA-Z0-9_]+$" title="A valid user name, starting with letter, followed by letters, digits or underscore" placeholder="bond007" readonly value="<?=$this->q($u->username)?>"/>
 					  	</li>
 			    		<li>
-			    			<label class="inline">Password:</label> ********  <a href="#">Reset</a>
+			    			<button type="button" name="do" value="password_reset" onclick="return this.form.submit()">Reset Password</button>
 					  	</li>
 			    		<li>
 					        <label for="email"><?=$this->_('Email')?></label>
@@ -72,7 +72,7 @@
 			</div>
 	    </div>
 	    <div class="buttons-group">
-	    	<button type="submit">Update</button>
+	    	<button type="submit" name="do" value="update">Update</button>
 	    </div>
 	</form>
 </div>

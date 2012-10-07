@@ -59,24 +59,36 @@ $user = DotMesh_Model_User::i()->sessionUser();
     <?php elseif ($node): ?>
     	<nav class="header-links logged-out">
     		<ul>
-	    		<li class="link-login popup-parent">
+	    		<li class="link-login popup-parent hover-delay">
 	    			<a href="#" class="title">Login / Sign Up</a>
 	    			<div class="popup">
 	    				<header class="popup-title"><?=$this->q($node->uri())?></header>
 				        <section class="top-login-form">
-					        <form name="top_login" method="post" action="<?=BApp::href('a/login')?>">
-					            <fieldset>
-					            	<header class="section-title">Log into your account</header>
-					                <ul class="field-group">
-					                	<li><input type="text" name="login[username]" required placeholder="Username / Email Address"/></li>
-					                	<li><input type="password" name="login[password]" required placeholder="Password"/></li>
-					                </ul>
-					                <div class="buttons-group a-right clearfix">
-					                	<button type="submit"><?=$this->_('Log In')?></button>
-					                	<a href="<?=BApp::href('a/password_recover')?>"><?=$this->_('Forgot Password?')?></a>
-					                </div>
-					            </fieldset>
-					        </form>
+                            <form id="top-login" name="top-login" method="post" action="<?=BApp::href('a/login')?>">
+                                <fieldset>
+                                    <header class="section-title">Log into your account</header>
+                                    <ul class="field-group">
+                                        <li><input type="text" name="login[username]" required placeholder="Username / Email Address"/></li>
+                                        <li><input type="password" name="login[password]" required placeholder="Password"/></li>
+                                    </ul>
+                                    <div class="buttons-group a-right clearfix">
+                                        <button type="submit"><?=$this->_('Log In')?></button>
+                                        <a href="<?=BApp::href('a/password_recover')?>" id="top-password-trigger"><?=$this->_('Forgot Password?')?></a>
+                                    </div>
+                                </fieldset>
+                            </form>
+                            <form id="top-password" name="top-password" method="post" action="<?=BApp::href('a/password_recover')?>">
+                                <fieldset>
+                                    <header class="section-title">Recover your password</header>
+                                    <ul class="field-group">
+                                        <li><input type="text" name="username" required placeholder="Username / Email Address"/></li>
+                                    </ul>
+                                    <div class="buttons-group a-right clearfix">
+                                        <button type="submit"><?=$this->_('Recover')?></button>
+                                        <a href="<?=BApp::href('a/login')?>" id="top-login-trigger"><?=$this->_('Login')?></a>
+                                    </div>
+                                </fieldset>
+                            </form>
 					        <span class="or"><span>or</span></span>
 	                        <?=$this->hook('login-after')?>
 				        </section>
@@ -85,16 +97,18 @@ $user = DotMesh_Model_User::i()->sessionUser();
 					            <fieldset>
 					            	<header class="section-title">Sign up for an account</header>
 					                <ul class="field-group">
-					                	<li><input type="text" name="signup[username]" required placeholder="Username"/></li>
-					                	<li><input type="password" name="signup[password]" required placeholder="Password"/></li>
-					                	<li><input type="password" name="signup[password_confirm]" required placeholder="Confirm Password"/></li>
-					                	<li><input type="text" name="signup[email]" required placeholder="Email Address"/></li>
-					                	<li><input type="text" name="signup[firstname]" required placeholder="First Name"/></li>
-					                	<li><input type="text" name="signup[lastname]" required placeholder="Last Name"/></li>
+					                	<li><input type="text" name="signup[username]" required placeholder="Username" pattern="^[a-zA-Z][a-zA-Z0-9_]+$" title="A valid user name, starting with a letter, followed by letters, digits or underscore"/></li>
+					                	<li><input type="password" name="signup[password]" required placeholder="Password" pattern=".{8,}" title="Strong password, minimum 8 characters"/></li>
+					                	<li><input type="password" name="signup[password_confirm]" required placeholder="Confirm Password" pattern=".{8,}" title="Please confirm your password"/></li>
+					                	<li><input type="email" name="signup[email]" required placeholder="Email Address" title="A valid email address"/></li>
+					                	<li><input type="text" name="signup[firstname]" required placeholder="First Name" title="First name"/></li>
+					                	<li><input type="text" name="signup[lastname]" required placeholder="Last Name" title="Last name"/></li>
 					                </ul>
+<?php if (($tncUri = BConfig::i()->get('modules/DotMesh/tnc_uri'))): ?>
 					                <div class="terms-line clearfix">
-					                	<input type="checkbox"/> I agree to the <a href="#">terms of conditions</a>
+					                	<input type="checkbox" id="agree_tnc" name="signup[agree_tnc]" required/> <label for="agree_tnc">I agree to the <a href="<?=$this->q($tncUri)?>">terms &amp; conditions</a></label>
 					                </div>
+<?php endif ?>
 					                <div class="buttons-group clearfix">
 					                	<button type="submit"><?=$this->_('Sign Up')?></button>
 					                </div>

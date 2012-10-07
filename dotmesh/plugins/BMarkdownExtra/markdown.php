@@ -15,7 +15,7 @@ class BMarkdownExtra_Loader
 {
     static public function bootstrap()
     {
-        BPubSub::i()->on('DotMesh_Model_Post::formatContentsHtml', function($args) {
+        BPubSub::i()->on('DotMesh_Util::formatHtml', function($args) {
             $args['contents'] = Markdown($args['contents']);
         });
     }

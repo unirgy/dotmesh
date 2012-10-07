@@ -99,4 +99,9 @@ class DotMesh_Model_Tag extends BModel
     {
         return $this->node()->uri('t', $full).$this->tagname;
     }
+
+    public static function trendingTags()
+    {
+        return array();
+    }
 }

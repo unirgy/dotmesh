@@ -37,7 +37,7 @@ $isSubscribed = $sessUser && $sessUser->isSubscribedToUser($user);
 			</tbody>
 		</table>
 		<div class="user-description">
-			<p><?=$this->q($user->short_bio)?></p>
+			<p><?=DotMesh_Util::formatHtml($this->q($user->short_bio))?></p>
 		</div>
 	</div>
 	<?=$this->view('timeline')?>

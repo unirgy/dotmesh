@@ -31,9 +31,16 @@ class BTwitterAdapter extends BClass
         ;
     }
 
+    public static function isConfigured()
+    {
+        $conf = BConfig::i()->get('modules/BTwitterAdapter');
+        return !empty($conf['consumer_key']) && !empty($conf['consumer_secret']);
+    }
+
     public static function connection()
     {
         if (!static::$_connection) {
+            $conf = BConfig::i()->get('modules/BTwitterAdapter');
             $sess = BSession::i()->data('twitter');
             $access = $sess['access_token'];
             static::$_connection = new TwitterOAuth($conf['consumer_key'], $conf['consumer_secret'],

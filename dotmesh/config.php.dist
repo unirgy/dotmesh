@@ -21,6 +21,7 @@ $config['cookie']['session_check_ip'] = 1;
 $config['modules']['DotMesh']['thumb_root_path'] = 'dotmesh/thumbs';
 $config['modules']['DotMesh']['contents_default_process'] = 1;
 $config['modules']['DotMesh']['timeline_page_size'] = 10;
+$config['modules']['DotMesh']['tnc_uri'] = '';
 
 #$config['request']['module_run_level']['BMarkdownExtra'] = 'ONDEMAND';
 

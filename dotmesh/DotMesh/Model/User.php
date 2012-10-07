@@ -341,7 +341,7 @@ class DotMesh_Model_User extends BModelUser
 
     public function updateFromPost($r)
     {
-        $this->set(BUtil::maskFields((array)$r, 'username,firstname,lastname,email,preferences,thumb_provider'));
+        $this->set(BUtil::maskFields((array)$r, 'username,firstname,lastname,email,preferences,thumb_provider,thumb_uri,short_bio'));
         if (!empty($r['password'])) {
             $this->setPassword($r['password']);
         }
@@ -480,5 +480,10 @@ class DotMesh_Model_User extends BModelUser
             $hlp->delete_many($where);
         }
         return $this;
+    }
+
+    public static function trendingUsers()
+    {
+        return array();
     }
 }

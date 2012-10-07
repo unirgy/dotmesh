@@ -50,7 +50,28 @@ if ( window.XDomainRequest ) {
 })( jQuery );
 
 $(function() {
-    $('.timeline .image-link').each(function(idx, el) {
+    $('#top-password').hide();
+    $('#top-password-trigger').on('click', function(event) {
+        $('#top-login').slideUp('fast');
+        $('#top-password').slideDown('fast');
+        return false;
+    });
+    $('#top-login-trigger').on('click', function(event) {
+        $('#top-login').slideDown('fast');
+        $('#top-password').slideUp('fast');
+        return false;
+    });
+
+    $('.hover-delay').each(function(idx, el) {
+        var $el = $(el), delayOpen = false, delayTimer;
+        $el.on('mouseout', function(event) {
+            $el.addClass('hover');
+            clearTimeout(delayTimer);
+            delayTimer = setTimeout(function() { $el.removeClass('hover') }, 500);
+        });
+    });
+
+    $('.image-link').each(function(idx, el) {
         var span = $('<span class="image-inline"></span>').insertAfter(el);
         var handle = $('<a href="#" class="image-expand">[+]</a>').appendTo(span);
         var image;
@@ -62,7 +83,7 @@ $(function() {
             return false;
         });
     });
-    $('.timeline .youtube-link').each(function(idx, el) {
+    $('.youtube-link').each(function(idx, el) {
         var span = $('<span class="youtube-inline"></span>').insertAfter(el);
         var handle = $('<a href="#" class="youtube-expand">[+]</a>').appendTo(span);
         var video;
@@ -130,9 +151,11 @@ $(function() {
         if (!el.length) {
             return;
         }
-        var et = el.offset().top, w = $(window), wt = w.scrollTop(), wh = w.height();
-        if (et < wt+wh) {
-            timelineNextPage();
+        if (!timelineLoading) {
+            var et = el.offset().top, w = $(window), wt = w.scrollTop(), wh = w.height();
+            if (et < wt+wh) {
+                timelineNextPage();
+            }
         }
         if ($('.timeline-loadmore:visible').length) {
             setTimeout(checkNextPageAboveFold, 200);
@@ -143,7 +166,7 @@ $(function() {
     $('.timeline-loadmore').on('click mouseover', timelineNextPage);
     //$(window).on('scroll resize', checkNextPageAboveFold);
 
-    setTimeout(function() { $('.messages-container').fadeOut(); }, 2000);
+    setTimeout(function() { $('.messages-container').fadeOut(); }, 10000);
 
     $('.tiptip-title').tipTip({delay:0, fadeIn:0, fadeOut:100});
 });

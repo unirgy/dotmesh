@@ -1,11 +1,11 @@
 <?php defined('DOTMESH_ROOT_DIR') || die ?>
 <?php if (!defined('DOTMESH_CONFIGURED')): ?>
 
-    <div class="site-main form-col1-layout clearfix page-my-account">
-        <h2 class="page-title"><?=$this->_('Please configure config.php using directions in the file')?></h2>
-    </div>
+<div class="site-main form-col1-layout clearfix page-my-account">
+    <h2 class="page-title"><?=$this->_('Please configure config.php using directions in the file')?></h2>
+</div>
 
-    <?php return; endif ?>
+<?php return; endif ?>
 
 
 <div class="site-main form-col1-layout clearfix page-my-account">
@@ -19,6 +19,10 @@
                         <li>
                             <label for="node_uri"><?=$this->_('Node URI')?></label>
                             <input type="text" required id="node_uri" name="setup[node_uri]" title="Format: yourserver.com/optional/path" placeholder="yourserver.com/path_to_dotmesh" value="<?=$this->node_uri?>"/>
+                        </li>
+                        <li>
+                            <label for="node_uri"><?=$this->_('Node Support Email Address')?></label>
+                            <input type="email" required id="node_support_email" name="setup[support_email]" title="admin@yournode.com" placeholder="admin@yournode.com"/>
                         </li>
                         <li>
                             <label for="is_https">Enable HTTPS?</label>

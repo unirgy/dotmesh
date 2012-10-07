@@ -1,4 +1,6 @@
+<?php defined('DOTMESH_ROOT_DIR') || die ?>
 <?php
+if (!BTwitterAdapter::i()->isConfigured()) return;
 $user = DotMesh_Model_User::i()->sessionUser();
 $screenName = $user->twitter_screenname;
 ?>

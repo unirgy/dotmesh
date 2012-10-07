@@ -72,7 +72,9 @@ $now = strtotime(BDb::now());
                 <a href="<?=$p->uri(true)?>#reply" class="button-reply button"><span class="icon"></span><span>Reply</span></a>
                 <!--<a href="#" class="button-share button"><span class="icon"></span><span>Share</span></a>-->
 <?php if ($p->user_id==$userId): ?>
+<!--
                 <button type="submit" name="do" value="edit" class="button-edit button"><span class="icon"></span><span class="label">Edit</span></button>
+-->
                 <button type="submit" name="do" value="delete" onclick="return confirm('Are you sure?')" class="button-delete button"><span class="icon"></span><span class="label">Delete</span></button>
 <?php endif ?>
 			</div>

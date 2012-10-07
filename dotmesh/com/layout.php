@@ -1048,7 +1048,6 @@ class BView extends BClass
         if ($files) {
             $this->addAttachment($files, $headers, $body);
         }
-
         return mail($to, $subject, trim($body), join("\r\n", $headers), join(' ', $params));
     }
 

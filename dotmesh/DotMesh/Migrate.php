@@ -28,6 +28,7 @@ class DotMesh_Migrate extends BClass
             'score' => "int(10) unsigned NOT NULL",
             'is_blocked' => "tinyint(3) unsigned NOT NULL DEFAULT '0'",
             'last_postname' => "varchar(10) DEFAULT NULL",
+            'support_email' => "varchar(100) DEFAULT NULL",
         ), array('primary'=>'(`id`)'));
         BDb::ddlTableColumns($nodeTable, array(), array(
             'IDX_uri' => 'UNIQUE (`uri`)',
@@ -38,6 +39,7 @@ class DotMesh_Migrate extends BClass
             'node_id' => "int(10) unsigned NOT NULL",
             'username' => "varchar(32) NOT NULL",
             'password_hash' => "varchar(64) CHARACTER SET latin1 COLLATE latin1_bin DEFAULT NULL",
+            'password_nonce' => "varchar(32) CHARACTER SET latin1 COLLATE latin1_bin DEFAULT NULL",
             'secret_key' => "varchar(64) CHARACTER SET latin1 COLLATE latin1_bin DEFAULT NULL",
             'remote_signature' => "varchar(100) CHARACTER SET latin1 COLLATE latin1_bin DEFAULT NULL",
             'firstname' => "varchar(32) DEFAULT NULL",

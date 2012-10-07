@@ -21,8 +21,15 @@ class DotMesh_Controller_Accounts extends DotMesh_Controler_Abstract
                 throw new BException('Not logged in');
             }
             $user = DotMesh_Model_User::i()->sessionUser();
-            $user->updateFromPost($r->post('account'));
-            $result = array('status'=>'success', 'message'=>'Your account changes were saved');
+            switch ($r->post('do')) {
+            case 'password_reset':
+                $user->recoverPassword();
+                $result = array('status'=>'success', 'message'=>'Password recovery instructions have been sent to your email');
+                break;
+            default:
+                $user->updateFromPost($r->post('account'));
+                $result = array('status'=>'success', 'message'=>'Your account changes were saved');
+            }
         } catch (BException $e) {
             $result = array('status'=>'error', 'message'=>$e->getMessage());
         } catch (Exception $e) {
@@ -191,19 +198,77 @@ class DotMesh_Controller_Accounts extends DotMesh_Controler_Abstract
 
     public function action_password_recover__POST()
     {
-
-        BResponse::i()->redirect(BApp::href());
+        try {
+            $r = BRequest::i();
+            $redirectUrl = BApp::href();
+            $localNode = DotMesh_Model_Node::i()->localNode();
+            $user = DotMesh_Model_User::i()->orm('u')->where(array(
+                'node_id' => $localNode->id,
+                (strpos($n, '@')!==false ? 'email' : 'username') => $r->post('username'),
+            ))->find_one();
+            if ($user) {
+                $user->recoverPassword();
+            }
+            $result = array('status'=>'success', 'message'=>'Password recovery instructions have been sent to your email');
+        } catch (Exception $e) {
+            $result = array('status'=>'error', 'message'=>$e->getMessage());
+        }
+        if ($r->xhr()) {
+            BResponse::i()->json($result);
+        } else {
+            BResponse::i()->redirect(BUtil::setUrlQuery($redirectUrl, $result));
+        }
     }
 
     public function action_password_reset()
     {
+        $r = BRequest::i();
+        if (!$r->get('u') || !$r->get('n')) {
+            BResponse::i()->redirect(BApp::href().'?status=error&message='.urlencode('Missing user name or token'));
+        }
+        $user = DotMesh_Model_Node::i()->localNode()->user($r->get('u'));
+        if ($user->password_nonce!==$r->get('n')) {
+            BResponse::i()->redirect(BApp::href().'?status=error&message='.urlencode('Invalid or expired token'));
+        }
+
         BLayout::i()->applyLayout('/password_reset');
+        BLayout::i()->view('password-reset')->set('user', $user);
     }
 
     public function action_password_reset__POST()
     {
-
-        BResponse::i()->redirect(BApp::href());
+        try {
+            $r = BRequest::i();
+            $redirectUrl = BApp::href();
+            $form = $r->post('reset');
+            if (empty($form['username']) || empty($form['password_nonce'])
+                || empty($form['password']) || empty($form['password_confirm'])
+            ) {
+                throw new BException('Incomplete form data');
+            }
+            if ($form['password']!==$form['password_confirm']) {
+                throw new BException('Password does not match confirmation');
+            }
+            $localNode = DotMesh_Model_Node::i()->localNode();
+            $user = DotMesh_Model_User::i()->orm('u')->where(array(
+                'node_id' => $localNode->id,
+                (strpos($n, '@')!==false ? 'email' : 'username') => $form['username'],
+            ))->find_one();
+            if ($user) {
+                if ($user->password_nonce!==$form['password_nonce']) {
+                    throw new BException('Invalid or expired password nonce token');
+                }
+                $user->resetPassword();
+            }
+            $result = array('status'=>'success', 'message'=>'Your password has been reset');
+        } catch (Exception $e) {
+            $result = array('status'=>'error', 'message'=>$e->getMessage());
+        }
+        if ($r->xhr()) {
+            BResponse::i()->json($result);
+        } else {
+            BResponse::i()->redirect(BUtil::setUrlQuery($redirectUrl, $result));
+        }
     }
 
     public function action_logout()
@@ -212,5 +277,20 @@ class DotMesh_Controller_Accounts extends DotMesh_Controler_Abstract
             $user->logout();
         }
         BResponse::i()->redirect(BApp::href());
+    }
+    
+    public function action_pub_users()
+    {
+        BLayout::i()->applyLayout('/pub_users');
+    }
+    
+    public function action_pub_tags()
+    {
+        BLayout::i()->applyLayout('/pub_tags');
+    }
+    
+    public function action_sub_users()
+    {
+        BLayout::i()->applyLayout('/sub_users');
     }
 }
