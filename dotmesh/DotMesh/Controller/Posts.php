@@ -157,7 +157,20 @@ class DotMesh_Controller_Posts extends DotMesh_Controler_Abstract
 
     public function action_feed_rss()
     {
-
+        $r = BRequest::i();
+        $localNode = DotMesh_Model_Node::i()->localNode();
+        $hlp = DotMesh_Model_Post::i();
+        $localNode = DotMesh_Model_Node::i()->localNode();
+        $post = $localNode->post($r->param('postname'));
+        if (!$post) {
+            BResponse::i()->status(404, 'Invalid post', true);
+        }
+        $orm = $post->threadTimelineOrm();
+        $timeline = $hlp->fetchTimeline($orm);
+        BResponse::i()->contentType('text/xml')->set($hlp->toRss(array(
+            'title' => $post->uri().' :: Post Timeline :: '.$localNode->uri(),
+            'link' => $post->uri(true),
+        ), $timeline['rows']));
     }
 }
 

@@ -92,6 +92,34 @@
     }
 })( jQuery );
 
+function dotmeshMediaLinks(parent) {
+    $('.image-link', parent).each(function(idx, el) {
+        var span = $('<span class="image-inline"></span>').insertAfter(el);
+        var handle = $('<a href="#" class="image-expand">[+]</a>').appendTo(span);
+        var image;
+        handle.on('click', function(event) {
+            span.toggleClass('shown');
+            if (!image) {
+                image = $('<img class="image-embed"/>').attr('src', $(el).data('src')).appendTo(span);
+            }
+            return false;
+        });
+    });
+    $('.youtube-link', parent).each(function(idx, el) {
+        var span = $('<span class="youtube-inline"></span>').insertAfter(el);
+        var handle = $('<a href="#" class="youtube-expand">[+]</a>').appendTo(span);
+        var video;
+        handle.on('click', function(event) {
+            span.toggleClass('shown');
+            if (!video) {
+                video = $('<iframe class="youtube-player" type="text/html" width="440" height="280" frameborder="0"/>')
+                .attr('src', $(el).data('src')).appendTo(span);
+            }
+            return false;
+        });
+    });
+}
+
 $(function() {
     $('#top-password').hide();
     $('#top-password-trigger').on('click', function(event) {
@@ -114,40 +142,15 @@ $(function() {
         });
     });
 
-    $('.image-link').each(function(idx, el) {
-        var span = $('<span class="image-inline"></span>').insertAfter(el);
-        var handle = $('<a href="#" class="image-expand">[+]</a>').appendTo(span);
-        var image;
-        handle.on('click', function(event) {
-            span.toggleClass('shown');
-            if (!image) {
-                image = $('<img class="image-embed"/>').attr('src', $(el).data('src')).appendTo(span);
-            }
-            return false;
-        });
-    });
-    $('.youtube-link').each(function(idx, el) {
-        var span = $('<span class="youtube-inline"></span>').insertAfter(el);
-        var handle = $('<a href="#" class="youtube-expand">[+]</a>').appendTo(span);
-        var video;
-        handle.on('click', function(event) {
-            span.toggleClass('shown');
-            if (!video) {
-                video = $('<iframe class="youtube-player" type="text/html" width="440" height="280" frameborder="0"/>')
-                .attr('src', $(el).data('src')).appendTo(span);
-            }
-            return false;
-        });
-    });
-    $('.timeline .preview-expand').on('click', function(event) {
+    $(document).on('click', '.timeline .preview-expand', function(event) {
         $(event.target).closest('.timeline-item').addClass('expanded');
         return false;
     });
-    $('.timeline .contents-collapse').on('click', function(event) {
+    $(document).on('click', '.timeline .contents-collapse', function(event) {
         $(event.target).closest('.timeline-item').removeClass('expanded');
         return false;
     });
-    $('.timeline .actions-group-1 button').on('click', function(event) {
+    $(document).on('click', '.timeline .actions-group-1 button', function(event) {
         var el = $(this), form = el.closest('form'), f = el.attr('name');
         var postVars = {type:'feedback', field:f, value:el.val()};
         $.post(form.attr('action')+'/api1.json', postVars, function(response, status, xhr) {
@@ -165,6 +168,8 @@ $(function() {
         });
         return false;
     });
+
+    dotmeshMediaLinks(document);
 
     $('input[name=is_private]:checkbox').on('change', function(event) {
         var container = $(this).closest('.new-post-block');

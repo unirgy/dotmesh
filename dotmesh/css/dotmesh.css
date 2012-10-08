@@ -25,3 +25,5 @@
 
 
 .site-main-container { margin-top:30px; }
+
+.site-footer { position:fixed; bottom:0; right:0; /*width:100%; */background:#FFF; color:#000; }
