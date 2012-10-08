@@ -65,7 +65,7 @@ class DotMesh extends BClass
             ->route('GET /p/:postname/feed.rss', 'DotMesh_Controller_Posts.feed_rss')
             ->route('GET /t/:tagname/feed.rss', 'DotMesh_Controller_Tags.feed_rss')
 
-            ->route('^GET /u/([a-zA-Z0-9_]+)/thumb\.(png|jpg|gif)$', 'DotMesh_Controller_Users.thumb')
+            ->route('^GET /u/([a-zA-Z0-9_]+)/thumb(\.(png|jpg|gif))?$', 'DotMesh_Controller_Users.thumb')
         ;
 
         BLayout::i()

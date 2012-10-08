@@ -288,7 +288,7 @@ class DotMesh_Model_User extends BModelUser
     public function thumbUri($size=100)
     {
         if (!$this->node()->is_local) {
-            return $this->uri(true).'/thumb.jpg';
+            return $this->uri(true).'/thumb';
         }
         switch ($this->thumb_provider) {
         case 'link':
