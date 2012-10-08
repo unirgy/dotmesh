@@ -56,6 +56,9 @@ class DotMesh extends BClass
 
             ->route('GET|POST|PUT|HEAD|OPTIONS /n/api1.json', 'DotMesh_Controller_Nodes.api1_json')
             ->route('GET|POST|PUT|HEAD|OPTIONS /a/api1.json', 'DotMesh_Controller_Accounts.api1_json')
+            ->route('GET|POST|PUT|HEAD|OPTIONS /u/api1.json', 'DotMesh_Controller_Users.api1_json')
+            ->route('GET|POST|PUT|HEAD|OPTIONS /p/api1.json', 'DotMesh_Controller_Posts.api1_json')
+            ->route('GET|POST|PUT|HEAD|OPTIONS /t/api1.json', 'DotMesh_Controller_Tags.api1_json')
             ->route('GET|POST|PUT|DELETE|HEAD|OPTIONS /u/:usernode/api1.json', 'DotMesh_Controller_Users.api1_json')
             ->route('GET|POST|PUT|DELETE|HEAD|OPTIONS /p/:postname/api1.json', 'DotMesh_Controller_Posts.api1_json')
             ->route('GET|POST|PUT|DELETE|HEAD|OPTIONS /t/:tagname/api1.json', 'DotMesh_Controller_Tags.api1_json')

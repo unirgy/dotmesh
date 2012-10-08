@@ -1,6 +1,6 @@
 <?php defined('DOTMESH_ROOT_DIR') || die ?>
 <?php
-$userId = DotMesh_Model_User::i()->sessionUserId();
+$sessUser = DotMesh_Model_User::i()->sessionUser();
 $localNodeId = DotMesh_Model_Node::i()->localNode()->id;
 if (!$this->timeline) return;
 $curPage = (int)BRequest::i()->get('p');
@@ -35,7 +35,8 @@ $now = strtotime(BDb::now());
 <?php foreach ((array)$this->timeline['rows'] as $p): $uri = $p->user()->uri(true); $name = $p->user()->fullname(); ?>
     <li id="timeline-<?=$p->id?>" class="timeline-item clearfix <?=$p->expanded?'expanded':''?> <?=$p->is_pinned?'pinned':''?> <?=$p->is_private?'private':''?>">
         <a name="<?=$this->q($p->postname)?>"></a>
-        <form name="timeline-form-<?=$p->id?>" method="post" action="<?=$p->uri(true)?>">
+        <form name="timeline-form-<?=$p->id?>" method="post" action="<?=$p->node()->is_local ? $p->uri(true) : BApp::href('p/REMOTE') ?>">
+            <input type="hidden" name="post_uri" value="<?=$this->q($p->uri())?>"/>
             <a href="<?=$this->q($uri)?>" class="avatar"><img src="<?=$this->q($p->user()->thumbUri(50))?>" width="50" height="50" alt="<?=$this->q($uri)?>"/></a>
             <a href="<?=$p->uri(true)?>" class="tiptip-title posted-on" title="<?=date('r', strtotime($p->create_dt)) ?>"><?=BUtil::timeAgo($p->create_dt, $now) ?></a>
             <?php if ($p->is_pinned): ?>
@@ -61,19 +62,19 @@ $now = strtotime(BDb::now());
 <?php //print_r($p->as_array()); ?>
 			<div class="actions-group actions-group-1 always-visible">
 <?php if (!$p->is_private): ?>
-                <button type="submit" name="echo" value="<?=$p->echo?0:1?>" class="tiptip-title button-echo<?=$p->echo?' active':''?>" <?=!$userId?'disabled':''?> title="<?=$this->_('Echo to your subscribers')?>"><span class="icon"></span><span class="label"><?=$this->_('Echo')?></span><span class="total-echo total <?=!$p->total_echos?'zero':''?>"><?=$p->total_echos?></span></button>
+                <button type="submit" name="echo" value="<?=$p->echo?0:1?>" class="tiptip-title button-echo<?=$p->echo?' active':''?>" <?=!$sessUser?'disabled':''?> title="<?=$this->_('Echo to your subscribers')?>"><span class="icon"></span><span class="label"><?=$this->_('Echo')?></span><span class="total-echo total <?=!$p->total_echos?'zero':''?>"><?=$p->total_echos?></span></button>
 <?php endif ?>
-                <button type="submit" name="star" value="<?=$p->star?0:1?>" class="tiptip-title button-star<?=$p->star?' active':''?>" <?=!$userId?'disabled':''?> title="<?=$this->_('Star Favorite')?>"><span class="icon"></span><span class="label">Star</span><span class="total-star total <?=!$p->total_stars?'zero':''?>"><?=$p->total_stars?></span></button>
-                <button type="submit" name="flag" value="<?=$p->flag?0:1?>" class="tiptip-title button-flag<?=$p->flag?' active':''?>" <?=!$userId?'disabled':''?> title="<?=$this->_('Flag Offensive')?>"><span class="icon"></span><span class="label">Flag</span><span class="total-flag total <?=!$p->total_flags?'zero':''?>"><?=$p->total_flags?></span></button>
-                <button type="submit" name="vote_up" value="<?=$p->vote_up?0:1?>" class="tiptip-title button-vote_up<?=$p->vote_up==1?' active':''?>" <?=!$userId?'disabled':''?> title="<?=$this->_('Thumbs Up')?>"><span class="icon"></span><span class="label">Thumbs Up</span><span class="total-vote_up total <?=!$p->total_vote_up?'zero':''?>"><?=$p->total_vote_up?></span></button>
-                <button type="submit" name="vote_down" value="<?=$p->vote_down?0:1?>" class="tiptip-title button-vote_down<?=$p->vote_down==1?' active':''?>" <?=!$userId?'disabled':''?> title="<?=$this->_('Thumbs Down')?>"><span class="icon"></span><span class="label">Thumbs Down</span><span class="total-vote_down total <?=!$p->total_vote_down?'zero':''?>"><?=$p->total_vote_down?></span></button>
+                <button type="submit" name="star" value="<?=$p->star?0:1?>" class="tiptip-title button-star<?=$p->star?' active':''?>" <?=!$sessUser?'disabled':''?> title="<?=$this->_('Star Favorite')?>"><span class="icon"></span><span class="label">Star</span><span class="total-star total <?=!$p->total_stars?'zero':''?>"><?=$p->total_stars?></span></button>
+                <button type="submit" name="flag" value="<?=$p->flag?0:1?>" class="tiptip-title button-flag<?=$p->flag?' active':''?>" <?=!$sessUser?'disabled':''?> title="<?=$this->_('Flag Offensive')?>"><span class="icon"></span><span class="label">Flag</span><span class="total-flag total <?=!$p->total_flags?'zero':''?>"><?=$p->total_flags?></span></button>
+                <button type="submit" name="vote_up" value="<?=$p->vote_up?0:1?>" class="tiptip-title button-vote_up<?=$p->vote_up==1?' active':''?>" <?=!$sessUser?'disabled':''?> title="<?=$this->_('Thumbs Up')?>"><span class="icon"></span><span class="label">Thumbs Up</span><span class="total-vote_up total <?=!$p->total_vote_up?'zero':''?>"><?=$p->total_vote_up?></span></button>
+                <button type="submit" name="vote_down" value="<?=$p->vote_down?0:1?>" class="tiptip-title button-vote_down<?=$p->vote_down==1?' active':''?>" <?=!$sessUser?'disabled':''?> title="<?=$this->_('Thumbs Down')?>"><span class="icon"></span><span class="label">Thumbs Down</span><span class="total-vote_down total <?=!$p->total_vote_down?'zero':''?>"><?=$p->total_vote_down?></span></button>
             </div>
 
-<?php if ($userId): ?>
+<?php if ($sessUser): ?>
             <div class="actions-group actions-group-2 hover-inline">
                 <a href="<?=$p->uri(true)?>#reply" class="button-reply button"><span class="icon"></span><span>Reply</span></a>
                 <!--<a href="#" class="button-share button"><span class="icon"></span><span>Share</span></a>-->
-<?php if ($p->user_id==$userId): ?>
+<?php if ($p->user_id==$sessUser->id || $sessUser->is_admin): ?>
 <!--
                 <button type="submit" name="do" value="edit" class="button-edit button"><span class="icon"></span><span class="label">Edit</span></button>
 -->

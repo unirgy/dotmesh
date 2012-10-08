@@ -59,7 +59,6 @@ Benefits
 * No inline advertisements (unless the node admin decides to inject)
 * Multiple nodes increase difficulty for blocking on infrastructure level
 
-
 Trade offs vs Cloud solutions (e.g. Twitter)
 ============================================
 

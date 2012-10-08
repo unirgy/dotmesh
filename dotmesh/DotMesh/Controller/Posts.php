@@ -73,7 +73,11 @@ class DotMesh_Controller_Posts extends DotMesh_Controler_Abstract
             $hlp = DotMesh_Model_Post::i();
             $postname = $r->param('postname');
             if ($postname) {
-                $post = $hlp->load($postname, 'postname');
+                if ('REMOTE'===$postname) {
+                    $post = $hlp->find($r->post('post_uri'));
+                } else {
+                    $post = $hlp->load($postname, 'postname');
+                }
                 if (!$post) {
                     throw new BException('Invalid post identifier');
                 }
@@ -125,14 +129,18 @@ class DotMesh_Controller_Posts extends DotMesh_Controler_Abstract
             if (!DotMesh_Model_User::isLoggedIn()) {
                 throw new BException('Not logged in');
             }
-            $request = BRequest::i()->json();
+            $r = BRequest::i();
+            $request = $r->json();
             if (!$request) {
-                $request = BRequest::i()->post();
+                $request = $r->post();
             }
             if (empty($request['type'])) {
                 throw new BException('Invalid request type');
             }
-            $postname = BRequest::i()->param('postname');
+            $postname = $r->param('postname');
+            if ($postname=='REMOTE') {
+                $postname = $r->post('post_uri');
+            }
             $post = DotMesh_Model_Post::i()->find($postname);
             if (!$post) {
                 throw new BException('Invalid post');

@@ -152,7 +152,12 @@ $(function() {
     });
     $(document).on('click', '.timeline .actions-group-1 button', function(event) {
         var el = $(this), form = el.closest('form'), f = el.attr('name');
-        var postVars = {type:'feedback', field:f, value:el.val()};
+console.log(this);
+        var postVars = {
+            type:'feedback',
+            field:f, value:el.val(),
+            post_uri:$('input[name=post_uri]', form).val()
+        };
         $.post(form.attr('action')+'/api1.json', postVars, function(response, status, xhr) {
             var parent = el.parent(), i;
             for (i in response.value) {
