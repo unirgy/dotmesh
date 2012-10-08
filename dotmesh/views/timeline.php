@@ -35,7 +35,7 @@ $now = strtotime(BDb::now());
 <?php foreach ((array)$this->timeline['rows'] as $p): $uri = $p->user()->uri(true); $name = $p->user()->fullname(); ?>
     <li id="timeline-<?=$p->id?>" class="timeline-item clearfix <?=$p->expanded?'expanded':''?> <?=$p->is_pinned?'pinned':''?> <?=$p->is_private?'private':''?>">
         <a name="<?=$this->q($p->postname)?>"></a>
-        <form name="timeline-form-<?=$p->id?>" method="post" action="<?=$p->node()->is_local ? $p->uri(true) : BApp::href('p/REMOTE') ?>">
+        <form name="timeline-form-<?=$p->id?>" method="post" action="<?=$p->node()->is_local ? $p->uri(true) : BApp::href('p/_') ?>">
             <input type="hidden" name="post_uri" value="<?=$this->q($p->uri())?>"/>
             <a href="<?=$this->q($uri)?>" class="avatar"><img src="<?=$this->q($p->user()->thumbUri(50))?>" width="50" height="50" alt="<?=$this->q($uri)?>"/></a>
             <a href="<?=$p->uri(true)?>" class="tiptip-title posted-on" title="<?=date('r', strtotime($p->create_dt)) ?>"><?=BUtil::timeAgo($p->create_dt, $now) ?></a>

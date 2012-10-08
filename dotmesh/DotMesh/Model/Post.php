@@ -292,6 +292,8 @@ class DotMesh_Model_Post extends BModel
     {
         BPubSub::i()->fire(__METHOD__.'.before', array('request'=>&$data));
 
+        $data = BUtil::maskFields($p, 'postname,preview,create_dt,is_private,is_tweeted');
+
         $post = static::create($data)->save();
 
         $post->collectUsersAndTags();
@@ -452,7 +454,7 @@ class DotMesh_Model_Post extends BModel
         return $preview;
     }
 
-    public function submitFeedback($data, $userId=null)
+    public function submitFeedback($data, $userId=null, $remote=false)
     {
         if ($value<0 || $value>1) {
             throw new BException('Invalid feedback value: '.$value);
@@ -481,11 +483,20 @@ class DotMesh_Model_Post extends BModel
             DotMesh_Model_PostFeedback::i()->update_many($data, $where);
         }
         $this->feedback = $fb;
+        if ($remote && !$this->node()->is_local) {
+            $data['user'] = $userId;
+            $data['post'] = $this;
+            $this->node()->apiClient(array(
+                'users' => array($userId),
+                'feedbacks' => array($data),
+            ));
+        }
         return $this;
     }
 
     public function receiveRemoteFeedback($data, $userId)
     {
+        $data = BUtil::maskFields($fb, 'echo,star,report,vote_up,vote_down');
         $where = array('post_id'=>$this->id, 'user_id'=>$userId);
         $fb = DotMesh_Model_PostFeedback::i()->load($where);
         if (!$fb) {
@@ -494,6 +505,7 @@ class DotMesh_Model_Post extends BModel
             $fb->set($data);
             DotMesh_Model_PostFeedback::i()->update_many($data, $where);
         }
+        return $this;
     }
 
     public function distribute($sendRemote=false)

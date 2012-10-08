@@ -105,7 +105,7 @@ class DotMesh_Controller_Posts extends DotMesh_Controler_Abstract
                 $post->delete();
                 break;
             }
-            $post->submitFeedback(BUtil::maskFields($r->post(), 'echo,star,report,vote_up,vote_down'));
+            $post->submitFeedback($r->post());
             $result['status'] = 'success';
         } catch (BException $e) {
             $result = array('status'=>'error', 'message'=>$e->getMessage());
@@ -134,7 +134,7 @@ class DotMesh_Controller_Posts extends DotMesh_Controler_Abstract
                 throw new BException('Invalid request type');
             }
             $postname = $r->param('postname');
-            if ($postname=='REMOTE') {
+            if ($postname=='_') {
                 $postname = $r->post('post_uri');
             }
             $post = DotMesh_Model_Post::i()->find($postname);

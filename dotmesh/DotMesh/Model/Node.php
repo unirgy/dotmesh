@@ -161,7 +161,9 @@ class DotMesh_Model_Node extends BModel
         if (!empty($request['users'])) {
             $usersData = array();
             foreach ($request['users'] as $user) {
-                if (is_string($user)) {
+                if (is_numeric($user)) {
+                    $user = DotMesh_Model_User::i()->load($user);
+                } elseif (is_string($user)) {
                     $user = $userHlp->find($user);
                 }
                 $userData = BUtil::maskFields($user->as_array(), 'username,firstname,lastname');
@@ -179,7 +181,9 @@ class DotMesh_Model_Node extends BModel
         if (!empty($request['posts'])) {
             $postsData = array();
             foreach ($request['posts'] as $post) {
-                if (is_string($post)) {
+                if (is_numeric($post)) {
+                    $post = DotMesh_Model_Post::i()->load($post);
+                } elseif (is_string($post)) {
                     $post = $localNode->post($post);
                 }
                 $postData = BUtil::maskFields($post->as_array(), 'postname,is_private,is_tweeted,create_dt');
@@ -191,6 +195,23 @@ class DotMesh_Model_Node extends BModel
                 $postsData[] = $postData;
             }
             $request['posts'] = $postsData;
+        }
+
+        if (!empty($request['feedbacks'])) {
+            $feedbacksData = array();
+            foreach ($request['feedbacks'] as $fb) {
+                if (is_numeric($fb['user'])) {
+                    $fb['user'] = DotMesh_Model_User::i()->load($fb['user']);
+                }
+                if (is_numeric($fb['post'])) {
+                    $fb['post'] = DotMesh_Model_Post::i()->load($fb['post']);
+                }
+                $fbData = BUtil::maskFields($fb, 'echo,star,report,vote_up,vote_down');
+                $fbData['post_uri'] = $fb['post']->uri();
+                $fbData['user_uri'] = $fb['user']->uri();
+                $feedbacksData[] = $fbData;
+            }
+            $request['feedbacks'] = $feedbacksData;
         }
 
         $response = BUtil::remoteHttp('POST', $this->uri(null, true).'/n/api1.json', BUtil::toJson($request));
@@ -324,7 +345,6 @@ class DotMesh_Model_Node extends BModel
                         throw new BException('Incomplete request');
                     }
                     $user = $userHlp->find($p['user_uri'], true);
-                    $data = BUtil::maskFields($p, 'postname,preview,create_dt,is_private,is_tweeted');
                     $data['node_id'] = $remoteNode->id;
                     $data['user_id'] = $user->id;
                     if (!empty($p['echo_user_uri'])) {
@@ -354,7 +374,6 @@ class DotMesh_Model_Node extends BModel
                     if ($user->node_id!==$remoteNode->id) {
                         throw new BException('Invalid user');
                     }
-                    $data = BUtil::maskFields($fb, 'echo,star,report,vote_up,vote_down');
                     $post->receiveRemoteFeedback($data);
                     $p['status'] = 'success';
                 } catch (Exception $e) {
