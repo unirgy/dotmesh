@@ -2,39 +2,101 @@
 
 $config = array();
 
+/***********************************************************************/
+/* Basic DB connection information                                     */
+
 $config['db']['host']         = 'localhost';
 $config['db']['username']     = 'root';
 $config['db']['password']     = '';
 $config['db']['dbname']       = 'dotmesh';
 $config['db']['table_prefix'] = '';
-#$config['db']['logging']      = 1;
-#$config['db']['implicit_migration'] = 1;
+
+/***********************************************************************/
+/* Use mod_rewrite?                                                    */
 
 $config['web']['hide_script_name'] = 1;
 
+/***********************************************************************/
+/* Session settings                                                    */
+
+/* Validate IP for sessions */
 $config['cookie']['session_check_ip'] = 1;
-#$config['cookie']['session_handler'] = 'apc';
-#$config['cookie']['timeout'] = 3600;
-#$config['cookie']['domain'] = null;
-#$config['cookie']['path'] = null;
+
+/* Set APC as session handler for preformance */
+$config['cookie']['session_handler'] = 'apc';
+
+/* Session timeout */
+# $config['cookie']['timeout'] = 3600;
+
+/* Leave null for default values */
+# $config['cookie']['domain'] = null;
+# $config['cookie']['path'] = null;
+
+/***********************************************************************/
+/* DotMesh core settings                                               */
 
 $config['modules']['DotMesh']['thumb_root_path'] = 'dotmesh/thumbs';
 $config['modules']['DotMesh']['contents_default_process'] = 1;
 $config['modules']['DotMesh']['timeline_page_size'] = 10;
 $config['modules']['DotMesh']['tnc_uri'] = '';
 
-#$config['request']['module_run_level']['BMarkdownExtra'] = 'ONDEMAND';
+/***********************************************************************/
+/* Plugins settings                                                    */
 
-#$config['request']['module_run_level']['BTwitterAdapter'] = 'ONDEMAND';
+/* Default module run level - uncomment to make all modules enabled by default */
+
+# BModule::defaultRunLevel(BModule::REQUESTED);
+
+/*********************** BMarkdownExtra plugin *************************/
+/* Uncomment to disable                                                */
+
+# $config['request']['module_run_level']['BMarkdownExtra'] = 'DISABLED';
+
+/*********************** BTwitterAdapter plugin ************************/
+/* Uncomment to disable                                                */
+
+# $config['request']['module_run_level']['BTwitterAdapter'] = 'ONDEMAND';
+
+/* To use twitter adapter on your node, you'll have to create your app */
+/* Go to https://dev.twitter.com/apps , sign in or sign up             */
+/* Click "Create a new application", follow instructions               */
+/* In callback put http://yournode.com/a/twitter/callback (or https)   */
+/* Fill out consumer_key and consumer_secret below                     */
+
 $config['modules']['BTwitterAdapter']['consumer_key'] = '';
 $config['modules']['BTwitterAdapter']['consumer_secret'] = '';
 
-#if (!in_array($_SERVER['REMOTE_ADDR'], explode(',', '1.2.3.4'))) {
-#    echo "<h1>UNDER CONSTRUCTION</h1>";
-#    exit;
-#}
+/***********************************************************************/
+/* Uncomment and put IP addresses to limit access                      */
 
-#BDebug::mode('DEBUG');
-#define('DOTMESH_CONFIGURED', 1);
+# if (!in_array($_SERVER['REMOTE_ADDR'], explode(',', '1.2.3.4'))) {
+#     echo "<h1>UNDER CONSTRUCTION</h1>";
+#     exit;
+# }
+
+/***********************************************************************/
+/* Debugging                                                           */
+
+/* Uncomment the relevant debug level */
+BDebug::mode('PRODUCTION');
+# BDebug::mode('DEVELOPMENT'); // view error notifications and basic debug info
+# BDebug::mode('DEBUG'); // view warnings, errors and detail debug info
+
+/* Uncomment to log and see DB queries in request */
+# $config['db']['logging']      = 1;
+
+
+# BModule::defaultRunLevel(BModule::REQUESTED);
+
+/***********************************************************************/
+/* After done with configuration, uncomment the following line         */
+
+# define('DOTMESH_CONFIGURED', 1);
+
+/***********************************************************************/
+/* DO NOT CHANGE THE FOLLOWING CONFIGURATION                           */
+
+$config['db']['implicit_migration'] = 1;
+
 
 return $config;

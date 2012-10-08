@@ -23,10 +23,6 @@
 * @license http://www.gnu.org/licenses/gpl.txt
 */
 
-if (defined('DOTMESH_CONFIGURED')) {
-    BModule::defaultRunLevel(BModule::REQUESTED);
-}
-
 BModuleRegistry::i()->addModule('DotMesh', array(
     'version' => '0.1.0',
     'bootstrap' => array('callback'=>'DotMesh::bootstrap'),

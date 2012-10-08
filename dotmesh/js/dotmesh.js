@@ -141,10 +141,10 @@ $(function() {
             delayTimer = setTimeout(function() { $el.removeClass('hover') }, 500);
         });
     });
-    $('.subscription-state').on('mouseover mouseout', function(event) {
-        var hoverLabel = $(this).data('hover-label'), curLabel = $('.label', this).html();
-        $('.label', this).html(hoverLabel);
-        $(this).data('hover-label', curLabel);
+    $('.subscription-state').each(function(idx, el) {
+        var hoverLabel = $(this).data('hover-label'), label = $('.label', this), defLabel = label.html();
+        $(el).on('mouseover', function(event) { label.html(hoverLabel); });
+        $(el).on('mouseout', function(event) { label.html(defLabel); });
     });
 
     $(document).on('click', '.timeline .preview-expand', function(event) {

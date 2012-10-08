@@ -21,6 +21,8 @@ Features
 * Markdown post formatting
 * Custom theming (plugin skeleton included)
 * Servers communicate using SSL if supported by either
+* Run multiple nodes from the same code/db instance
+* Supports full i18n
 
 Security measures
 =================
@@ -76,3 +78,25 @@ Trade offs vs Cloud solutions (e.g. Twitter)
 
 * Maintain your own real/virtual server, backups, host security, upgrades, etc.
 
+Installation Instructions
+=========================
+
+* Clone git repository (https://github.com/unirgy/dotmesh)
+* OR Download as zip (https://github.com/unirgy/dotmesh/zipball/master)
+* Copy dotmesh/config.php.dist to dotmesh/config.php
+* Edit dotmesh/config.php and follow instructions to configure the instance
+* Navigate to your node web address, setup page should be shown
+* Fill out setup page (node and admin user info)
+* Enjoy your own DotMesh node!
+
+How you can help?
+=================
+
+If you like what you see, do what you can:
+
+* Help to test the software, by using it and reporting issues or writing PHPUnit tests
+* Help to secure the software, by examining the code and do blackbox audits
+* Help to develop the software, by forking it and submitting pull requests
+* Help to increase awareness, by talking with your friends and co-workers
+* Help to make it pretty, by creating custom themes
+* Help to translate it to other languages
