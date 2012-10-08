@@ -452,11 +452,8 @@ class DotMesh_Model_Post extends BModel
         return $preview;
     }
 
-    public function submitFeedback($type, $value, $userId=null)
+    public function submitFeedback($data, $userId=null)
     {
-        if (!in_array($type, array('echo', 'star', 'flag', 'vote_up', 'vote_down'))) {
-            throw new BException('Invalid feedback type: '.$type);
-        }
         if ($value<0 || $value>1) {
             throw new BException('Invalid feedback value: '.$value);
         }
@@ -466,9 +463,9 @@ class DotMesh_Model_Post extends BModel
         if (!$userId) {
             throw new BException('Invalid user');
         }
-
+        $data = BUtil::maskFields($data, 'echo,star,flag,vote_up,vote_down');
         $where = array('post_id'=>$this->id, 'user_id'=>$userId);
-        $data = array($type=>$value);
+
         if ($type=='vote_up') {
             $data['vote_down'] = 0;
             $data['vote_up_dt'] = BDb::now();
@@ -485,6 +482,18 @@ class DotMesh_Model_Post extends BModel
         }
         $this->feedback = $fb;
         return $this;
+    }
+
+    public function receiveRemoteFeedback($data, $userId)
+    {
+        $where = array('post_id'=>$this->id, 'user_id'=>$userId);
+        $fb = DotMesh_Model_PostFeedback::i()->load($where);
+        if (!$fb) {
+            $fb = DotMesh_Model_PostFeedback::i()->create($where)->set($data)->save();
+        } else {
+            $fb->set($data);
+            DotMesh_Model_PostFeedback::i()->update_many($data, $where);
+        }
     }
 
     public function distribute($sendRemote=false)
