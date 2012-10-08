@@ -18,21 +18,21 @@
                     <ul class="field-group">
                         <li>
                             <label for="node_uri"><?=$this->_('Node URI')?></label>
-                            <input type="text" required id="node_uri" name="setup[node_uri]" title="Format: yourserver.com/optional/path" placeholder="yourserver.com/path_to_dotmesh" value="<?=$this->node_uri?>"/>
+                            <input type="text" required id="node_uri" name="setup[node_uri]" title="<?=$this->_('Format: yourserver.com/optional/path')?>" placeholder="yourserver.com/path_to_dotmesh" value="<?=$this->node_uri?>"/>
                         </li>
                         <li>
                             <label for="node_uri"><?=$this->_('Node Support Email Address')?></label>
                             <input type="email" required id="node_support_email" name="setup[support_email]" title="admin@yournode.com" placeholder="admin@yournode.com"/>
                         </li>
                         <li>
-                            <label for="is_https">Enable HTTPS?</label>
+                            <label for="is_https"><?=$this->_('Enable HTTPS?')?></label>
                             <select id="is_https" name="setup[is_https]">
                                 <option value="0"><?=$this->_('No')?></option>
                                 <option value="1" <?=$this->is_https?'selected':''?>><?=$this->_('Yes')?></option>
                             </select>
                         </li>
                         <li>
-                            <label for="is_rewrite">Enable URL Rewrites?</label>
+                            <label for="is_rewrite"><?=$this->_('Enable URL Rewrites?')?></label>
                             <select id="is_rewrite" name="setup[is_rewrite]">
                                 <option value="0"><?=$this->_('No')?></option>
                                 <option value="1" <?=$this->is_rewrite?'selected':''?>><?=$this->_('Yes')?></option>
@@ -43,31 +43,31 @@
             </div>
             <div class="col last">
                 <fieldset>
-                    <h3>Admin Account Info</h3>
+                    <h3><?=$this->_('Admin Account Info')?></h3>
                     <ul class="field-group">
                         <li>
                             <label for="username"><?=$this->_('Username')?></label>
-                            <input type="text" required id="username" name="setup[username]" pattern="^[a-zA-Z][a-zA-Z0-9_]+$" title="A valid user name, starting with letter, followed by letters, digits or underscore" placeholder="bond007 "/>
+                            <input type="text" required id="username" name="setup[username]" pattern="^[a-zA-Z][a-zA-Z0-9_]+$" title="<?=$this->_('A valid user name, starting with letter, followed by letters, digits or underscore')?>" placeholder="bond007 "/>
                         </li>
                         <li>
                             <label for="password"><?=$this->_('Password')?></label>
-                            <input type="password" required id="password" name="setup[password]" pattern=".{8,}" title="Strong password, minimum 8 characters" placeholder="*****"/>
+                            <input type="password" required id="password" name="setup[password]" pattern=".{8,}" title="<?=$this->_('Strong password, minimum 8 characters')?>" placeholder="*****"/>
                         </li>
                         <li>
                             <label for="password_confirm"><?=$this->_('Confirm')?></label>
-                            <input type="password" required id="password_comfirm" name="setup[password_confirm]" pattern=".{8,}" title="Please confirm your password" placeholder="*****"/>
+                            <input type="password" required id="password_comfirm" name="setup[password_confirm]" pattern=".{8,}" title="<?=$this->_('Please confirm your password')?>" placeholder="*****"/>
                         </li>
                         <li>
                             <label for="email"><?=$this->_('Email')?></label>
-                            <input type="email" required id="email" name="setup[email]" title="A valid email address" placeholder="bond@superduper.com"/>
+                            <input type="email" required id="email" name="setup[email]" title="<?=$this->_('A valid email address')?>" placeholder="bond@superduper.com"/>
                         </li>
                         <li>
                             <label for="firstname"><?=$this->_('First Name')?></label>
-                            <input type="text" required id="firstname" name="setup[firstname]" title="First name" placeholder="James"/>
+                            <input type="text" required id="firstname" name="setup[firstname]" title="<?=$this->_('First name')?>" placeholder="James"/>
                         </li>
                         <li>
                             <label for="lastname"><?=$this->_('Last Name')?></label>
-                            <input type="text" required id="lastname" name="setup[lastname]" title="Last name" placeholder="Bond"/>
+                            <input type="text" required id="lastname" name="setup[lastname]" title="<?=$this->_('Last name')?>" placeholder="Bond"/>
                         </li>
                     </ul>
                 </fieldset>

@@ -55,7 +55,7 @@ $config['modules']['DotMesh']['tnc_uri'] = '';
 /*********************** BTwitterAdapter plugin ************************/
 /* Uncomment to disable                                                */
 
-# $config['request']['module_run_level']['BTwitterAdapter'] = 'ONDEMAND';
+# $config['request']['module_run_level']['BTwitterAdapter'] = 'DISABLED';
 
 /* To use twitter adapter on your node, you'll have to create your app */
 /* Go to https://dev.twitter.com/apps , sign in or sign up             */

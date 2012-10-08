@@ -10,15 +10,15 @@
 <?php if (!empty($this->list['rows'])): ?>
 <ul class="timeline">
 <?php foreach ($this->list['rows'] as $u): ?>
-    <li id="timeline-<?=$p->id?>" class="timeline-item clearfix">
-        <form name="unsubscribe-user" method="post" action="<?=BApp::href('u/')?>" class="f-right">
+    <li id="timeline-<?=$u->id?>" class="timeline-item clearfix">
+        <form name="unsubscribe-user" class="unsubscribe f-right" method="post" action="<?=BApp::href('u/')?>" class="f-right">
             <fieldset>
                 <input type="hidden" name="user_uri" value="<?=$this->q($u->uri())?>"/>
-                <button type="submit" name="subscribe" value="0">X</button>
+                <button type="submit" name="subscribe" value="0" class="icon">X</button>
             </fieldset>
         </form>
         <a href="<?=$u->uri(true)?>">
-            <img src="<?=$u->thumbUri()?>" class="avatar">
+            <span class="avatar"><img src="<?=$u->thumbUri()?>"></span>
             <span class="node-name"><?=$u->node()->uri()?></span>
             <span class="user-name"><?=$u->username?></span>
         </a>

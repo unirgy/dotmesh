@@ -24,9 +24,9 @@ $isSubscribed = $sessUser && $sessUser->isSubscribedToUser($user);
         <table class="user-activity">
             <thead>
                 <tr>
-                    <th>Subscribers</th>
-                    <th>Subscribed</th>
-                    <th>Posts</th>
+                    <th><?=$this->_('Subscribers')?></th>
+                    <th><?=$this->_('Subscribed')?></th>
+                    <th><?=$this->_('Posts')?></th>
                 </tr>
             </thead>
             <tbody>

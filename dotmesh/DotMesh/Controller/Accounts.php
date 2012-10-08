@@ -343,7 +343,11 @@ class DotMesh_Controller_Accounts extends DotMesh_Controler_Abstract
             'title' => 'Subscribed to users',
             'list' => array('rows'=>$rows, 'is_last_page'=>sizeof($rows)<$limit),
         ));
-        BLayout::i()->applyLayout('/pub_users');
+        if (BRequest::i()->xhr()) {
+            BLayout::i()->setRootView('user-list');
+        } else {
+            BLayout::i()->applyLayout('/pub_users');
+        }
     }
 
     public function action_pub_tags()
@@ -358,7 +362,11 @@ class DotMesh_Controller_Accounts extends DotMesh_Controler_Abstract
             'title' => 'Subscribed to tags',
             'list' => array('rows'=>$rows, 'is_last_page'=>sizeof($rows)<$limit),
         ));
-        BLayout::i()->applyLayout('/pub_tags');
+        if (BRequest::i()->xhr()) {
+            BLayout::i()->setRootView('tag-list');
+        } else {
+            BLayout::i()->applyLayout('/pub_tags');
+        }
     }
 
     public function action_sub_users()
@@ -373,6 +381,10 @@ class DotMesh_Controller_Accounts extends DotMesh_Controler_Abstract
             'title' => 'Subscribers',
             'list' => array('rows'=>$rows, 'is_last_page'=>sizeof($rows)<$limit),
         ));
-        BLayout::i()->applyLayout('/sub_users');
+        if (BRequest::i()->xhr()) {
+            BLayout::i()->setRootView('user-list');
+        } else {
+            BLayout::i()->applyLayout('/sub_users');
+        }
     }
 }

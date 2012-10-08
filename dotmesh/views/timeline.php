@@ -2,7 +2,7 @@
 <?php
 $sessUser = DotMesh_Model_User::i()->sessionUser();
 $userUri = $sessUser ? $this->q($sessUser->uri()) : null;
-$isAdmin = $sessUser->is_admin;
+$isAdmin = $sessUser ? $sessUser->is_admin : false;
 $localNodeId = DotMesh_Model_Node::i()->localNode()->id;
 if (!$this->timeline) return;
 $curPage = (int)BRequest::i()->get('p');
@@ -20,21 +20,24 @@ $now = strtotime(BDb::now());
             <strong><?=$s ? $s : 'recent'?></strong>
 <?php else: ?>
             <a href="<?=str_replace('SORT', $s, $sortUri)?>"><?=$s ? $s : 'recent'?></a>
-<?php endif ?>
-<?php endforeach ?>
+<?php endif // if ($curSort==$s): ?>
+<?php endforeach // foreach (explode(',', ',hot,best,worst,controversial') as $s): ?>
         </div>
     <h2 class="timeline-block-title"><?=$this->q($this->title)?>
 <?php if ($this->feed_uri): ?>
         <a href="<?=BUtil::setUrlQuery($this->feed_uri, array('s'=>$curSort))?>" class="rss-link tiptip-title" title="<?=$this->_('RSS Feed for the current timeline')?>">
             <img src="<?=BApp::src('DotMesh', 'img/rss-icon.png')?>"/>
         </a>
-<?php endif ?>
+<?php endif // if ($this->feed_uri): ?>
     </h2>
-<?php endif ?>
+<?php endif // if (!BRequest::i()->xhr()): ?>
 
 <?php if (!empty($this->timeline['rows'])): ?>
+
 <ul class="timeline" id="timeline-page-<?=$curPage?>">
+
 <?php foreach ((array)$this->timeline['rows'] as $p): ?>
+
 <?php $uri = $p->user()->uri(true); $name = $p->user()->fullname(); $isLocal = $p->node()->is_local; ?>
     <li id="timeline-<?=$p->id?>" class="timeline-item clearfix <?=$p->expanded?'expanded':''?> <?=$p->is_pinned?'pinned':''?> <?=$p->is_private?'private':''?>">
         <a name="<?=$this->q($p->postname)?>"></a>
@@ -66,38 +69,59 @@ $now = strtotime(BDb::now());
                     <?=$p->contentsHtml()?>
                 </div>
             </div>
+<?php if ($p->echoUsers()): ?>
+            <div class="echoed-by">
+                <span class="icon tiptip-title" title="<?=$this->_("Echoed by users you are subscribed")?>"><?=$this->_('Echoed by:')?></span>
+<?php foreach ($p->echoUsers() as $eu): ?>
+                <a href="<?=$eu->uri(true)?>" class="tiptip-title" title="<?=$eu->uri()?>"><img src="<?=$eu->thumbUri()?>"/></a>
+<?php endforeach ?>
+            </div>
+<?php endif ?>
+
 <?php if ($p->contents && $p->preview!=$p->contents): ?>
             <a href="#" class="read-toggler preview-expand"><?=$this->_('Expand')?></a>
             <a href="#" class="read-toggler contents-collapse"><?=$this->_('Collapse')?></a>
 <?php endif ?>
+
 <?php //print_r($p->as_array()); ?>
 			<div class="actions-group actions-group-1 always-visible">
-<?php if (!$p->is_private): ?>
+
+<?php if (!$p->is_private && (!$sessUser || $p->user_id!==$sessUser->id)): ?>
                 <button type="submit" name="echo" value="<?=$p->echo?0:1?>" class="tiptip-title button-echo<?=$p->echo?' active':''?>" <?=!$sessUser?'disabled':''?> title="<?=$this->_('Echo to your subscribers')?>"><span class="icon"></span><span class="label"><?=$this->_('Echo')?></span><span class="total-echo total <?=!$p->total_echos?'zero':''?>"><?=$p->total_echos?></span></button>
 <?php endif ?>
-                <button type="submit" name="star" value="<?=$p->star?0:1?>" class="tiptip-title button-star<?=$p->star?' active':''?>" <?=!$sessUser?'disabled':''?> title="<?=$this->_('Star Favorite')?>"><span class="icon"></span><span class="label">Star</span><span class="total-star total <?=!$p->total_stars?'zero':''?>"><?=$p->total_stars?></span></button>
-                <button type="submit" name="flag" value="<?=$p->flag?0:1?>" class="tiptip-title button-flag<?=$p->flag?' active':''?>" <?=!$sessUser?'disabled':''?> title="<?=$this->_('Flag Offensive')?>"><span class="icon"></span><span class="label">Flag</span><span class="total-flag total <?=!$p->total_flags?'zero':''?>"><?=$p->total_flags?></span></button>
-                <button type="submit" name="vote_up" value="<?=$p->vote_up?0:1?>" class="tiptip-title button-vote_up<?=$p->vote_up==1?' active':''?>" <?=!$sessUser?'disabled':''?> title="<?=$this->_('Thumbs Up')?>"><span class="icon"></span><span class="label">Thumbs Up</span><span class="total-vote_up total <?=!$p->total_vote_up?'zero':''?>"><?=$p->total_vote_up?></span></button>
-                <button type="submit" name="vote_down" value="<?=$p->vote_down?0:1?>" class="tiptip-title button-vote_down<?=$p->vote_down==1?' active':''?>" <?=!$sessUser?'disabled':''?> title="<?=$this->_('Thumbs Down')?>"><span class="icon"></span><span class="label">Thumbs Down</span><span class="total-vote_down total <?=!$p->total_vote_down?'zero':''?>"><?=$p->total_vote_down?></span></button>
+
+                <button type="submit" name="star" value="<?=$p->star?0:1?>" class="tiptip-title button-star<?=$p->star?' active':''?>" <?=!$sessUser?'disabled':''?> title="<?=$this->_('Star Favorite')?>"><span class="icon"></span><span class="label"><?=$this->_('Star')?></span><span class="total-star total <?=!$p->total_stars?'zero':''?>"><?=$p->total_stars?></span></button>
+
+<?php if (!$sessUser || $p->user_id!==$sessUser->id): ?>
+                <button type="submit" name="flag" value="<?=$p->flag?0:1?>" class="tiptip-title button-flag<?=$p->flag?' active':''?>" <?=!$sessUser?'disabled':''?> title="<?=$this->_('Flag Offensive')?>"><span class="icon"></span><span class="label"><?=$this->_('Flag')?></span><span class="total-flag total <?=!$p->total_flags?'zero':''?>"><?=$p->total_flags?></span></button>
+<?php endif ?>
+
+                <button type="submit" name="vote_up" value="<?=$p->vote_up?0:1?>" class="tiptip-title button-vote_up<?=$p->vote_up==1?' active':''?>" <?=!$sessUser?'disabled':''?> title="<?=$this->_('Thumbs Up')?>"><span class="icon"></span><span class="label"><?=$this->_('Thumbs Up')?></span><span class="total-vote_up total <?=!$p->total_vote_up?'zero':''?>"><?=$p->total_vote_up?></span></button>
+
+                <button type="submit" name="vote_down" value="<?=$p->vote_down?0:1?>" class="tiptip-title button-vote_down<?=$p->vote_down==1?' active':''?>" <?=!$sessUser?'disabled':''?> title="<?=$this->_('Thumbs Down')?>"><span class="icon"></span><span class="label"><?=$this->_('Thumbs Down')?></span><span class="total-vote_down total <?=!$p->total_vote_down?'zero':''?>"><?=$p->total_vote_down?></span></button>
             </div>
 
 <?php if ($sessUser): ?>
             <div class="actions-group actions-group-2 hover-inline">
-                <a href="<?=$p->uri(true)?>#reply" class="button-reply button"><span class="icon"></span><span>Reply</span></a>
+                <a href="<?=$p->uri(true)?>#reply" class="button-reply button"><span class="icon"></span><span><?=$this->_('Reply')?></span></a>
+
                 <!--<a href="#" class="button-share button"><span class="icon"></span><span>Share</span></a>-->
-<?php if ($p->user_id==$sessUser->id || $isAdmin): ?>
+<?php if ($isLocal && ($p->user_id==$sessUser->id || $isAdmin)): ?>
 <!--
                 <button type="submit" name="do" value="edit" class="button-edit button"><span class="icon"></span><span class="label">Edit</span></button>
 -->
-                <button type="submit" name="do" value="delete" onclick="return confirm('Are you sure?')" class="button-delete button"><span class="icon"></span><span class="label">Delete</span></button>
-<?php endif ?>
+                <button type="submit" name="do" value="delete" onclick="return confirm('<?=$this->_('Are you sure?')?>')" class="button-delete button"><span class="icon"></span><span class="label"><?=$this->_('Delete')?></span></button>
+<?php endif // if ($p->user_id==$sessUser->id || $isAdmin): ?>
+
 			</div>
-<?php endif ?>
+<?php endif // if ($sessUser): ?>
         </form>
     </li>
-<?php endforeach ?>
+<?php endforeach // foreach ((array)$this->timeline['rows'] as $p): ?>
+
 </ul>
-<?php endif ?>
+
+<?php endif // if (!empty($this->timeline['rows'])): ?>
 
 <?php if (!BRequest::i()->xhr()): ?>
 <div class="timeline-loadmore" data-uri-pattern="<?=BUtil::setUrlQuery(BRequest::currentUrl(), array('p'=>'PAGE'))?>"
@@ -115,4 +139,4 @@ $(function() { dotmeshMediaLinks('#timeline-page-<?=$curPage?>'); });
 dotmeshMediaLinks('#timeline-page-<?=$curPage?>');
 </script>
 
-<?php endif ?>
+<?php endif // if (!BRequest::i()->xhr()): ?>

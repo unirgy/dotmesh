@@ -47,14 +47,19 @@ class DotMesh_Controller_Posts extends DotMesh_Controler_Abstract
         } else {
             $layout->applyLayout('/thread');
             $sessUserId = DotMesh_Model_User::i()->sessionUserId();
-            $mentions = array('+'.$post->user()->uri());
+            $mentions = array();
+            if ($post->user()->id!==$sessUserId) {
+                $username = $post->node()->is_local ? $post->user()->username : $post->user()->uri();
+                $mentions['+'.$username] = 1;
+            }
             foreach ($post->mentionedUsers() as $pUser) {
                 if ($pUser->id!=$sessUserId) {
-                    $mentions[] = '+'.$pUser->uri();
+                    $username = $pUser->node()->is_local ? $pUser->username : $pUser->uri();
+                    $mentions['+'.$username] = 1;
                 }
             }
             $layout->view('thread')->set('post', $post);
-            $layout->view('compose')->set('post', $post)->set('contents', join(' ', $mentions).' ');
+            $layout->view('compose')->set('post', $post)->set('contents', join(' ', array_keys($mentions)).' ');
             $layout->view('timeline')->set(array(
                 'title' => BLocale::i()->_("Thread timeline"),
                 'feed_uri' => $post->uri(true).'/feed.rss',
@@ -103,9 +108,10 @@ class DotMesh_Controller_Posts extends DotMesh_Controler_Abstract
                     throw new BException('Post does not belong to the logged in user');
                 }
                 $post->delete();
+                $result['message'] = 'Post has been deleted';
                 break;
             }
-            $post->submitFeedback($r->post());
+            //$post->submitFeedback($r->post());
             $result['status'] = 'success';
         } catch (BException $e) {
             $result = array('status'=>'error', 'message'=>$e->getMessage());
@@ -154,6 +160,10 @@ class DotMesh_Controller_Posts extends DotMesh_Controler_Abstract
             }
             switch ($request['type']) {
             case 'feedback':
+                if ($request['field']=='pin') {
+                    $post->set('is_pinned', 0)->save();
+                    break;
+                }
                 $post->submitFeedback(array($request['field']=>$request['value']), $user->id, $remote);
                 $result = array('status'=>'success', 'message'=>'Feedback submitted');
                 $orm = DotMesh_Model_PostFeedback::i()->orm()->where('post_id', $post->id);

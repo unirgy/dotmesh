@@ -118,8 +118,11 @@ class DotMesh_Model_User extends BModelUser
 
     public static function myTimelineOrm($uId=null)
     {
+        $node = DotMesh_Model_Node::table();
+        $user = DotMesh_Model_User::table();
         $nodeBlock = DotMesh_Model_NodeBlock::table();
         $userBlock = DotMesh_Model_UserBlock::table();
+        $postFeedback = DotMesh_Model_PostFeedback::table();
         $postUser = DotMesh_Model_PostUser::table();
         $postTag = DotMesh_Model_PostTag::table();
         $userSub = DotMesh_Model_UserSub::table();
@@ -133,27 +136,55 @@ class DotMesh_Model_User extends BModelUser
         $orm->where(array('OR' => array(
             "p.user_id={$uId} or p.echo_user_id={$uId}", // post is made or echoed by logged in user
             'AND' => array(
-                'n.is_blocked=0', // post node is not globally blocked
-                'u.is_blocked=0', // post user is not globally blocked
-                'p.echo_user_id is null or eu.is_blocked=0', // post is not echoed by globally blocked user
-                "p.node_id not in (select block_node_id from {$nodeBlock} where user_id={$uId})", // post node is not blocked by user
-                "p.user_id not in (select block_user_id from {$userBlock} where user_id={$uId})", // post user is not blocked by user
+                // post node is not globally blocked
+                'n.is_blocked=0',
+                // post user is not globally blocked
+                'u.is_blocked=0',
+                // post node is not blocked by user
+                "p.node_id not in (select block_node_id from {$nodeBlock} where user_id={$uId})",
+                // post user is not blocked by user
+                "p.user_id not in (select block_user_id from {$userBlock} where user_id={$uId})",
                 'OR' => array(
-                    "p.id in (select post_id from {$postUser} where user_id={$uId})", // logged in user mentioned in the post
+                    // logged in user mentioned in the post
+                    "p.id in (select post_id from {$postUser} where user_id={$uId})",
                     'AND' => array(
-                        'p.is_private=0', // post is public
-                        'OR' => array( // post is by user or tag logged in user is subscribed to
+                        // post is public
+                        'p.is_private=0',
+                        'OR' => array(
+                            // post is by user i'm subscribed to
                             "p.user_id in (select pub_user_id from {$userSub} where sub_user_id={$uId})",
-                            "p.id in (select post_id from {$postTag} pt inner join {$tagSub} ts on ts.pub_tag_id=pt.tag_id where ts.sub_user_id={$uId})",
-                            'AND' => array( // or echoed by user i subscribed to and it's not blocked by me
-                                "p.echo_user_id in (select pub_user_id from {$userSub} where sub_user_id={$uId})",
-                                "p.echo_user_id not in (select block_user_id from {$userBlock} where user_id={$uId})",
-                            ),
+                            // post has tag i'm subscribed to
+                            "p.id in (select post_id from {$postTag} pt
+                                inner join {$tagSub} ts on ts.pub_tag_id=pt.tag_id
+                                where ts.sub_user_id={$uId}
+                            )",
+                            // post is echoed by user i'm subscribed to and are not globally blocked
+                            "p.id in (select post_id from {$postFeedback} epf
+                                inner join {$userSub} eus on eus.pub_user_id=epf.user_id
+                                inner join {$user} eu on eu.id=epf.user_id
+                                inner join {$node} en on en.id=eu.node_id
+                                where epf.echo=1 and eus.sub_user_id={$uId} and eu.is_blocked=0 and en.is_blocked=0
+                            )",
                         ),
                     ),
                 ),
             ),
         )));
+
+        // collect users that have echoed and i'm subscribed to and are not globally blocked
+        $orm->select("(
+            select group_concat(concat(
+                en.id,';',en.uri,';',en.is_local,';',en.is_https,';',en.is_rewrite,';',
+                eu.id,';',eu.username,';',eu.email,';',eu.firstname,';',eu.lastname,';',
+                    eu.thumb_provider,';',eu.thumb_filename,';',eu.thumb_uri
+            ) separator '|')
+            from {$postFeedback} epf
+            inner join {$userSub} eus on eus.pub_user_id=epf.user_id
+            inner join {$user} eu on eu.id=epf.user_id
+            inner join {$node} en on en.id=eu.node_id
+            where epf.post_id=p.id and epf.echo=1 and eus.sub_user_id={$uId} and eu.is_blocked=0 and en.is_blocked=0
+            limit 5
+        )", 'echo_users');
 
         return $orm;
     }
@@ -242,6 +273,9 @@ class DotMesh_Model_User extends BModelUser
 
     public static function find($uri, $create=false)
     {
+        if (!$uri) {
+            throw new BException('Empty User URI');
+        }
         list($nodeUri, $username) = static::parseUri($uri);
         $nodeHlp = DotMesh_Model_Node::i();
         if (is_array($create) && !empty($create['node_id'])) {

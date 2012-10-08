@@ -45,8 +45,6 @@ class DotMesh_Model_Post extends BModel
             ->select('p.*')
             ->join('DotMesh_Model_Node', array('n.id','=','p.node_id'), 'n')
             ->join('DotMesh_Model_User', array('u.id','=','p.user_Id'), 'u')
-            ->left_outer_join('DotMesh_Model_User', array('eu.id','=','p.echo_user_id'), 'eu')
-            ->left_outer_join('DotMesh_Model_Node', array('en.id','=','eu.node_id'), 'en')
         ;
         if (($uId = (int)DotMesh_Model_User::sessionUserId())) {
             $fbTable = DotMesh_Model_PostFeedback::table();
@@ -72,20 +70,7 @@ class DotMesh_Model_Post extends BModel
             'user_thumb_provider' => 'u.thumb_provider',
             'user_thumb_filename' => 'u.thumb_filename',
             'user_thumb_uri' => 'u.thumb_uri',
-
-            'echo_user_node_id' => 'eu.node_id',
-            'echo_user_username' => 'eu.username',
-            'echo_user_firstname' => 'eu.firstname',
-            'echo_user_lastname' => 'eu.lastname',
-            'echo_user_thumb_provider' => 'eu.thumb_provider',
-            'echo_user_thumb_filename' => 'eu.thumb_filename',
-            'echo_user_thumb_uri' => 'eu.thumb_uri',
-
-            'echo_node_id' => 'eu.node_id',
-            'echo_node_uri' => 'en.uri',
-            'echo_node_is_local' => 'en.is_local',
-            'echo_node_is_https' => 'en.is_https',
-            'echo_node_is_rewrite' => 'en.is_rewrite',
+            'user_email' => 'u.email',
 
             'feedback_totals' => "(select concat(sum(ifnull(echo,0)),';',sum(ifnull(star,0)),';',sum(ifnull(flag,0)),
                 ';',sum(ifnull(vote_up,0)),';',sum(ifnull(vote_down,0))) from {$fbTable} where post_id=p.id)",
@@ -119,6 +104,7 @@ class DotMesh_Model_Post extends BModel
         $orm->offset($pageNum*$pageSize)->limit($pageSize)->order_by_desc('p.is_pinned')->order_by_desc('p.create_dt');
         $rows = (array)$orm->find_many();
 
+        $userHlp = DotMesh_Model_User::i();
         foreach ($rows as $p) {
             $fbTotals = explode(';', $p->feedback_totals);
             $p->set(array(
@@ -141,29 +127,40 @@ class DotMesh_Model_Post extends BModel
                 'username' => $p->user_username,
                 'firstname' => $p->user_firstname,
                 'lastname' => $p->user_lastname,
+                'email' => $p->user_email,
                 'thumb_provider' => $p->user_thumb_provider,
                 'thumb_filename' => $p->user_thumb_filename,
                 'thumb_uri' => $p->user_thumb_uri,
             ));
             $user->node = $node;
-            if ($p->echo_user_id) {
-                $echoUser = $p->echoUser(array(
-                    'id' => $p->echo_user_id,
-                    'node_id' => $p->echo_user_node_id,
-                    'username' => $p->echo_user_username,
-                    'firstname' => $p->echo_user_firstname,
-                    'lastname' => $p->echo_user_lastname,
-                    'thumb_provider' => $p->echo_user_thumb_provider,
-                    'thumb_filename' => $p->echo_user_thumb_filename,
-                    'thumb_uri' => $p->echo_user_thumb_uri,
-                ));
-                $echoNode = $echoUser->node(array(
-                    'id' => $p->echo_node_id,
-                    'uri' => $p->echo_node_uri,
-                    'is_local' => $p->echo_node_is_local,
-                    'is_https' => $p->echo_node_is_https,
-                    'is_rewrite' => $p->echo_node_is_rewrite,
-                ));
+            if ($p->echo_users) {
+                $echoUsers = array();
+                foreach (explode('|', $p->echo_users) as $userStr) {
+                    $u = explode(';', $userStr);
+                    // en.id,';',en.uri,';',en.is_local,';',en.is_https,';',en.is_rewrite,';',
+                    // eu.id,';',eu.username,';',eu.email,';',eu.firstname,';',eu.lastname,';',
+                    // eu.thumb_provider,';',eu.thumb_filename,';',eu.thumb_uri
+                    $echoUser = $userHlp->create(array(
+                        'id' => $u[5],
+                        'node_id' => $u[0],
+                        'username' => $u[6],
+                        'email' => $u[7],
+                        'firstname' => $u[8],
+                        'lastname' => $u[9],
+                        'thumb_provider' => $u[10],
+                        'thumb_filename' => $u[11],
+                        'thumb_uri' => $u[12],
+                    ));
+                    $echoNode = $echoUser->node(array(
+                        'id' => $u[0],
+                        'uri' => $u[1],
+                        'is_local' => $u[2],
+                        'is_https' => $u[3],
+                        'is_rewrite' => $u[4],
+                    ));
+                    $echoUsers[] = $echoUser;
+                }
+                $p->echo_users = $echoUsers;
             }
         }
 
@@ -192,7 +189,7 @@ class DotMesh_Model_Post extends BModel
             "p.id={$threadId} or p.thread_id={$threadId}",
             "p.user_id={$pubUserId} or p.echo_user_id={$pubUserId}",
             "p.is_private=0".($uId ? " or p.user_id={$uId} or p.id in (select post_id from {$postUser} where user_id={$uId})" : ''),
-        )))->select("(p.id={$threadId})", 'expanded');
+        )))->select("(p.id={$this->id})", 'expanded');
 
         return $orm;
     }
@@ -379,17 +376,10 @@ class DotMesh_Model_Post extends BModel
         return $this->user;
     }
 
-    public function echoUser($data=null, $reset=false)
+    public function echoUsers($data=null, $reset=false)
     {
-        if (!$this->echo_user || $reset) {
-            $hlp = DotMesh_Model_User::i();
-            if ($data) {
-                $this->echo_user = $hlp->create($data);
-            } else {
-                $this->echo_user = $hlp->load($this->echo_user_id);
-            }
-        }
-        return $this->echo_user;
+        // TODO: retrieve if missing
+        return $this->echo_users;
     }
 
     public function collectUsersAndTags($contents=null)

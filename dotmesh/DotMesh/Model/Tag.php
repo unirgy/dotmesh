@@ -91,6 +91,9 @@ class DotMesh_Model_Tag extends BModel
 
     public static function find($uri, $create=false)
     {
+        if (!$uri) {
+            throw new BException('Empty User URI');
+        }
         list($nodeUri, $tagname) = static::parseUri($uri);
         $nodeHlp = DotMesh_Model_Node::i();
         if (is_array($create) && !empty($create['node_id'])) {

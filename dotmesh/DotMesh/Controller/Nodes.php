@@ -142,7 +142,7 @@ class DotMesh_Controller_Nodes extends DotMesh_Controler_Abstract
         } else {
             $layout->applyLayout('/search');
             $layout->view('timeline')->set(array(
-                'title' => BLocale::i()->_('Searching for: %s', $this->term),
+                'title' => BLocale::i()->_('Searching for: %s', $q),
             ));
         }
     }

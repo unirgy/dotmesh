@@ -2,11 +2,16 @@ DotMesh
 =======
 Open source macroblogging application ready to be deployed on any PHP/MySQL server.
 
+See it in action
+================
+Go to http://dotmesh.org and sign up!
+
 Features
 ========
 
 * Use as local Twitter clone
 * Subscribe to local and remote Users and Tags
+* Pin new posts as admin, and unpin later
 * Star (Favorite) posts
 * Flag (Report as offensive) posts
 * Vote posts up and down
@@ -56,6 +61,7 @@ Wishlist
 * Guest user API
 * Client side AES256 encryption
 * User/tag Karma
+* The sky is no limit
 
 Potential Uses
 ==============

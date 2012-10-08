@@ -4,17 +4,17 @@
 <section class="new-post-block <?=!empty($user->preferences['default_private']) ? 'private-post' : '' ?> clearfix">
 	<aside class="new-post-block-left">
 		<dl>
-			<dt>Subscribers</dt>
+			<dt><?=$this->_('Subscribers')?></dt>
 			<dd><?=$user->subscribersCnt()?></dd>
-			<dt>Subscribed To</dt>
+			<dt><?=$this->_('Subscribed To')?></dt>
 			<dd><?=$user->subscribedToUsersCnt()?></dd>
-			<dt>Posts</dt>
+			<dt><?=$this->_('Posts')?></dt>
 			<dd><?=$user->postsCnt()?></dd>
 		</dl>
 	</aside>
 	<div class="new-post-block-right">
 		<?php if (!$user): ?>
-		<h3>Please login or sign up to post a new message</h3>
+		<h3><?=$this->_('Please login or sign up to post a new message')?></h3>
 		<?php else: ?>
 		<form name="post" method="post" action="<?=BApp::href('p/')?>">
 		    <fieldset>
@@ -31,12 +31,12 @@
 		        </div>
 		        <div class="buttons-group">
                     <label for="is_private" class="private-post-label"><input type="checkbox" name="is_private" id="is_private"
-                        <?=!empty($user->preferences['default_private']) || ($this->post && $this->post->is_private) ? 'checked' : '' ?>/><span class="icon"></span> Private?</label>
+                        <?=!empty($user->preferences['default_private']) || ($this->post && $this->post->is_private) ? 'checked' : '' ?>/><span class="icon"></span> <?=$this->_('Private?')?></label>
 <?php if ($user->is_admin): ?>
-                    <label for="is_pinned" class="pinned-post-label"><input type="checkbox" name="is_pinned" id="is_pinned"/><span class="icon"></span> Pinned?</label>
+                    <label for="is_pinned" class="pinned-post-label"><input type="checkbox" name="is_pinned" id="is_pinned"/><span class="icon"></span> <?=$this->_('Pinned?')?></label>
 <?php endif ?>
 		        	<?=$this->hook('compose-flags')?>
-		        	<button type="submit" class="button" name="do" value="new">Post</button>
+		        	<button type="submit" class="button" name="do" value="new"><?=$this->_('Post')?></button>
 		        </div>
 		    </fieldset>
 		</form>

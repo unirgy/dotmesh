@@ -4,7 +4,7 @@
     <header><?=$this->_('Users')?></header>
     <form name="subscribe-remote-user" method="post" action="<?=BApp::href('u/')?>" class="subscribe-remote-user">
         <fieldset>
-            <input type="text" name="user_uri" placeholder="dotmesh.org/username"/>
+            <input type="text" name="user_uri" placeholder="dotmesh.org/username" required class="tiptip-title" title="<?=$this->_('Add a new user subscription. For local users, just username will suffice.')?>"/>
             <button type="submit" class="icon" name="subscribe" value="1"><?=$this->_('Subscribe')?></button>
         </fieldset>
     </form>
@@ -31,7 +31,7 @@
     <header>^ <?=$this->_('Tags')?></header>
     <form name="subscribe-remote-user" method="post" action="<?=BApp::href('t/')?>" class="subscribe-remote-user">
         <fieldset>
-            <input type="text" name="tag_uri" placeholder="dotmesh.org/tagname"/>
+            <input type="text" name="tag_uri" placeholder="dotmesh.org/tagname" required class="tiptip-title" title="<?=$this->_('Add a new tag subscription. For local tags, just tag name will suffice.')?>"/>
             <button type="submit" class="icon" name="subscribe" value="1"><?=$this->_('Subscribe')?></button>
         </fieldset>
     </form>
