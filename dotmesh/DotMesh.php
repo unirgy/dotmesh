@@ -42,6 +42,7 @@ class DotMesh extends BClass
 
             ->route('GET /', 'DotMesh_Controller_Accounts.my')
             ->route('GET /:term', 'DotMesh_Controller_Nodes.catch_all')
+            ->route('GET /n/page/:view', 'DotMesh_Controller_Nodes.page')
 
             ->route('GET|POST /a/.action', 'DotMesh_Controller_Accounts')
             ->route('GET|POST /n/.action', 'DotMesh_Controller_Nodes')
@@ -65,7 +66,7 @@ class DotMesh extends BClass
             ->route('GET /p/:postname/feed.rss', 'DotMesh_Controller_Posts.feed_rss')
             ->route('GET /t/:tagname/feed.rss', 'DotMesh_Controller_Tags.feed_rss')
 
-            ->route('^GET /u/([a-zA-Z0-9_]+)/thumb\.(png|jpg|gif)$', 'DotMesh_Controller_Users.thumb')
+            ->route('^GET /u/([a-zA-Z0-9_]+)/thumb(\.(png|jpg|gif))?$', 'DotMesh_Controller_Users.thumb')
         ;
 
         BLayout::i()
@@ -105,6 +106,9 @@ class DotMesh extends BClass
                 ),
                 'xhr-timeline' => array(
                     array('root', 'timeline'),
+                ),
+                'view-proxy' => array(
+                    array('layout', 'base'),
                 ),
                 '/password_reset' => array(
                     array('layout', 'base'),
