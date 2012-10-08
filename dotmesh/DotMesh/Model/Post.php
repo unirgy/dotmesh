@@ -456,23 +456,24 @@ class DotMesh_Model_Post extends BModel
 
     public function submitFeedback($data, $userId=null, $remote=false)
     {
-        if ($value<0 || $value>1) {
-            throw new BException('Invalid feedback value: '.$value);
-        }
         if (is_null($userId)) {
             $userId = DotMesh_Model_User::sessionUserId();
         }
         if (!$userId) {
             throw new BException('Invalid user');
         }
-        $data = BUtil::maskFields($data, 'echo,star,flag,vote_up,vote_down');
+        $data = BUtil::maskFields($data, 'echo,star,flag,vote_up,vote_down', false, false);
+        foreach ($data as $k=>$v) {
+            if ($v<0 || $v>1) {
+                throw new BException('Invalid feedback value: '.$k.' => '.$v);
+            }
+        }
         $where = array('post_id'=>$this->id, 'user_id'=>$userId);
 
-        if ($type=='vote_up') {
+        if (!empty($data['vote_up'])) {
             $data['vote_down'] = 0;
             $data['vote_up_dt'] = BDb::now();
-        }
-        if ($type=='vote_down') {
+        } elseif (!empty($data['vote_down'])) {
             $data['vote_up'] = 0;
         }
         $fb = DotMesh_Model_PostFeedback::i()->load($where);

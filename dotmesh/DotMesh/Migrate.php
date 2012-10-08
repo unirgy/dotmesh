@@ -140,11 +140,11 @@ class DotMesh_Migrate extends BClass
         BDb::ddlTable(DotMesh_Model_PostFeedback::table(), array(
             'post_id' => "int(10) unsigned NOT NULL",
             'user_id' => "int(10) unsigned NOT NULL",
-            'echo' => "tinyint(4) NOT NULL",
-            'star' => "tinyint(4) NOT NULL",
-            'flag' => "tinyint(4) NOT NULL",
-            'vote_up' => "tinyint(4) NOT NULL",
-            'vote_down' => "tinyint(4) NOT NULL",
+            'echo' => "tinyint(4) NOT NULL DEFAULT '0'",
+            'star' => "tinyint(4) NOT NULL DEFAULT '0'",
+            'flag' => "tinyint(4) NOT NULL DEFAULT '0'",
+            'vote_up' => "tinyint(4) NOT NULL DEFAULT '0'",
+            'vote_down' => "tinyint(4) NOT NULL DEFAULT '0'",
             'vote_up_dt' => "datetime DEFAULT NULL COMMENT 'For hot sorting'",
         ), array('primary'=>'(`post_id`, `user_id`)'));
         BDb::ddlTableColumns(DotMesh_Model_PostFeedback::table(), array(), array(

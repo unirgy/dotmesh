@@ -32,6 +32,7 @@ Immediate Roadmap
 Wishlist
 ========
 
+* Post attachments
 * Per user page design
 * Edit posts
 * Inline reply

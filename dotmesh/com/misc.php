@@ -832,18 +832,27 @@ class BUtil extends BClass
     * @param array $source
     * @param array|string $fields
     * @param boolean $inverse if true, will return anything NOT in $fields
+    * @param boolean $setNulls fill missing fields with nulls
     * @result array
     */
-    public static function maskFields($source, $fields, $inverse=false)
+    public static function maskFields($source, $fields, $inverse=false, $setNulls=true)
     {
         if (is_string($fields)) {
             $fields = explode(',', $fields);
         }
         $result = array();
         if (!$inverse) {
-            foreach ($fields as $k) $result[$k] = isset($source[$k]) ? $source[$k] : null;
+            foreach ($fields as $k) {
+                if (isset($source[$k])) {
+                    $result[$k] = $source[$k];
+                } elseif ($setNulls) {
+                    $result[$k] = null;
+                }
+            }
         } else {
-            foreach ($source as $k=>$v) if (!in_array($k, $fields)) $result[$k] = $v;
+            foreach ($source as $k=>$v) {
+                if (!in_array($k, $fields)) $result[$k] = $v;
+            }
         }
         return $result;
     }
