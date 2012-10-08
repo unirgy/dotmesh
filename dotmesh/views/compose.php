@@ -31,9 +31,9 @@
 		        </div>
 		        <div class="buttons-group">
                     <label for="is_private" class="private-post-label"><input type="checkbox" name="is_private" id="is_private"
-                        <?=!empty($user->preferences['default_private']) || ($this->post && $this->post->is_private) ? 'checked' : '' ?>/> Private?</label>
+                        <?=!empty($user->preferences['default_private']) || ($this->post && $this->post->is_private) ? 'checked' : '' ?>/><span class="icon"></span> Private?</label>
 <?php if ($user->is_admin): ?>
-                    <label for="is_pinned" class="pinned-post-label"><input type="checkbox" name="is_pinned" id="is_pinned"/> Pinned?</label>
+                    <label for="is_pinned" class="pinned-post-label"><input type="checkbox" name="is_pinned" id="is_pinned"/><span class="icon"></span> Pinned?</label>
 <?php endif ?>
 		        	<?=$this->hook('compose-flags')?>
 		        	<button type="submit" class="button" name="do" value="new">Post</button>

@@ -22,6 +22,17 @@ Features
 * Custom theming (plugin skeleton included)
 * Servers communicate using SSL if supported by either
 
+Security measures
+=================
+
+* User passwords are hashed using bcrypt with difficulty 10
+* Remote users validated using SHA512 double hash:
+    SHA512( [agent ip] * SHA512( [local node secret key] * [remote node secret key] * [user secret key] ))
+* Remote user signatures are re-validated against claiming node when needed
+* Server to server communication is DNS validated
+* Use SSL when available
+* If a node database is compromised, change local secret key and send request to remote nodes to invalidate all user signatures (roadmap)
+
 Immediate Roadmap
 =================
 
@@ -64,3 +75,4 @@ Trade offs vs Cloud solutions (e.g. Twitter)
 ============================================
 
 * Maintain your own real/virtual server, backups, host security, upgrades, etc.
+

@@ -122,9 +122,6 @@ class DotMesh_Controller_Posts extends DotMesh_Controler_Abstract
     public function action_api1_json__POST()
     {
         try {
-            if (!DotMesh_Model_User::isLoggedIn()) {
-                throw new BException('Not logged in');
-            }
             $r = BRequest::i();
             $request = $r->json();
             if (!$request) {
@@ -133,17 +130,31 @@ class DotMesh_Controller_Posts extends DotMesh_Controler_Abstract
             if (empty($request['type'])) {
                 throw new BException('Invalid request type');
             }
-            $postname = $r->param('postname');
-            if ($postname=='_') {
-                $postname = $r->post('post_uri');
+            if ($r->xhr() && $r->post('user_uri') && $r->post('post_uri') && $r->post('remote_signature_ip')) {
+                $user = DotMesh_Model_User::i()->find($r->post('user_uri'), true);
+                if (!$user) {
+                    throw new BException('Invalid user uri');
+                }
+                if (!$user->verifyRemoteSignature($r->post('remote_signature_ip'), true)) {
+                    throw new BException('Invalid remote signature');
+                }
+                $post = DotMesh_Model_Post::i()->find($r->post('post_uri'));
+                $remote = true;
+                BResponse::i()->cors();
+            } else {
+                $user = DotMesh_Model_User::i()->sessionUser();
+                if (!$user) {
+                    throw new BException('Not logged in');
+                }
+                $post = DotMesh_Model_Post::i()->find($r->param('postname'));
+                $remote = false;
             }
-            $post = DotMesh_Model_Post::i()->find($postname);
             if (!$post) {
                 throw new BException('Invalid post');
             }
             switch ($request['type']) {
             case 'feedback':
-                $post->submitFeedback(array($request['field']=>$request['value']));
+                $post->submitFeedback(array($request['field']=>$request['value']), $user->id, $remote);
                 $result = array('status'=>'success', 'message'=>'Feedback submitted');
                 $orm = DotMesh_Model_PostFeedback::i()->orm()->where('post_id', $post->id);
                 foreach (explode(',','echo,star,flag,vote_up,vote_down') as $f) {

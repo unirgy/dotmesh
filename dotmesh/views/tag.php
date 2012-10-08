@@ -4,7 +4,7 @@
     $isSubscribed = DotMesh_Model_User::i()->sessionUser()->isSubscribedToTag($tag);
 ?>
 <div class="site-main timeline-col1-layout clearfix">
-    <div class="user-profile-block">
+    <div class="user-profile-block clearfix">
 		<div class="avatar">
 	        <form method="post" name="user-actions" action="<?=$tag->uri(true)?>">
 	            <fieldset>

@@ -29,6 +29,6 @@ $(function() {
         <img src="<?=BApp::src('BTwitterAdapter', 'lib/images/lighter.png')?>" alt="<?=$this->_('Sign in to post on Twitter')?>"/>
     </a>
     <div class="twitter-post-toggle">
-        <label for="is_tweeted"><input type="checkbox" name="is_tweeted" id="is_tweeted"/> Tweet as <span class="twitter-screenname"><?=$this->q($screenName)?></span></label>
+        <label for="is_tweeted" class="twitter-post-label"><input type="checkbox" name="is_tweeted" id="is_tweeted"/><span class="icon"></span> <?=$this->_('Tweet as')?> <span class="twitter-screenname"><?=$this->q($screenName)?></span></label>
     </div>
 </div>

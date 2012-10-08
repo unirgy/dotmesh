@@ -310,7 +310,7 @@ class DotMesh_Controller_Accounts extends DotMesh_Controler_Abstract
                 if ($user->password_nonce!==$form['password_nonce']) {
                     throw new BException('Invalid or expired password nonce token');
                 }
-                $user->resetPassword();
+                $user->resetPassword($form['password']);
             }
             $result = array('status'=>'success', 'message'=>'Your password has been reset');
         } catch (Exception $e) {

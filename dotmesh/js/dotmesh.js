@@ -141,6 +141,11 @@ $(function() {
             delayTimer = setTimeout(function() { $el.removeClass('hover') }, 500);
         });
     });
+    $('.subscription-state').on('mouseover mouseout', function(event) {
+        var hoverLabel = $(this).data('hover-label'), curLabel = $('.label', this).html();
+        $('.label', this).html(hoverLabel);
+        $(this).data('hover-label', curLabel);
+    });
 
     $(document).on('click', '.timeline .preview-expand', function(event) {
         $(event.target).closest('.timeline-item').addClass('expanded');
@@ -150,7 +155,7 @@ $(function() {
         $(event.target).closest('.timeline-item').removeClass('expanded');
         return false;
     });
-    $(document).on('click', '.timeline .actions-group-1 button', function(event) {
+    $(document).on('click', '.timeline .actions-group-1 button,.timeline .actions-group-3 button', function(event) {
         var el = $(this), form = el.closest('form'), f = el.attr('name');
 console.log(this);
         var postVars = {

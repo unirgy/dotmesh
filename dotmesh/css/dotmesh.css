@@ -26,4 +26,10 @@
 
 .site-main-container { margin-top:30px; }
 
-.site-footer { position:fixed; bottom:0; right:0; /*width:100%; */background:#FFF; color:#000; }
+.site-footer { box-shadow:0 2px 5px #999; -moz-box-shadow:0 2px 5px #999; -webkit-box-shadow:0 2px 5px #999; position:fixed; bottom:0; right:0; /*width:100%; */background:#fff; color:#444; font-size:.75em; padding:8px 10px; line-height:1.2; }
+.site-footer .get-dotmesh { color:#0147b0; font-weight:bold; }
+.site-footer a { color:#666; }
+.site-footer .pipe { padding:0 7px; color:#aaa; font-size:.75em; }
+
+
+.timeline .actions-group-3 { float:right; }

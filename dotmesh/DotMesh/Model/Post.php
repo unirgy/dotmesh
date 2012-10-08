@@ -509,6 +509,14 @@ class DotMesh_Model_Post extends BModel
         return $this;
     }
 
+    public function remoteSignature($user=null, $agentIP=null)
+    {
+        if (!$user) {
+            $user = DotMesh_Model_User::i()->sessionUser();
+        }
+        return $user->generateRemoteSignature($this->node(), $agentIP);
+    }
+
     public function distribute($sendRemote=false)
     {
         $usersToSend = array();

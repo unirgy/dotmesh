@@ -1,6 +1,8 @@
 <?php defined('DOTMESH_ROOT_DIR') || die ?>
 <?php
 $sessUser = DotMesh_Model_User::i()->sessionUser();
+$userUri = $sessUser ? $this->q($sessUser->uri()) : null;
+$isAdmin = $sessUser->is_admin;
 $localNodeId = DotMesh_Model_Node::i()->localNode()->id;
 if (!$this->timeline) return;
 $curPage = (int)BRequest::i()->get('p');
@@ -32,19 +34,28 @@ $now = strtotime(BDb::now());
 
 <?php if (!empty($this->timeline['rows'])): ?>
 <ul class="timeline" id="timeline-page-<?=$curPage?>">
-<?php foreach ((array)$this->timeline['rows'] as $p): $uri = $p->user()->uri(true); $name = $p->user()->fullname(); ?>
+<?php foreach ((array)$this->timeline['rows'] as $p): ?>
+<?php $uri = $p->user()->uri(true); $name = $p->user()->fullname(); $isLocal = $p->node()->is_local; ?>
     <li id="timeline-<?=$p->id?>" class="timeline-item clearfix <?=$p->expanded?'expanded':''?> <?=$p->is_pinned?'pinned':''?> <?=$p->is_private?'private':''?>">
         <a name="<?=$this->q($p->postname)?>"></a>
-        <form name="timeline-form-<?=$p->id?>" method="post" action="<?=$p->node()->is_local ? $p->uri(true) : BApp::href('p/_') ?>">
-            <input type="hidden" name="post_uri" value="<?=$this->q($p->uri())?>"/>
+        <form name="timeline-form-<?=$p->id?>" method="post" action="<?=$p->uri(true) ?>" data-local-uri="<?=BApp::href('p/_')?>">
+<?php if (!$isLocal): ?>
+            <input type="hidden" id="user_uri" name="user_uri" value="<?=$userUri?>"/>
+            <input type="hidden" id="post_uri" name="post_uri" value="<?=$this->q($p->uri())?>"/>
+            <input type="hidden" id="user_remote_signature_ip" name="remote_signature_ip" value="<?=$p->remoteSignature(null, true)?>"/>
+<?php endif ?>
             <a href="<?=$this->q($uri)?>" class="avatar"><img src="<?=$this->q($p->user()->thumbUri(50))?>" width="50" height="50" alt="<?=$this->q($uri)?>"/></a>
             <a href="<?=$p->uri(true)?>" class="tiptip-title posted-on" title="<?=date('r', strtotime($p->create_dt)) ?>"><?=BUtil::timeAgo($p->create_dt, $now) ?></a>
-            <?php if ($p->is_pinned): ?>
-                <span class="icon icon-pinned-post tiptip-title" title="<?=$this->_('Pinned Post')?>"></span>
-            <?php endif ?>
-            <?php if ($p->is_private): ?>
-                <span class="icon icon-private-post tiptip-title" title="<?=$this->_('Private Post')?>"></span>
-            <?php endif ?>
+            <div class="actions-group actions-group-3">
+                <?php if ($p->is_pinned): ?>
+                    <?php if ($isAdmin): ?><button type="submit" name="pin" value="0"><?php endif ?>
+                        <span class="icon icon-pinned-post tiptip-title" title="<?=$this->_('Pinned Post')?>"></span>
+                    <?php if ($isAdmin): ?></button><?php endif ?>
+                <?php endif ?>
+                <?php if ($p->is_private): ?>
+                    <span class="icon icon-private-post tiptip-title" title="<?=$this->_('Private Post')?>"></span>
+                <?php endif ?>
+            </div>
             <strong class="user-name"><?=$this->q($name)?></strong>
             <a href="<?=$this->q($uri)?>" class="user-url"><?=$this->q($p->user()->uri())?></a>
             <div class="content-wrapper">
@@ -74,7 +85,7 @@ $now = strtotime(BDb::now());
             <div class="actions-group actions-group-2 hover-inline">
                 <a href="<?=$p->uri(true)?>#reply" class="button-reply button"><span class="icon"></span><span>Reply</span></a>
                 <!--<a href="#" class="button-share button"><span class="icon"></span><span>Share</span></a>-->
-<?php if ($p->user_id==$sessUser->id || $sessUser->is_admin): ?>
+<?php if ($p->user_id==$sessUser->id || $isAdmin): ?>
 <!--
                 <button type="submit" name="do" value="edit" class="button-edit button"><span class="icon"></span><span class="label">Edit</span></button>
 -->
@@ -98,7 +109,7 @@ $now = strtotime(BDb::now());
 $(function() { dotmeshMediaLinks('#timeline-page-<?=$curPage?>'); });
 </script>
 
-<?php else: ?>
+<?php elseif (!empty($this->timeline['rows'])): ?>
 
 <script>
 dotmeshMediaLinks('#timeline-page-<?=$curPage?>');

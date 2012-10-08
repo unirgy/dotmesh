@@ -449,6 +449,7 @@ a:hover { color:#0147b0; text-decoration:none; }
 .timeline .timeline-item .posted-on { float:right; font-size:.9em; }
 .timeline .timeline-item .icon-private-post { float:right; margin:-2px 2px 0 0; background-position:-265px -5px; }
 .timeline .timeline-item .icon-pinned-post { float:right; margin:-2px 2px 0 0; background-position:-265px -5px; }
+.timeline .timeline-item .icon-pinned-post { float:right; margin:-2px 2px 0 0; background-position:-369px -109px; }
 .timeline .timeline-item .avatar { float:left; margin-left:-85px; }
 .timeline .timeline-item .avatar img {
 	width:65px;
@@ -625,7 +626,12 @@ body { background:url(../img/dotmesh_default_bkg.jpg); }
 .new-post-block .new-post-block-right .textarea { float:left; width:495px; }
 .new-post-block .new-post-block-right .textarea textarea { min-height:165px; }
 .new-post-block .new-post-block-right .buttons-group { float:right; width:205px; }
-.new-post-block .new-post-block-right .buttons-group label { display:block; margin:0 0 5px -8px; padding:3px 8px; font-weight:bold; font-size:.85em; }
+.new-post-block .new-post-block-right .buttons-group label { display:block; margin:0 0 5px -8px; padding:3px 8px; font-weight:bold; font-size:.8em; }
+.new-post-block .new-post-block-right .buttons-group input[type='checkbox'] { float:left; margin:3px 0 0 0;  }
+.new-post-block .new-post-block-right label .icon { float:left; width:21px; height:21px; margin:-2px 5px 0 2px;  }
+.new-post-block .new-post-block-right label.private-post-label .icon { background-position:-239px -109px; }
+.new-post-block .new-post-block-right label.twitter-post-label .icon { background-position:-265px -109px; }
+.new-post-block .new-post-block-right label.pinned-post-label .icon { background-position:-291px -109px; }
 .new-post-block .new-post-block-right .buttons-group .button { margin-top:6px; width:115px; }
 .new-post-block .new-post-block-right:after, .new-post-block .new-post-block-right:before {
 	position:absolute;
@@ -691,6 +697,15 @@ body { background:url(../img/dotmesh_default_bkg.jpg); }
 .col-left section.section-users li .node-name { color:#aaa; font-size:.9em; }
 .col-left section.section-users li .user-name { display:block; font-weight:bold; }
 .col-main { float:right; width:668px; background:#ddd; }
+.subscribe-remote-user { position:relative; margin:0 20px 8px; }
+.subscribe-remote-user input[type='text'] { padding-top:5px; padding-bottom:5px; }
+.subscribe-remote-user .icon,
+.subscribe-remote-user .icon:hover,
+.subscribe-remote-user .icon:active { background:transparent url(../img/icons.png) no-repeat -58px -136px; padding:0 !important; border:none !important; position:absolute; top:5px; right:3px; width:21px; height:21px; text-indent:-999em; box-shadow:none; -moz-box-shadow:none; -webkit-box-shadow:none; border-radius:0; -moz-border-radius:0; -webkit-border-radius:0; }
+.unsubscribe .icon,
+.unsubscribe .icon:hover,
+.unsubscribe .icon:active { background:transparent url(../img/icons.png) no-repeat -5px -135px; padding:0 !important; border:none !important; width:21px; height:21px; text-indent:-999em; box-shadow:none; -moz-box-shadow:none; -webkit-box-shadow:none; border-radius:0; -moz-border-radius:0; -webkit-border-radius:0; }
+.unsubscribe .icon:hover { background-position:-31px -135px; }
 
 /* Public Timeline */
 .page-main.public .timeline-block-title {
@@ -810,6 +825,11 @@ button.state-subscribed:hover .icon { background-position:-213px -108px; }
 .page-my-account .col2-set .col.last { width:450px; float:left; margin-left:30px; }
 .page-my-account .col2-set .col.last fieldset { margin-bottom:30px; }
 .page-my-account .buttons-group { border-top:1px solid #ddd; margin-top:30px; padding-top:10px; text-align:right; }
+
+/* 404 */
+.page-404 { margin:100px auto 0; width:750px; background:url(../img/404_icon.png) no-repeat 50% 0; padding-top:190px; color:#5c6b82; text-align:center; text-shadow: 1px 3px 5px #d6e0ec, 0 0 0 #000, 0 1px 0 #fff; }
+.page-404 h2 { font-size:1.7em; }
+.page-404 p { margin-top:5px; font-size:1.2em; }
 
 /**** Icons/Sprites ****/
 .icon { width:21px; height:21px; background-image:url(../img/icons.png); background-repeat:no-repeat; }

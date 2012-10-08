@@ -287,6 +287,9 @@ class DotMesh_Model_User extends BModelUser
 
     public function thumbUri($size=100)
     {
+        if (!$this->node()->is_local) {
+            return $this->uri(true).'/thumb.jpg';
+        }
         switch ($this->thumb_provider) {
         case 'link':
             return $this->thumb_uri;
@@ -349,17 +352,42 @@ class DotMesh_Model_User extends BModelUser
         return $this->generateRemoteSignature($node, $agentIP)===$signature;
     }
 
-    public function confirmRemoteSignature($signature)
+    public function retrieveRemoteSignature()
     {
-        $result = BUtil::fromJson(BUtil::remoteHttp('POST', $this->uri().'.json', array(
-            'do' => 'confirm_signature',
-            'signature' => $signature,
-            'node_info' => $this->node()->info(),
-        )));
-        if ($result && $result['status']=='success') {
-            $this->remote_signature = $signature;
+        $result = $this->node()->apiClient(array('ask_users' => array($this->username)));
+        if (empty($result['ask_users'][$this->username]['remote_signature'])) {
+            throw new BException('Could not retrieve remote signature');
         }
+        $this->set('remote_signature', $result['ask_users'][$this->username]['remote_signature'])->save();
         return $this;
+    }
+
+    public function verifyRemoteSignature($requestSignature, $agentIP=null)
+    {
+        $retrieved = false;
+        if (!$this->remote_signature) {
+            $this->retrieveRemoteSignature();
+            $retrieved = true;
+        }
+        $remoteSignature = $this->remote_signature;
+        if (true===$agentIP) {
+            $agentIP = BRequest::i()->ip();
+        }
+        if ($agentIP) {
+            $remoteSignature = hash('sha512', $agentIP.'|'.$remoteSignature);
+        }
+        if ($remoteSignature === $requestSignature) {
+            return true;
+        } elseif ($retrieved) {
+            return false;
+        } else { // attempt to revalidate
+            $this->retrieveRemoteSignature();
+            $remoteSignature = $this->remote_signature;
+            if ($agentIP) {
+                $remoteSignature = hash('sha512', $agentIP.'|'.$remoteSignature);
+            }
+            return $remoteSignature === $requestSignature;
+        }
     }
 
     public function acceptGuest($username, $signature)
