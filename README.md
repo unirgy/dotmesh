@@ -23,6 +23,7 @@ Features
 * Servers communicate using SSL if supported by either
 * Run multiple nodes from the same code/db instance
 * Supports full i18n
+* Canonical URLs allow SEO for posts (add your own text in URL)
 
 Security measures
 =================

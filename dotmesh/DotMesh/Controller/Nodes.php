@@ -184,4 +184,9 @@ class DotMesh_Controller_Nodes extends DotMesh_Controler_Abstract
             'link' => BApp::href('n/'),
         ), $timeline['rows']));
     }
+
+    public function action_page()
+    {
+        $page = $this->viewProxy('page');
+    }
 }
