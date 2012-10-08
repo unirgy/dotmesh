@@ -3,6 +3,8 @@
 $userId = DotMesh_Model_User::i()->sessionUserId();
 $localNodeId = DotMesh_Model_Node::i()->localNode()->id;
 if (!$this->timeline) return;
+$curPage = (int)BRequest::i()->get('p');
+if (!$curPage) $curPage = 1;
 $curSort = BRequest::i()->get('s');
 $sortUri = $this->q(BUtil::setUrlQuery(BRequest::i()->currentUrl(), array('s'=>'SORT', 'status'=>null, 'message'=>null)));
 $now = strtotime(BDb::now());
@@ -29,7 +31,7 @@ $now = strtotime(BDb::now());
 <?php endif ?>
 
 <?php if (!empty($this->timeline['rows'])): ?>
-<ul class="timeline">
+<ul class="timeline" id="timeline-page-<?=$curPage?>">
 <?php foreach ((array)$this->timeline['rows'] as $p): $uri = $p->user()->uri(true); $name = $p->user()->fullname(); ?>
     <li id="timeline-<?=$p->id?>" class="timeline-item clearfix <?=$p->expanded?'expanded':''?> <?=$p->is_pinned?'pinned':''?> <?=$p->is_private?'private':''?>">
         <a name="<?=$this->q($p->postname)?>"></a>
@@ -52,17 +54,17 @@ $now = strtotime(BDb::now());
                     <?=$p->contentsHtml()?>
                 </div>
             </div>
-<?php if ($p->preview!=$p->contents): ?>
+<?php if ($p->contents && $p->preview!=$p->contents): ?>
             <a href="#" class="read-toggler preview-expand"><?=$this->_('Expand')?></a>
             <a href="#" class="read-toggler contents-collapse"><?=$this->_('Collapse')?></a>
 <?php endif ?>
 <?php //print_r($p->as_array()); ?>
 			<div class="actions-group actions-group-1 always-visible">
 <?php if (!$p->is_private): ?>
-                <button type="submit" name="echo" value="<?=$p->echo?0:1?>" class="tiptip-title button-echo<?=$p->echo?' active':''?>" <?=!$userId?'disabled':''?> title="<?=$this->_('Echo')?>"><span class="icon"></span><span class="label"><?=$this->_('Echo')?></span><span class="total-echo total <?=!$p->total_echos?'zero':''?>"><?=$p->total_echos?></span></button>
+                <button type="submit" name="echo" value="<?=$p->echo?0:1?>" class="tiptip-title button-echo<?=$p->echo?' active':''?>" <?=!$userId?'disabled':''?> title="<?=$this->_('Echo to your subscribers')?>"><span class="icon"></span><span class="label"><?=$this->_('Echo')?></span><span class="total-echo total <?=!$p->total_echos?'zero':''?>"><?=$p->total_echos?></span></button>
 <?php endif ?>
-                <button type="submit" name="star" value="<?=$p->star?0:1?>" class="tiptip-title button-star<?=$p->star?' active':''?>" <?=!$userId?'disabled':''?> title="<?=$this->_('Star')?>"><span class="icon"></span><span class="label">Star</span><span class="total-star total <?=!$p->total_stars?'zero':''?>"><?=$p->total_stars?></span></button>
-                <button type="submit" name="flag" value="<?=$p->flag?0:1?>" class="tiptip-title button-flag<?=$p->flag?' active':''?>" <?=!$userId?'disabled':''?> title="<?=$this->_('Flag')?>"><span class="icon"></span><span class="label">Flag</span><span class="total-flag total <?=!$p->total_flags?'zero':''?>"><?=$p->total_flags?></span></button>
+                <button type="submit" name="star" value="<?=$p->star?0:1?>" class="tiptip-title button-star<?=$p->star?' active':''?>" <?=!$userId?'disabled':''?> title="<?=$this->_('Star Favorite')?>"><span class="icon"></span><span class="label">Star</span><span class="total-star total <?=!$p->total_stars?'zero':''?>"><?=$p->total_stars?></span></button>
+                <button type="submit" name="flag" value="<?=$p->flag?0:1?>" class="tiptip-title button-flag<?=$p->flag?' active':''?>" <?=!$userId?'disabled':''?> title="<?=$this->_('Flag Offensive')?>"><span class="icon"></span><span class="label">Flag</span><span class="total-flag total <?=!$p->total_flags?'zero':''?>"><?=$p->total_flags?></span></button>
                 <button type="submit" name="vote_up" value="<?=$p->vote_up?0:1?>" class="tiptip-title button-vote_up<?=$p->vote_up==1?' active':''?>" <?=!$userId?'disabled':''?> title="<?=$this->_('Thumbs Up')?>"><span class="icon"></span><span class="label">Thumbs Up</span><span class="total-vote_up total <?=!$p->total_vote_up?'zero':''?>"><?=$p->total_vote_up?></span></button>
                 <button type="submit" name="vote_down" value="<?=$p->vote_down?0:1?>" class="tiptip-title button-vote_down<?=$p->vote_down==1?' active':''?>" <?=!$userId?'disabled':''?> title="<?=$this->_('Thumbs Down')?>"><span class="icon"></span><span class="label">Thumbs Down</span><span class="total-vote_down total <?=!$p->total_vote_down?'zero':''?>"><?=$p->total_vote_down?></span></button>
             </div>
@@ -91,4 +93,14 @@ $now = strtotime(BDb::now());
     <div class="loadmore"><?=$this->_('Load more ...')?></div>
     <div class="loader"><img src="<?=BApp::src('DotMesh', 'img/ajax-loader.gif')?>"/><?=$this->_('Please wait, loading ...')?></div>
 </div>
+<script>
+$(function() { dotmeshMediaLinks('#timeline-page-<?=$curPage?>'); });
+</script>
+
+<?php else: ?>
+
+<script>
+dotmeshMediaLinks('#timeline-page-<?=$curPage?>');
+</script>
+
 <?php endif ?>
