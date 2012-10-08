@@ -105,11 +105,7 @@ class DotMesh_Controller_Posts extends DotMesh_Controler_Abstract
                 $post->delete();
                 break;
             }
-            foreach (explode(',','echo,star,report,vote_up,vote_down') as $f) {
-                if (($fb = $r->post($f))) {
-                    $post->submitFeedback($f, $fb);
-                }
-            }
+            $post->submitFeedback(BUtil::maskFields($r->post(), 'echo,star,report,vote_up,vote_down'));
             $result['status'] = 'success';
         } catch (BException $e) {
             $result = array('status'=>'error', 'message'=>$e->getMessage());
@@ -147,7 +143,7 @@ class DotMesh_Controller_Posts extends DotMesh_Controler_Abstract
             }
             switch ($request['type']) {
             case 'feedback':
-                $post->submitFeedback($request['field'], $request['value']);
+                $post->submitFeedback(array($request['field']=>$request['value']));
                 $result = array('status'=>'success', 'message'=>'Feedback submitted');
                 $orm = DotMesh_Model_PostFeedback::i()->orm()->where('post_id', $post->id);
                 foreach (explode(',','echo,star,flag,vote_up,vote_down') as $f) {

@@ -246,6 +246,7 @@ class DotMesh_Model_Node extends BModel
         );
 
         $userHlp = DotMesh_Model_User::i();
+        $postHlp = DotMesh_Model_Post::i();
 
         if (!empty($request['users'])) {
             foreach ($request['users'] as $userData) {
@@ -330,12 +331,37 @@ class DotMesh_Model_Node extends BModel
                         $echoUser = $userHlp->find($p['echo_user_uri'], true);
                         $data['echo_user_id'] = $echoUser->id;
                     }
-                    $post = DotMesh_Model_Post::i()->receiveRemotePost($data);
+                    $post = $postHlp->receiveRemotePost($data);
+                    $p['status'] = 'success';
                 } catch (Exception $e) {
                     $p['status'] = 'error';
                     $p['message'] = 'Incomplete request';
                 }
                 $result['posts'][] = $p;
+            }
+        }
+        if (!empty($request['feedbacks'])) {
+            foreach ($request['feedbacks'] as $fb) {
+                try {
+                    if (empty($p['post_uri']) || empty($p['user_uri'])) {
+                        throw new BException('Incomplete request');
+                    }
+                    $post = $postHlp->find($p['post_uri']);
+                    if (!$post || $post->node_id!==$localNode->id) {
+                        throw new BException('Invalid post');
+                    }
+                    $user = $userHlp->find($p['user_uri'], true);
+                    if ($user->node_id!==$remoteNode->id) {
+                        throw new BException('Invalid user');
+                    }
+                    $data = BUtil::maskFields($fb, 'echo,star,report,vote_up,vote_down');
+                    $post->receiveRemoteFeedback($data);
+                    $p['status'] = 'success';
+                } catch (Exception $e) {
+                    $fb['status'] = 'error';
+                    $fb['message'] = 'Incomplete request';
+                }
+                $result['feedbacks'][] = $fb;
             }
         }
 
