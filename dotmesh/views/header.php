@@ -14,7 +14,10 @@ localNodeData = <?=BUtil::toJson(BUtil::maskFields($node->as_array(), 'uri,api_v
 <?php endif ?>
         </ul>
     </div>
-    <h1 class="dotmesh-logo"><a href="<?=BApp::href()?>">dotmesh &trade;</a></h1>
+    <div class="dotmesh-branding">
+    	<h1 class="dotmesh-logo"><a href="<?=BApp::href()?>">dotmesh &trade;</a></h1>
+    	<span class="beta"></span>
+    </div>
 <?php if ($node): ?>
    	<a href="<?=BApp::href('n/')?>" class="node-logo tiptip-title" title="<?=$this->_('Node Public Timeline')?>"><span class="icon"></span><?=$this->q($node->uri())?></a>
     <form class="server-search" name="top_search" method="get" action="<?=BApp::href('n/search')?>">
@@ -67,58 +70,73 @@ localNodeData = <?=BUtil::toJson(BUtil::maskFields($node->as_array(), 'uri,api_v
 	    			<div class="popup">
 	    				<header class="popup-title"><?=$this->q($node->uri())?></header>
 				        <section class="top-login-form">
-                            <form id="top-login" name="top-login" method="post" action="<?=BApp::href('a/login')?>">
-                                <fieldset>
-                                    <header class="section-title"><?=$this->_('Log into your account')?></header>
-                                    <ul class="field-group">
-                                        <li><input type="text" name="login[username]" required placeholder="<?=$this->_('Username / Email Address')?>"/></li>
-                                        <li><input type="password" name="login[password]" required placeholder="<?=$this->_('Password')?>"/></li>
-                                    </ul>
-                                    <div class="buttons-group a-right clearfix">
-                                        <button type="submit"><?=$this->_('Log In')?></button>
-                                        <a href="<?=BApp::href('a/password_recover')?>" id="top-password-trigger"><?=$this->_('Forgot Password?')?></a>
-                                    </div>
-                                </fieldset>
-                            </form>
-                            <form id="top-password" name="top-password" method="post" action="<?=BApp::href('a/password_recover')?>">
-                                <fieldset>
-                                    <header class="section-title"><?=$this->_('Recover your password')?></header>
-                                    <ul class="field-group">
-                                        <li><input type="text" name="username" required placeholder="<?=$this->_('Username / Email Address')?>"/></li>
-                                    </ul>
-                                    <div class="buttons-group a-right clearfix">
-                                        <button type="submit"><?=$this->_('Recover')?></button>
-                                        <a href="<?=BApp::href('a/login')?>" id="top-login-trigger"><?=$this->_('Login')?></a>
-                                    </div>
-                                </fieldset>
-                            </form>
+<form id="top-login" name="top-login" method="post" action="<?=BApp::href('a/login')?>">
+    <fieldset>
+        <header class="section-title"><?=$this->_('Log into your account')?></header>
+        <ul class="field-group">
+            <li><input type="text" name="login[username]" required placeholder="<?=$this->_('Username / Email Address')?>"/></li>
+            <li><input type="password" name="login[password]" required placeholder="<?=$this->_('Password')?>"/></li>
+        </ul>
+        <div class="buttons-group a-right clearfix">
+            <button type="submit"><?=$this->_('Log In')?></button>
+            <a href="<?=BApp::href('a/password_recover')?>" id="top-password-trigger"><?=$this->_('Forgot Password?')?></a>
+        </div>
+    </fieldset>
+</form>
+<form id="top-password" name="top-password" method="post" action="<?=BApp::href('a/password_recover')?>">
+    <fieldset>
+        <header class="section-title"><?=$this->_('Recover your password')?></header>
+        <ul class="field-group">
+            <li><input type="text" name="username" required placeholder="<?=$this->_('Username / Email Address')?>"/></li>
+        </ul>
+        <div class="buttons-group a-right clearfix">
+            <button type="submit"><?=$this->_('Recover')?></button>
+            <a href="<?=BApp::href('a/login')?>" id="top-login-trigger"><?=$this->_('Login')?></a>
+        </div>
+    </fieldset>
+</form>
 <?php if (($loginAfterHtml = $this->hook('login-after'))): ?>
 					        <span class="or"><span>or</span></span>
 	                        <?=$loginAfterHtml?>
 <?php endif ?>
 				        </section>
 				        <section class="top-registration-form">
-					        <form name="top_signup" method="post" action="<?=BApp::href('a/signup')?>">
-					            <fieldset>
-					            	<header class="section-title"><?=$this->_('Sign up for an account')?></header>
-					                <ul class="field-group">
-					                	<li><input type="text" name="signup[username]" required placeholder="<?=$this->_('Username')?>" pattern="^[a-zA-Z][a-zA-Z0-9_]+$" title="<?=$this->_('A valid user name, starting with a letter, followed by letters, digits or underscore')?>"/></li>
-					                	<li><input type="password" name="signup[password]" required placeholder="<?=$this->_('Password')?>" pattern=".{8,}" title="<?=$this->_('Strong password, minimum 8 characters')?>"/></li>
-					                	<li><input type="password" name="signup[password_confirm]" required placeholder="<?=$this->_('Confirm Password')?>" pattern=".{8,}" title="<?=$this->_('Please confirm your password')?>"/></li>
-					                	<li><input type="email" name="signup[email]" required placeholder="<?=$this->_('Email Address')?>" title="<?=$this->_('A valid email address')?>"/></li>
-					                	<li><input type="text" name="signup[firstname]" required placeholder="<?=$this->_('First Name')?>" title="<?=$this->_('First name')?>"/></li>
-					                	<li><input type="text" name="signup[lastname]" required placeholder="<?=$this->_('Last Name')?>" title="<?=$this->_('Last name')?>"/></li>
-					                </ul>
+<form id="top-signup" name="top-signup" method="post" action="<?=BApp::href('a/signup')?>" data-avail-uri="<?=BApp::href('a/check_availability')?>">
+	<fieldset>
+		<header class="section-title"><?=$this->_('Sign up for an account')?></header>
+		<ul class="field-group">
+			<li><input type="text" id="signup-username" name="signup[username]" required placeholder="<?=$this->_('Username')?>"
+                    pattern="^[a-zA-Z][a-zA-Z0-9_]+$"
+                    title="<?=$this->_('A valid user name, starting with a letter, followed by letters, digits or underscore')?>"/>
+                <div class="availability"></div>
+            </li>
+			<li><input type="password" name="signup[password]" required placeholder="<?=$this->_('Password')?>" pattern=".{8,}"
+                    title="<?=$this->_('Strong password, minimum 8 characters')?>"/>
+            </li>
+			<li><input type="password" name="signup[password_confirm]" required placeholder="<?=$this->_('Confirm Password')?>"
+                    pattern=".{8,}" title="<?=$this->_('Please confirm your password')?>"/>
+            </li>
+			<li><input type="email" id="signup-email" name="signup[email]" required placeholder="<?=$this->_('Email Address')?>"
+                    title="<?=$this->_('A valid email address')?>"/>
+                <div class="availability"></div>
+            </li>
+			<li><input type="text" name="signup[firstname]" required placeholder="<?=$this->_('First Name')?>"
+                    title="<?=$this->_('First name')?>"/>
+            </li>
+			<li><input type="text" name="signup[lastname]" required placeholder="<?=$this->_('Last Name')?>"
+                    title="<?=$this->_('Last name')?>"/>
+            </li>
+		</ul>
 <?php if (($tncUri = BConfig::i()->get('modules/DotMesh/tnc_uri'))): ?>
-					                <div class="terms-line clearfix">
-					                	<input type="checkbox" id="agree_tnc" name="signup[agree_tnc]" required/> <label for="agree_tnc"><?=$this->q($this->_('I agree to the <a href="%s">terms & conditions', array($tncUri)))?></a></label>
-					                </div>
+		<div class="terms-line clearfix">
+			<input type="checkbox" id="agree_tnc" name="signup[agree_tnc]" required/> <label for="agree_tnc"><?=$this->q($this->_('I agree to the <a href="%s">terms & conditions', array($tncUri)))?></a></label>
+		</div>
 <?php endif ?>
-					                <div class="buttons-group clearfix">
-					                	<button type="submit"><?=$this->_('Sign Up')?></button>
-					                </div>
-					            </fieldset>
-					        </form>
+		<div class="buttons-group clearfix">
+			<button type="submit"><?=$this->_('Sign Up')?></button>
+		</div>
+	</fieldset>
+</form>
 				        </section>
 			        </div>
 	    		</li>

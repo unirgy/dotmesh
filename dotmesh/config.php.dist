@@ -35,10 +35,17 @@ $config['cookie']['session_handler'] = 'apc';
 /***********************************************************************/
 /* DotMesh core settings                                               */
 
+/* Do not change this */
 $config['modules']['DotMesh']['thumb_root_path'] = 'dotmesh/thumbs';
+
+/* Add new lines in HTML automatically (use if Markdown plugin is disabled) */
 $config['modules']['DotMesh']['contents_default_process'] = 1;
+
+/* How many entries to show on one page of timeline */
 $config['modules']['DotMesh']['timeline_page_size'] = 10;
-$config['modules']['DotMesh']['tnc_uri'] = '';
+
+/* Terms and conditions link for signup agreement */
+# $config['modules']['DotMesh']['tnc_uri'] = '';
 
 /***********************************************************************/
 /* Plugins settings                                                    */

@@ -1,6 +1,7 @@
 <?php defined('DOTMESH_ROOT_DIR') || die ?>
 <div class="site-main clearfix">
 	<div class="page-main clearfix">
+<!--
 		<aside class="col-left"><br/>
 			<section class="section-tags">
 			    <header><?=$this->_('Trending Tags')?></header>
@@ -27,6 +28,7 @@
 			    <a href="<?=BApp::href('u/')?>" class="link-view-all"><?=$this->_('View All')?></a>
 			</section>
 		</aside>
+-->
 		<div class="col-main">
 	    	<?=$this->view('timeline')?>
 	    </div>

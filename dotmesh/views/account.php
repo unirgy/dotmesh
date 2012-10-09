@@ -10,7 +10,7 @@
 		    	<fieldset>
 		    		<div class="avatar">
 		    			<img src="<?=$this->q($u->thumbUri())?>"/>
-		    			<a href="#" class="icon icon-delete"><?=$this->_('Delete image')?></a>
+		    			<!--<a href="#" class="icon icon-delete"><?=$this->_('Delete image')?></a>-->
 		    		</div>
 			    	<ul class="field-group">
 			    		<li>
@@ -21,11 +21,11 @@
 					<?php endforeach ?>
 					        </select>
 					  	</li>
-			    		<li>
+			    		<li id="thumb-fileupload">
 					        <label for="thumb"><?=$this->_('Upload a file')?></label>
 					        <input type="file" id="thumb" name="thumb" title="Thumbnail"/>
 					  	</li>
-			    		<li>
+			    		<li id="thumb-weblink">
 					        <label for="thumb"><?=$this->_('Avatar web link')?></label>
 					        <input type="url" id="thumb_uri" name="account[thumb_uri]" title="<?=$this->_('Avatar web link')?>" value="<?=$this->q($u->thumb_uri)?>"/>
 					  	</li>

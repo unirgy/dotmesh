@@ -259,21 +259,31 @@ a:hover { color:#0147b0; text-decoration:none; }
 	font-size:.85em;
 	z-index:9;
 	}
-.dotmesh-logo {
+.dotmesh-branding {
 	float:left;
 	margin:-7px 0 -7px 0;
 	border-right:1px solid #ddd;
-	padding:12px 15px 13px 10px;
+	padding:12px 45px 13px 10px;
 	}
-.node-logo { float:left; margin-left:10px; padding:5px 0; color:#32426f; font-weight:bold; }
-.node-logo .icon { float:left; width:21px; height:21px; margin-right:4px; background-position:-161px -57px; }
+.dotmesh-branding .beta {
+	float:right;
+	position:relative;
+	margin:-12px -38px 0 0;
+	width:33px;
+	height:31px;
+	background:url(../img/beta_ribbon.png) no-repeat;
+	text-indent:-999em;
+	}
+.dotmesh-logo { float:left; }
 .dotmesh-logo a {
 	display:block;
-	width:162px;
+	width:122px;
 	height:21px;
 	background:url(../img/dotmesh_default_logo.png) no-repeat;
 	text-indent:-999em;
 	}
+.node-logo { float:left; margin-left:10px; padding:5px 0; color:#32426f; font-weight:bold; }
+.node-logo .icon { float:left; width:21px; height:21px; margin-right:4px; background-position:-161px -57px; }
 .server-search {
 	position:relative;
 	float:left;
@@ -315,6 +325,7 @@ a:hover { color:#0147b0; text-decoration:none; }
 	background:#fff;
 	}
 .header-links .popup-parent.hover .popup,
+.header-links .popup-parent.inform .popup,
 .header-links .popup-parent:hover .popup { display:block; }
 .header-links .popup:after, .header-links .popup:before {
 	position:absolute;
@@ -537,9 +548,9 @@ a:hover { color:#0147b0; text-decoration:none; }
 .timeline .image-inline.shown a.image-expand { }
 .timeline .image-inline.shown img { display:block; }
 
-.timeline .youtube-inline a.youtube-expand { margin:0 5px; }
+.timeline .youtube-inline a.youtube-expand { display:inline-block; margin:0 5px; background-position:-213px -133px; text-indent:-999em; }
 .timeline .youtube-inline iframe { display:none; }
-.timeline .youtube-inline.shown a.youtube-expand { }
+.timeline .youtube-inline.shown a.youtube-expand { background-position:-239px -133px;}
 .timeline .youtube-inline.shown iframe { display:block; }
 
 .timeline .echoed-by { margin:5px 0 10px; }

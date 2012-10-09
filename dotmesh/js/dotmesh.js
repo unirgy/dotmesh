@@ -95,7 +95,7 @@
 function dotmeshMediaLinks(parent) {
     $('.image-link', parent).each(function(idx, el) {
         var span = $('<span class="image-inline"></span>').insertAfter(el);
-        var handle = $('<a href="#" class="image-expand">[+]</a>').appendTo(span);
+        var handle = $('<a href="#" class="image-expand icon">[+]</a>').appendTo(span);
         var image;
         handle.on('click', function(event) {
             span.toggleClass('shown');
@@ -107,7 +107,7 @@ function dotmeshMediaLinks(parent) {
     });
     $('.youtube-link', parent).each(function(idx, el) {
         var span = $('<span class="youtube-inline"></span>').insertAfter(el);
-        var handle = $('<a href="#" class="youtube-expand">[+]</a>').appendTo(span);
+        var handle = $('<a href="#" class="youtube-expand icon">[+]</a>').appendTo(span);
         var video;
         handle.on('click', function(event) {
             span.toggleClass('shown');
@@ -142,6 +142,23 @@ $(function() {
         return false;
     });
 
+    function accountSwitchThumbProvider() {
+        var type = $('#thumb_provider').val();
+        $('#thumb-fileupload')[type=='file' ? 'show' : 'hide']();
+        $('#thumb-weblink')[type=='link' ? 'show' : 'hide']();
+    }
+    accountSwitchThumbProvider();
+    $('#thumb_provider').change(accountSwitchThumbProvider);
+
+    var topOpen = false;
+    $('#top-login input, #top-signup input').each(function(idx, el) {
+        $(el).on('focus', function(event) {
+            $('.link-login').addClass('inform');
+        });
+        $(el).on('blur', function(event) {
+            $('.link-login').removeClass('inform');
+        });
+    });
     $('.hover-delay').each(function(idx, el) {
         var $el = $(el), delayOpen = false, delayTimer;
         $el.on('mouseout', function(event) {
@@ -150,6 +167,7 @@ $(function() {
             delayTimer = setTimeout(function() { $el.removeClass('hover') }, 500);
         });
     });
+
     $('.subscription-state').each(function(idx, el) {
         var hoverLabel = $(this).data('hover-label'), label = $('.label', this), defLabel = label.html();
         $(el).on('mouseover', function(event) { label.html(hoverLabel); });
@@ -197,7 +215,7 @@ console.log(resp);
         return false;
     });
 
-    dotmeshMediaLinks(document);
+    //dotmeshMediaLinks(document);
 
     $('input[name=is_private]:checkbox').on('change', function(event) {
         var container = $(this).closest('.new-post-block');
@@ -277,6 +295,26 @@ console.log(resp);
         });
         return false;
     });
+
+    function checkAvailability(event, field) {
+        var form = $('#top-signup'), fieldEl = $('#signup-'+field), availEl = fieldEl.siblings('.availability');
+        if (!fieldEl.get(0).validity.valid) {
+            availEl.html();
+            return;
+        }
+        var url = form.data('avail-uri')+'?f='+encodeURIComponent(field)+'&v='+encodeURIComponent(fieldEl.val());
+        $.get(url, function(response, status) {
+            if (response.status == 'unavailable') {
+                fieldEl.get(0).setCustomValidity(response.message);
+                availEl.addClass('unavailable').html(response.message);
+            } else {
+                fieldEl.get(0).setCustomValidity('');
+                availEl.removeClass('unavailable').html(response.message);
+            }
+        });
+    }
+    $('#signup-username').on('change', function(event) { checkAvailability(event, 'username'); });
+    $('#signup-email').on('change', function(event) { checkAvailability(event, 'email'); });
 
     setTimeout(function() { removeMessage('.messages-container li') }, 10000);
 });

@@ -5,3 +5,5 @@
 <!--{ Subject: New User Sign Up }-->
 
 Hello <?=$u->firstname?>,
+
+Welcome to DotMesh (<?=$n->uri()?>)!

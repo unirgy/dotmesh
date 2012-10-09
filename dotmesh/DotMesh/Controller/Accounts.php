@@ -387,4 +387,27 @@ class DotMesh_Controller_Accounts extends DotMesh_Controler_Abstract
             BLayout::i()->applyLayout('/sub_users');
         }
     }
+
+    public function action_check_availability()
+    {
+        try {
+            $r = BRequest::i();
+            $f = $r->get('f');
+            if ($f!=='username' && $f!=='email') {
+                throw new Exception('Invalid field');
+            }
+            $localNode = DotMesh_Model_Node::i()->localNode();
+            $user = DotMesh_Model_User::i()->orm()
+                ->where('node_id', $localNode->id)
+                ->where($f, $r->get('v'))
+                ->find_one();
+            $result = array(
+                'status' => $user ? 'unavailable' : 'available',
+                'message' => $user ? 'Unavailable' : 'Available',
+            );
+        } catch (Exception $e) {
+            $result = array('status' => 'error', 'message' => $e);
+        }
+        BResponse::i()->json($result);
+    }
 }
