@@ -34,12 +34,12 @@ Security measures
 =================
 
 * User passwords are hashed using bcrypt with difficulty 10
-* Remote users validated using SHA512 double hash:
+* Remote users are validated using SHA512 double hash:
     SHA512( [agent ip] * SHA512( [local node secret key] * [remote node secret key] * [user secret key] ))
 * Remote user signatures are re-validated against claiming node when needed
 * Server to server communication is DNS validated
 * Use SSL when available
-* If a node database is compromised, change local secret key and send request to remote nodes to invalidate all user signatures (roadmap)
+* If a node database is compromised, change local node secret key and send request to remote nodes to invalidate all user signatures (roadmap)
 
 Immediate Roadmap
 =================
@@ -95,6 +95,8 @@ Installation Instructions
 * OR Download as zip (https://github.com/unirgy/dotmesh/zipball/master)
 * Copy dotmesh/config.php.dist to dotmesh/config.php
 * Edit dotmesh/config.php and follow instructions to configure the instance
+* If running Apache, the rewrites should be handled by .htaccess
+* If running other web service, please configure it to rewrite all calls to dotmesh.php/$1
 * Navigate to your node web address, setup page should be shown
 * Fill out setup page (node and admin user info)
 * Enjoy your own DotMesh node!
