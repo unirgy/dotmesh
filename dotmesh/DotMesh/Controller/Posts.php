@@ -114,7 +114,7 @@ class DotMesh_Controller_Posts extends DotMesh_Controler_Abstract
                             $result['remote_nodes'][] = array(
                                 //'uri' => $uri,
                                 'api_uri' => $uri.'/p/_/api1.json',
-                                'remote_signature' => $sessUser->generateRemoteSignature($rNode),
+                                //'remote_signature' => $sessUser->generateRemoteSignature($rNode), // never send live
                                 'remote_signature_ip' => $sessUser->generateRemoteSignature($rNode, true),
                             );
                         }
@@ -168,6 +168,7 @@ class DotMesh_Controller_Posts extends DotMesh_Controler_Abstract
                 throw new BException('Invalid request type');
             }
             if (!empty($request['user_uri']) && !empty($request['post_uri']) && !empty($request['remote_signature_ip'])) {
+                BResponse::i()->cors();
                 $user = DotMesh_Model_User::i()->find($request['user_uri'], true);
                 if (!$user) {
                     throw new BException('Invalid user uri');
@@ -176,14 +177,13 @@ class DotMesh_Controller_Posts extends DotMesh_Controler_Abstract
                     throw new BException('Invalid remote signature');
                 }
                 $post = $postHlp->find($request['post_uri']);
-                BResponse::i()->cors();
                 $remote = true;
-            } elseif (!empty($request['postname'])) {
+            } elseif ($r->param('postname')) {
                 $user = DotMesh_Model_User::i()->sessionUser();
                 if (!$user) {
                     throw new BException('Not logged in');
                 }
-                $post = $postHlp->find($request['postname']);
+                $post = $postHlp->find($r->param('postname'));
                 $remote = false;
             } else {
                 throw new Exception('Invalid request');

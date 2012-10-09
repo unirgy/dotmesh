@@ -35,7 +35,7 @@ Security measures
 
 * User passwords are hashed using bcrypt with difficulty 10
 * Remote users are validated using SHA512 double hash:
-    SHA512( [agent ip] * SHA512( [local node secret key] * [remote node secret key] * [user secret key] ))
+    SHA512( [agent ip] * SHA512( [local node secret key] * [remote node secret key] * [remote user secret key] ))
 * Remote user signatures are re-validated against claiming node when needed
 * Server to server communication is DNS validated
 * Use SSL when available
@@ -49,6 +49,15 @@ Immediate Roadmap
 * Block nodes and users on node level (admin)
 * Block nodes and users on a user level
 * Responsive HTML
+
+Known Issues
+============
+
+* Post Feedback synchronization between remote nodes of subscribed users.
+  Currently only the local node of the post has full feedback totals.
+  Other nodes that have this post have only local totals.
+* Admin can only delete others' posts. Full functionality will include deleting local users,
+  blocking remote users and nodes.
 
 Wishlist
 ========

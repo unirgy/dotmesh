@@ -372,6 +372,7 @@ class DotMesh_Model_User extends BModelUser
     {
         $localNode = DotMesh_Model_Node::i()->localNode();
         $signature = BUtil::sha512base64($localNode->secret_key.'|'.$node->secret_key.'|'.$this->secret_key);
+error_log(date('Y-m-d H:i:s').' '.$signature.' '.$localNode->uri.' '.$node->uri.' '.$this->username.' '.$localNode->secret_key.'|'.$node->secret_key.'|'.$this->secret_key."\n", 3, DOTMESH_ROOT_DIR.'/logs/nodeapi.log');
         if ($agentIP) {
             if (true===$agentIP) {
                 $agentIP = BRequest::i()->ip();

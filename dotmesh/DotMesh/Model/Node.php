@@ -71,11 +71,12 @@ class DotMesh_Model_Node extends BModel
         return static::$_localNode;
     }
 
-    public function afterCreate()
+    public function beforeSave()
     {
-        parent::afterCreate();
+        if (!parent::beforeSave()) return false;
         $this->set('api_version', 1);
         $this->set('secret_key', BUtil::randomString(64), null);
+        return true;
     }
 
     public static function setup($form)
@@ -231,9 +232,7 @@ class DotMesh_Model_Node extends BModel
                 $userData['node_id'] = $this->id;
                 $userData['username'] = $username;
                 $user = $userHlp->find($username, $userData);
-                if (!$user->remote_signature) {
-                    $user->set('remote_signature', $userData['remote_signature'])->save();
-                }
+                $user->set('remote_signature', $userData['remote_signature'])->save();
             }
         }
         return $this;

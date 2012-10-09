@@ -3,7 +3,8 @@
 $sessUser = DotMesh_Model_User::i()->sessionUser();
 $userUri = $sessUser ? $this->q($sessUser->uri()) : null;
 $isAdmin = $sessUser ? $sessUser->is_admin : false;
-$localNodeId = DotMesh_Model_Node::i()->localNode()->id;
+$localNode = DotMesh_Model_Node::i()->localNode();
+$localNodeId = $localNode->id;
 if (!$this->timeline) return;
 $curPage = (int)BRequest::i()->get('p');
 if (!$curPage) $curPage = 1;
@@ -42,11 +43,14 @@ $now = strtotime(BDb::now());
 <?php $uri = $p->user()->uri(true); $name = $p->user()->fullname(); $isLocal = $p->node()->is_local; ?>
     <li id="timeline-<?=$p->id?>" class="timeline-item clearfix <?=$p->expanded?'expanded':''?> <?=$p->is_pinned?'pinned':''?> <?=$p->is_private?'private':''?>">
         <a name="<?=$this->q($p->postname)?>"></a>
-        <form name="timeline-form-<?=$p->id?>" method="post" action="<?=$p->uri(true) ?>" data-local-uri="<?=BApp::href('p/_')?>">
+        <form name="timeline-form-<?=$p->id?>" method="post" action="<?=$p->uri(true) ?>" data-local-uri="<?=BApp::href('p/_/api1.json')?>" data-is-local="<?=$isLocal?>">
 <?php if (!$isLocal): ?>
             <input type="hidden" id="user_uri" name="user_uri" value="<?=$userUri?>"/>
             <input type="hidden" id="post_uri" name="post_uri" value="<?=$this->q($p->uri())?>"/>
-            <input type="hidden" id="user_remote_signature_ip" name="remote_signature_ip" value="<?=$p->remoteSignature(null, true)?>"/>
+            <input type="hidden" id="local_signature_ip" name="local_signature_ip"
+                value="<?=$sessUser->generateRemoteSignature($localNode, true)?>"/>
+            <input type="hidden" id="remote_signature_ip" name="remote_signature_ip"
+                value="<?=$sessUser->generateRemoteSignature($p->node(), true)?>"/>
 <?php endif ?>
             <a href="<?=$this->q($uri)?>" class="avatar"><img src="<?=$this->q($p->user()->thumbUri(50))?>" width="50" height="50" alt="<?=$this->q($uri)?>"/></a>
             <a href="<?=$p->uri(true)?>" class="tiptip-title posted-on" title="<?=date('r', strtotime($p->create_dt)) ?>"><?=BUtil::timeAgo($p->create_dt, $now) ?></a>

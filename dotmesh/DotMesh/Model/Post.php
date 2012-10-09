@@ -63,6 +63,7 @@ class DotMesh_Model_Post extends BModel
             'node_is_local' => 'n.is_local',
             'node_is_https' => 'n.is_https',
             'node_is_rewrite' => 'n.is_rewrite',
+            'node_secret_key' => 'n.secret_key',
 
             'user_username' => 'u.username',
             'user_firstname' => 'u.firstname',
@@ -71,6 +72,7 @@ class DotMesh_Model_Post extends BModel
             'user_thumb_filename' => 'u.thumb_filename',
             'user_thumb_uri' => 'u.thumb_uri',
             'user_email' => 'u.email',
+            'user_secret_key' => 'u.secret_key',
 
             'feedback_totals' => "(select concat(sum(ifnull(echo,0)),';',sum(ifnull(star,0)),';',sum(ifnull(flag,0)),
                 ';',sum(ifnull(vote_up,0)),';',sum(ifnull(vote_down,0))) from {$fbTable} where post_id=p.id)",
@@ -120,6 +122,7 @@ class DotMesh_Model_Post extends BModel
                 'is_local' => $p->node_is_local,
                 'is_https' => $p->node_is_https,
                 'is_rewrite' => $p->node_is_rewrite,
+                'secret_key' => $p->node_secret_key,
             ));
             $user = $p->user(array(
                 'id' => $p->user_id,
@@ -131,6 +134,7 @@ class DotMesh_Model_Post extends BModel
                 'thumb_provider' => $p->user_thumb_provider,
                 'thumb_filename' => $p->user_thumb_filename,
                 'thumb_uri' => $p->user_thumb_uri,
+                'secret_key' => $p->user_secret_key,
             ));
             $user->node = $node;
             if ($p->echo_users) {

@@ -167,9 +167,12 @@ $(function() {
     $(document).on('click', '.timeline .actions-group-1 button,.timeline .actions-group-3 button', function(event) {
         var el = $(this), form = el.closest('form'), f = el.attr('name');
         var postVars = {
-            type:'feedback',
-            field:f, value:el.val(),
-            post_uri:$('input[name=post_uri]', form).val()
+            type: 'feedback',
+            field: f,
+            value: el.val(),
+            post_uri: $('input[name=post_uri]', form).val(),
+            user_uri: $('input[name=user_uri]', form).val(),
+            remote_signature_ip: $('input[name=remote_signature_ip]', form).val(),
         };
         $.post(form.attr('action')+'/api1.json', postVars, function(response, status) {
             var parent = el.parent(), i;
@@ -182,6 +185,13 @@ $(function() {
                 var total = parent.find('.total-'+i);
                 total.html(response.total[i]);
                 if (1*response.total[i]) total.removeClass('zero'); else total.addClass('zero');
+            }
+            if (form.data('is-local')=='0') {
+                postVars.remote_signature_ip = $('input[name=local_signature_ip]', form).val();
+                postVars.total = response.total;
+                $.post(form.data('local-uri'), postVars, function(resp, stat) {
+console.log(resp);
+                });
             }
         });
         return false;
