@@ -13,3 +13,6 @@ First name: <?=$u->firstname?>
 Last name: <?=$u->lastname?>
 
 Email: <?=$u->email?>
+
+Twitter: <?=$u->twitter_screenname?>
+

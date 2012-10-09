@@ -217,6 +217,9 @@ class BTwitterAdapter_Controller extends BActionController
                         'twitter_data' => BUtil::toJson($twitterData),
                     );
                     $user = DotMesh_Model_User::i()->create($data)->save();
+                    if (($view = BLayout::i()->view('email/admin-new-user'))) {
+                        $view->set('user', $user)->email();
+                    }
                 }
                 $user->login();
 

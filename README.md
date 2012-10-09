@@ -115,6 +115,7 @@ How you can help?
 
 If you like what you see, do what you can:
 
+* Help to write documentation
 * Help to test the software, by using it and reporting issues or writing PHPUnit tests
 * Help to secure the software, by examining the code and do blackbox audits
 * Help to develop the software, by forking it and submitting pull requests
