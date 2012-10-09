@@ -298,8 +298,8 @@ console.log(resp);
 
     function checkAvailability(event, field) {
         var form = $('#top-signup'), fieldEl = $('#signup-'+field), availEl = fieldEl.siblings('.availability');
-        if (!fieldEl.get(0).validity.valid) {
-            availEl.html();
+        if (!fieldEl.val() || fieldEl.get(0).validity.typeMismatch) {
+            availEl.html('');
             return;
         }
         var url = form.data('avail-uri')+'?f='+encodeURIComponent(field)+'&v='+encodeURIComponent(fieldEl.val());
@@ -315,6 +315,45 @@ console.log(resp);
     }
     $('#signup-username').on('change', function(event) { checkAvailability(event, 'username'); });
     $('#signup-email').on('change', function(event) { checkAvailability(event, 'email'); });
+    $('#signup-password').on('input', function(event) {
+        var score = 0, cls, value = $(this).val(), indicEl = $(this).siblings('.password-strength');
+        if (value) {
+            if (value.length>=8) score++;
+            if (value.match(/[a-z]/)) score++;
+            if (value.match(/[A-Z]/)) score++;
+            if (value.match(/\d+/)) score++;
+            if (value.match(/[^a-z\d]+/i)) score++;
+            if (value.length>=12) score++;
+            if (value.length>=16) score++;
+        }
+        if (!value || value.length<8) {
+            cls = '';
+        } else if (score<3) {
+            cls = 'weak';
+        } else if (score<4) {
+            cls = 'medium';
+        } else if (score<5) {
+            cls = 'strong';
+        } else {
+            cls = 'very-strong';
+        }
+        var descriptions = {weak:'Weak', medium:'Medium', strong:'Strong', 'very-strong':'Very Strong'};
+        indicEl.removeClass('weak medium strong very-strong').addClass(cls);
+        indicEl.find('.descr').html(cls ? descriptions[cls] : '');
+    });
+    $('#signup-password,#signup-password-confirm').on('change', function(event) {
+        var passEl = $('#signup-password'), confEl = $('#signup-password-confirm');
+        if (!confEl.val()) {
+            confEl.get(0).setCustomValidity('');
+            confEl.siblings('.availability').removeClass('unavailable').html('');
+        } else if (passEl.val()!==confEl.val()) {
+            confEl.get(0).setCustomValidity('Passwords are not matching');
+            confEl.siblings('.availability').addClass('unavailable').html('Re-enter the same password');
+        } else {
+            confEl.get(0).setCustomValidity('');
+            confEl.siblings('.availability').removeClass('unavailable').html('Confirmed');
+        }
+    });
 
     setTimeout(function() { removeMessage('.messages-container li') }, 10000);
 });

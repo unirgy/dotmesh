@@ -110,11 +110,15 @@ localNodeData = <?=BUtil::toJson(BUtil::maskFields($node->as_array(), 'uri,api_v
                     title="<?=$this->_('A valid user name, starting with a letter, followed by letters, digits or underscore')?>"/>
                 <div class="availability"></div>
             </li>
-			<li><input type="password" name="signup[password]" required placeholder="<?=$this->_('Password')?>" pattern=".{8,}"
+			<li><input type="password" id="signup-password" name="signup[password]" required
+                    placeholder="<?=$this->_('Password')?>" pattern=".{8,}"
                     title="<?=$this->_('Strong password, minimum 8 characters')?>"/>
+                <div class="password-strength"><div class="gauge"></div><div class="descr"></div></div>
             </li>
-			<li><input type="password" name="signup[password_confirm]" required placeholder="<?=$this->_('Confirm Password')?>"
-                    pattern=".{8,}" title="<?=$this->_('Please confirm your password')?>"/>
+			<li><input type="password" id="signup-password-confirm" name="signup[password_confirm]" required
+                    placeholder="<?=$this->_('Confirm Password')?>" pattern=".{8,}"
+                    title="<?=$this->_('Please confirm your password')?>"/>
+                <div class="availability"></div>
             </li>
 			<li><input type="email" id="signup-email" name="signup[email]" required placeholder="<?=$this->_('Email Address')?>"
                     title="<?=$this->_('A valid email address')?>"/>
