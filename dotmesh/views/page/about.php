@@ -11,7 +11,7 @@
     	<h3>Creators of DotMesh</h3>
     	<ul class="credit">
     		<li><strong>Boris Gurvich</strong> - Architecture &amp; Development &nbsp; <a href="http://www.linkedin.com/in/unirgy" class="icon icon-linkedin">LinkedIn</a> <a href="http://www.twitter.com/unirgy" class="icon icon-twitter">Twitter</a></li>
-    		<li><strong>Minu Oh</strong> - Design &amp; HTML/CSS &nbsp; <a href="http://www.linkedin.com/in/minuoh" class="icon icon-linkedin">LinkedIn</a> <a href="http://www.twitter.com/minuoh" class="icon icon-twitter">Twitter</a></li>
+    		<li><strong><a href="http://www.minuoh.com" target="ext">Minu Oh</a></strong> - Design &amp; HTML/CSS &nbsp; <a href="http://www.linkedin.com/in/minuoh" class="icon icon-linkedin">LinkedIn</a> <a href="http://www.twitter.com/minuoh" class="icon icon-twitter">Twitter</a></li>
     	</ul>
     </div>
 </div>
