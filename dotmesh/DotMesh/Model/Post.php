@@ -139,7 +139,8 @@ class DotMesh_Model_Post extends BModel
             $user->node = $node;
             if ($p->echo_users) {
                 $echoUsers = array();
-                foreach (explode('|', $p->echo_users) as $userStr) {
+                $echoUsersStr = array_unique(explode('|', $p->echo_users));
+                foreach ($echoUsersStr as $userStr) {
                     $u = explode(';', $userStr);
                     // en.id,';',en.uri,';',en.is_local,';',en.is_https,';',en.is_rewrite,';',
                     // eu.id,';',eu.username,';',eu.email,';',eu.firstname,';',eu.lastname,';',

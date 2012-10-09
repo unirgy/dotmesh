@@ -1,10 +1,12 @@
 <?php defined('DOTMESH_ROOT_DIR') || die ?>
 <?php
     $tag = $this->tag;
-    $isSubscribed = DotMesh_Model_User::i()->sessionUser()->isSubscribedToTag($tag);
+    $sessUser = DotMesh_Model_User::i()->sessionUser();
+    $isSubscribed = $sessUser && $sessUser->isSubscribedToTag($tag);
 ?>
 <div class="site-main timeline-col1-layout clearfix">
     <div class="user-profile-block clearfix">
+<?php if ($sessUser): ?>
 		<div class="avatar">
 	        <form method="post" name="user-actions" action="<?=$tag->uri(true)?>">
 	            <fieldset>
@@ -15,6 +17,7 @@
 	            </fieldset>
 	        </form>
 		</div>
+<?php endif ?>
 		<h1 class="user-url"><?=$tag->tagname?></h1>
 		<table class="user-activity">
 			<thead>

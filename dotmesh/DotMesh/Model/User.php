@@ -163,7 +163,8 @@ class DotMesh_Model_User extends BModelUser
                                 inner join {$userSub} eus on eus.pub_user_id=epf.user_id
                                 inner join {$user} eu on eu.id=epf.user_id
                                 inner join {$node} en on en.id=eu.node_id
-                                where epf.echo=1 and eus.sub_user_id={$uId} and eu.is_blocked=0 and en.is_blocked=0
+                                where epf.echo=1 and (eus.pub_user_id={$uId} or eus.sub_user_id={$uId})
+                                    and eu.is_blocked=0 and en.is_blocked=0
                             )",
                         ),
                     ),
@@ -173,7 +174,7 @@ class DotMesh_Model_User extends BModelUser
 
         // collect users that have echoed and i'm subscribed to and are not globally blocked
         $orm->select("(
-            select group_concat(concat(
+            select distinct group_concat(concat(
                 en.id,';',en.uri,';',en.is_local,';',en.is_https,';',en.is_rewrite,';',
                 eu.id,';',eu.username,';',eu.email,';',eu.firstname,';',eu.lastname,';',
                     eu.thumb_provider,';',eu.thumb_filename,';',eu.thumb_uri
@@ -182,8 +183,9 @@ class DotMesh_Model_User extends BModelUser
             inner join {$userSub} eus on eus.pub_user_id=epf.user_id
             inner join {$user} eu on eu.id=epf.user_id
             inner join {$node} en on en.id=eu.node_id
-            where epf.post_id=p.id and epf.echo=1 and eus.sub_user_id={$uId} and eu.is_blocked=0 and en.is_blocked=0
-            limit 5
+            where epf.post_id=p.id and epf.echo=1 and (eus.pub_user_id={$uId} or eus.sub_user_id={$uId})
+                and eu.is_blocked=0 and en.is_blocked=0
+            limit 10
         )", 'echo_users');
 
         return $orm;

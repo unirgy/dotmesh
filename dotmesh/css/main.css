@@ -1,40 +1,15 @@
-/*
- * HTML5 Boilerplate
- *
- * What follows is the result of much research on cross-browser styling.
- * Credit left inline and big thanks to Nicolas Gallagher, Jonathan Neal,
- * Kroc Camen, and the H5BP dev community and team.
- */
-
 /* ==========================================================================
    Base styles:opinionated defaults
    ========================================================================== */
-
-* {
-	-webkit-box-sizing:border-box;
-	-moz-box-sizing:   border-box;
-	box-sizing:        border-box;
-}
-html,
-button,
-input,
-select,
-textarea {
-    color:#222;
-}
-
-body {
-    font-size:1em;
-    line-height:1.4;
-}
-::-moz-selection {
-    background:#b3d4fc;
-    text-shadow:none;
-}
-::selection {
-    background:#b3d4fc;
-    text-shadow:none;
-}
+/*
+ * HTML5 Boilerplate
+ * Credit left inline and big thanks to Nicolas Gallagher, Jonathan Neal,
+ * Kroc Camen, and the H5BP dev community and team.
+ */
+html, button, input, select, textarea { color:#2f2f2f; }
+body { font-size:1em; line-height:1.4; }
+::-moz-selection { background:#b3d4fc; text-shadow:none; }
+::selection { background:#b3d4fc; text-shadow:none; }
 hr {
     display:block;
     height:1px;
@@ -42,24 +17,12 @@ hr {
     border-top:1px solid #ccc;
     margin:1em 0;
     padding:0;
-}
-img {
-    vertical-align:middle;
-}
-fieldset {
-    border:0;
-    margin:0;
-    padding:0;
-}
-textarea {
-    resize:vertical;
-}
+	}
+img { vertical-align:middle; }
+fieldset { border:0; margin:0; padding:0; }
+textarea { resize:vertical; }
 
-
-/* ==========================================================================
-   Chrome Frame prompt
-   ========================================================================== */
-
+/* Chrome Frame prompt */
 .chromeframe {
     margin:0.2em 0;
     background:#ccc;
@@ -69,20 +32,33 @@ textarea {
 
 
 /* ==========================================================================
-   Dotmesh custom styles
+   Dotmesh Custom Styles
    ========================================================================== */
+   
+/***** BASE *****/
 
-body { background:url(../img/dotmesh_default_bkg.jpg); }
+* {
+	-webkit-box-sizing:border-box;
+	-moz-box-sizing:   border-box;
+	box-sizing:        border-box;
+	}
+body { background:url(../img/dotmesh_default_bkg.jpg); font-family:'Helvetica Neue','Helvetica Neue LT Std', Helvetica, sans-serif; }
+a { color:#0147b0; text-decoration:none; }
+a:hover { color:#0147b0; text-decoration:none; }
 ul, ol { margin-left:20px; }
 nav ul, nav ol { margin-left:0; }
 h1, h2, h3, h4, h5 { margin:0; }
 p { margin-top:.5em; }
+label { color:#555; }
+select { border:1px solid #ccc; font:14px Arial, Helvetica, sans-serif; }
 
 /**** COMMON ****/
 
-/* Effects */
+/* Effects + Spacing */
 .no-box-shadow { box-shadow:none !important; -moz-box-shadow:none !important; -webkit-box-shadow:none !important; }
 .no-border { border:0 !important; -moz-border:0 !important; -webkit-border:0 !important; }
+.no-padding { padding:0 !important; }
+.no-margin { margin:0 !important; }
 
 /* Alignment */
 .a-left { text-align:left !important; }
@@ -99,9 +75,6 @@ p { margin-top:.5em; }
 ul.field-group { margin-left:0; padding:0; }
 ul.field-group li { list-style:none; margin:13px 0; }
 ul.field-group li label { display:block; margin-bottom:3px; color:#444; font-size:.9em; font-weight:bold; }
-
-label { color:#555; }
-
 input[readonly] { border-color:#ccc !important; background:#eee; color:#999; }
 input[type="checkbox"],
 input[type="radio"] { margin:0 5px 0 0; }
@@ -135,7 +108,6 @@ textarea {
 	padding:6px 4px;
 	font:1em 'Helvetica Neue','Helvetica Neue LT Std', Helvetica, sans-serif;
 	}
-select { border:1px solid #ccc; font:14px Arial, Helvetica, sans-serif; }
 
 button,
 input[type='submit'] {
@@ -236,13 +208,19 @@ button span {
 	}
 .header-links .private-post:after { border-bottom-color:#dce8fc !important; }
 
-/**** GENERAL ****/
-
-body {
-	font-family:'Helvetica Neue','Helvetica Neue LT Std', Helvetica, sans-serif;
-	}
-a { color:#0147b0; text-decoration:none; }
-a:hover { color:#0147b0; text-decoration:none; }
+/* Sign Up */
+.availability { display:block; margin:3px 0 10px; color:#246f0b; font-size:.95em; }
+.unavailable { color:#c81e1e !important; }
+.password-strength { width:200px; }
+.password-strength .gauge { height:2px; }
+.password-strength.weak .gauge { width:40%; background:#f00; }
+.password-strength.medium .gauge { width:60%; background:#a70; }
+.password-strength.strong .gauge { width:80%; background:#0a0; }
+.password-strength.very-strong .gauge { width:100%; background:#0d0; }
+.password-strength.weak .descr { color:#f00; }
+.password-strength.medium .descr { color:#a70; }
+.password-strength.strong .descr { color:#0a0; }
+.password-strength.very-strong .descr { color:#0d0; }
 
 
 /**** HEADER ****/
@@ -442,7 +420,7 @@ a:hover { color:#0147b0; text-decoration:none; }
 
 
 
-/**** Footer ****/
+/**** FOOTER ****/
 .site-footer { box-shadow:0 2px 5px #999; -moz-box-shadow:0 2px 5px #999; -webkit-box-shadow:0 2px 5px #999; position:fixed; bottom:0; right:0; /*width:100%; */background:#fff; color:#444; font-size:.75em; padding:8px 10px; line-height:1.2; }
 .site-footer .get-dotmesh { color:#0147b0; font-weight:bold; }
 .site-footer a { color:#666; }
@@ -529,12 +507,7 @@ a:hover { color:#0147b0; text-decoration:none; }
     border-width:1px 0;
     background:#dce8fc !important;
     }
-.timeline .timeline-item.pinned {
-    /*margin-top:-1px;*/
-    /*border:1px solid #FFFFAA;*/
-    /*border-width:1px 0;*/
-    background:#FFFFEE !important;
-    }
+.timeline .timeline-item.pinned { background:#ffe !important; }
 .timeline .expanded .preview { display:none; }
 .timeline .expanded .contents { display:block; }
 
@@ -631,8 +604,21 @@ a:hover { color:#0147b0; text-decoration:none; }
 .timeline-loadmore.loading .loadmore { display:none; }
 .timeline-loadmore.loading .loader { display:block; }
 
+/* Public Timeline */
+.page-main.public .timeline-block-title {
+	border-radius:5px 5px 0 0;
+	-moz-border-radius:5px 5px 0 0;
+	-webkit-border-radius:5px 5px 0 0;
+	}
+.page-main.public { border:0; margin:0; min-height:auto; }
+.page-main.public:after { height:auto; content:""; }
+.page-main.public .timeline-loadmore {
+	border-radius:0 0 5px 5px;
+	-moz-border-radius:0 0 5px 5px;
+	-webkit-border-radius:0 0 5px 5px;
+	}
 
-/* Logged in Timeline */
+/* Compose Block */
 .new-post-block {
 	min-height:275px;
 	position:relative;
@@ -703,6 +689,8 @@ a:hover { color:#0147b0; text-decoration:none; }
 	top:17px;
 	left:-31px;
 	}
+
+/* Col Left */
 .col-left {
 	position:relative;
 	width:231px;
@@ -748,6 +736,8 @@ a:hover { color:#0147b0; text-decoration:none; }
 .col-left section.section-users li .node-name { color:#aaa; font-size:.9em; }
 .col-left section.section-users li .user-name { display:block; font-weight:bold; }
 .col-main { float:right; width:668px; background:#ddd; }
+
+/* Subscription */
 .subscribe-remote-user { position:relative; margin:0 20px 8px; }
 .subscribe-remote-user input[type='text'] { padding-top:5px; padding-bottom:5px; }
 .subscribe-remote-user .icon,
@@ -758,19 +748,6 @@ a:hover { color:#0147b0; text-decoration:none; }
 .unsubscribe .icon:active { background:transparent url(../img/icons.png) no-repeat -5px -135px; padding:0 !important; border:none !important; width:21px; height:21px; text-indent:-999em; box-shadow:none; -moz-box-shadow:none; -webkit-box-shadow:none; border-radius:0; -moz-border-radius:0; -webkit-border-radius:0; }
 .unsubscribe .icon:hover { background-position:-31px -135px; }
 
-/* Public Timeline */
-.page-main.public .timeline-block-title {
-	border-radius:5px 5px 0 0;
-	-moz-border-radius:5px 5px 0 0;
-	-webkit-border-radius:5px 5px 0 0;
-	}
-.page-main.public { border:0; margin:0; min-height:auto; }
-.page-main.public:after { height:auto; content:""; }
-.page-main.public .timeline-loadmore {
-	border-radius:0 0 5px 5px;
-	-moz-border-radius:0 0 5px 5px;
-	-webkit-border-radius:0 0 5px 5px;
-	}
 
 /* User Profile */
 .user-profile-block {
@@ -830,7 +807,7 @@ button.state-subscribed:hover {
 		color-stop(1, #e13500)
 		);
 	text-shadow:0 1px 2px #a30d00;
-		}
+	}
 button.state-subscribed:hover .icon { background-position:-213px -108px; }
 
 .user-profile-block .user-url { margin-bottom:.2em; font-size:1.4em; }
@@ -877,7 +854,6 @@ button.state-subscribed:hover .icon { background-position:-213px -108px; }
 .page-my-account .col2-set .col.last fieldset { margin-bottom:30px; }
 .page-my-account .buttons-group { border-top:1px solid #ddd; margin-top:30px; padding-top:10px; text-align:right; }
 
-
 /* CMS */
 .page-404 { margin:180px auto 0; width:750px; background:url(../img/404_icon.png) no-repeat 50% 0; padding-top:190px; color:#5c6b82; text-align:center; text-shadow: 1px 3px 5px #d6e0ec, 0 0 0 #000, 0 1px 0 #fff; }
 .page-404 h2 { font-size:1.7em; }
@@ -885,49 +861,42 @@ button.state-subscribed:hover .icon { background-position:-213px -108px; }
 
 .page-about-us .content { font-size:.95em; }
 
-/**** Icons/Sprites ****/
+
+/**** ICONS + SPRITES ****/
 .icon { width:21px; height:21px; background-image:url(../img/icons.png); background-repeat:no-repeat; }
 .icon-linkedin { width:22px; height:22px; display:inline-block; background-position:-161px -135px; text-indent:-999em; }
 .icon-twitter { width:22px; height:22px; display:inline-block; background-position:-187px -135px; text-indent:-999em; }
 
+
 /* ==========================================================================
    Helper classes
    ========================================================================== */
-
+/*
+ * HTML5 Boilerplate
+ * Credit left inline and big thanks to Nicolas Gallagher, Jonathan Neal,
+ * Kroc Camen, and the H5BP dev community and team.
+ */
 .inline { display:inline !important; }
 
-/*
- * Image replacement
- */
-
+/* Image Replacement */
 .ir {
     background-color:transparent;
     border:0;
     overflow:hidden;
     /* IE 6/7 fallback */
     *text-indent:-9999px;
-}
-
+	}
 .ir:before {
     content:"";
     display:block;
     width:0;
     height:100%;
-}
+	}
 
-/*
- * Hide from both screenreaders and browsers:h5bp.com/u
- */
+/* Hide from both screenreaders and browsers:h5bp.com/u */
+.hidden { display:none !important; visibility:hidden; }
 
-.hidden {
-    display:none !important;
-    visibility:hidden;
-}
-
-/*
- * Hide only visually, but have it available for screenreaders:h5bp.com/v
- */
-
+/* Hide only visually, but have it available for screenreaders:h5bp.com/v */
 .visuallyhidden {
     border:0;
     clip:rect(0 0 0 0);
@@ -937,13 +906,12 @@ button.state-subscribed:hover .icon { background-position:-213px -108px; }
     padding:0;
     position:absolute;
     width:1px;
-}
+	}
 
 /*
  * Extends the .visuallyhidden class to allow the element to be focusable
  * when navigated to via the keyboard:h5bp.com/p
  */
-
 .visuallyhidden.focusable:active,
 .visuallyhidden.focusable:focus {
     clip:auto;
@@ -952,27 +920,13 @@ button.state-subscribed:hover .icon { background-position:-213px -108px; }
     overflow:visible;
     position:static;
     width:auto;
-}
+	}
 
 /*
  * Hide visually and from screenreaders, but maintain layout
  */
 
-.invisible {
-    visibility:hidden;
-}
-
-/*
- * Clearfix:contain floats
- *
- * For modern browsers
- * 1. The space content is one way to avoid an Opera bug when the
- *    `contenteditable` attribute is included anywhere else in the document.
- *    Otherwise it causes space to appear at the top and bottom of elements
- *    that receive the `clearfix` class.
- * 2. The use of `table` rather than `block` is only necessary if using
- *    `:before` to contain the top-margins of child elements.
- */
+.invisible { visibility:hidden;  }
 
 .clearfix:before,
 .clearfix:after,
@@ -985,30 +939,9 @@ button.state-subscribed:hover .icon { background-position:-213px -108px; }
 .col-left li:after {
     clear:both;
 }
+/* For IE 6/7 only  */
+.clearfix, .col-left li { *zoom:1; }
 
-/*
- * For IE 6/7 only
- * Include this rule to trigger hasLayout and contain floats.
- */
-.clearfix,
-.col-left li {
-    *zoom:1;
-}
-
-/* ==========================================================================
-   EXAMPLE Media Queries for Responsive Design.
-   Theses examples override the primary ('mobile first') styles.
-   Modify as content requires.
-   ========================================================================== */
-
-  /*@media only screen and (min-width:35em) {
-   Style adjustments for viewports that meet the condition */
-}
-
-/*@media only screen and (-webkit-min-device-pixel-ratio:1.5),
-       only screen and (min-resolution:144dpi) {
-     Style adjustments for high resolution devices */
-}
 
 /* ==========================================================================
    Print styles.

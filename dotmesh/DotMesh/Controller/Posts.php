@@ -210,18 +210,19 @@ class DotMesh_Controller_Posts extends DotMesh_Controler_Abstract
                 }
                 if ($request['field']=='pin') {
                     $post->set('is_pinned', 0)->save();
-                    break;
-                }
-                $post->submitFeedback(array($request['field']=>$request['value']), $user->id, $remote);
-                $result = array('status'=>'success', 'message'=>'Feedback submitted');
-                $orm = DotMesh_Model_PostFeedback::i()->orm()->where('post_id', $post->id);
-                foreach (explode(',','echo,star,flag,vote_up,vote_down') as $f) {
-                    $orm->select('(sum('.$f.'))', $f);
-                    $result['value'][$f] = (int)$post->feedback->$f;
-                }
-                $total = $orm->find_one();
-                foreach ($total->as_array() as $k=>$v) {
-                    $result['total'][$k] = $v ? $v : '';
+                    $result = array('status'=>'success', 'message'=>'Post is unpinned');
+                } else {
+                    $post->submitFeedback(array($request['field']=>$request['value']), $user->id, $remote);
+                    $result = array('status'=>'success', 'message'=>'Feedback submitted');
+                    $orm = DotMesh_Model_PostFeedback::i()->orm()->where('post_id', $post->id);
+                    foreach (explode(',','echo,star,flag,vote_up,vote_down') as $f) {
+                        $orm->select('(sum('.$f.'))', $f);
+                        $result['value'][$f] = (int)$post->feedback->$f;
+                    }
+                    $total = $orm->find_one();
+                    foreach ($total->as_array() as $k=>$v) {
+                        $result['total'][$k] = $v ? $v : '';
+                    }
                 }
                 break;
             }
