@@ -133,33 +133,51 @@ class DotMesh_Controller_Posts extends DotMesh_Controler_Abstract
             if (!$request) {
                 $request = $r->post();
             }
+            $postHlp = DotMesh_Model_Post::i();
             if (empty($request['type'])) {
                 throw new BException('Invalid request type');
             }
-            if ($r->xhr() && $r->post('user_uri') && $r->post('post_uri') && $r->post('remote_signature_ip')) {
-                $user = DotMesh_Model_User::i()->find($r->post('user_uri'), true);
+            if (!empty($request['user_uri']) && !empty($request['post_uri']) && !empty($request['remote_signature_ip'])) {
+                $user = DotMesh_Model_User::i()->find($request['user_uri'], true);
                 if (!$user) {
                     throw new BException('Invalid user uri');
                 }
-                if (!$user->verifyRemoteSignature($r->post('remote_signature_ip'), true)) {
+                if (!$user->verifyRemoteSignature($request['remote_signature_ip'], true)) {
                     throw new BException('Invalid remote signature');
                 }
-                $post = DotMesh_Model_Post::i()->find($r->post('post_uri'));
-                $remote = true;
+                $post = $postHlp->find($request['post_uri']);
                 BResponse::i()->cors();
-            } else {
+                $remote = true;
+            } elseif (!empty($request['postname'])) {
                 $user = DotMesh_Model_User::i()->sessionUser();
                 if (!$user) {
                     throw new BException('Not logged in');
                 }
-                $post = DotMesh_Model_Post::i()->find($r->param('postname'));
+                $post = $postHlp->find($request['postname']);
                 $remote = false;
-            }
-            if (!$post) {
-                throw new BException('Invalid post');
+            } else {
+                throw new Exception('Invalid request');
             }
             switch ($request['type']) {
+            case 'new':
+                if (empty($request['post'])) {
+                    throw new Exception('Missing post data');
+                }
+                $data = $request['post'];
+                $data['node_id'] = $user->node()->id;
+                $data['user_id'] = $user->id;
+                $post = $postHlp->receiveRemotePost($data);
+                $result = $post->result;
+                if ($post->thread_id) {
+                    $redirectUrl = $post->uri(true);
+                }
+                $result['message'] = 'Your post has been submited';
+                break;
+
             case 'feedback':
+                if (empty($post)) {
+                    throw new BException('Invalid post');
+                }
                 if ($request['field']=='pin') {
                     $post->set('is_pinned', 0)->save();
                     break;

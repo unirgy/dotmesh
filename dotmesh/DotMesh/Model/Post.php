@@ -289,7 +289,7 @@ class DotMesh_Model_Post extends BModel
     {
         BPubSub::i()->fire(__METHOD__.'.before', array('request'=>&$data));
 
-        $data = BUtil::maskFields($p, 'postname,preview,create_dt,is_private,is_tweeted');
+        $data = BUtil::maskFields($data, 'node_id,user_id,postname,preview,create_dt,is_private,is_tweeted');
 
         $post = static::create($data)->save();
 

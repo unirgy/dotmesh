@@ -388,11 +388,7 @@ class DotMesh_Model_User extends BModelUser
 
     public function retrieveRemoteSignature()
     {
-        $result = $this->node()->apiClient(array('ask_users' => array($this->username)));
-        if (empty($result['ask_users'][$this->username]['remote_signature'])) {
-            throw new BException('Could not retrieve remote signature');
-        }
-        $this->set('remote_signature', $result['ask_users'][$this->username]['remote_signature'])->save();
+        $this->node()->apiClient(array('ask_users' => array($this->username)));
         return $this;
     }
 
@@ -408,7 +404,7 @@ class DotMesh_Model_User extends BModelUser
             $agentIP = BRequest::i()->ip();
         }
         if ($agentIP) {
-            $remoteSignature = hash('sha512', $agentIP.'|'.$remoteSignature);
+            $remoteSignature = BUtil::sha512base64($agentIP.'|'.$remoteSignature);
         }
         if ($remoteSignature === $requestSignature) {
             return true;
@@ -418,7 +414,7 @@ class DotMesh_Model_User extends BModelUser
             $this->retrieveRemoteSignature();
             $remoteSignature = $this->remote_signature;
             if ($agentIP) {
-                $remoteSignature = hash('sha512', $agentIP.'|'.$remoteSignature);
+                $remoteSignature = BUtil::sha512base64($agentIP.'|'.$remoteSignature);
             }
             return $remoteSignature === $requestSignature;
         }

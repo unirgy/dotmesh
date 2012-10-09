@@ -234,7 +234,9 @@ class DotMesh_Model_Node extends BModel
                 $userData['node_id'] = $this->id;
                 $userData['username'] = $username;
                 $user = $userHlp->find($username, $userData);
-                //$user->set('remote_signature', $userData['remote_signature'])->save();
+                if (!$user->remote_signature) {
+                    $user->set('remote_signature', $userData['remote_signature'])->save();
+                }
             }
         }
         return $this;
