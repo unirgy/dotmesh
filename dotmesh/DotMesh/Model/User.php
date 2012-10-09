@@ -171,11 +171,11 @@ class DotMesh_Model_User extends BModelUser
                 ),
             ),
         )));
-
+/*
         // collect users that have echoed and i'm subscribed to and are not globally blocked
         $orm->select("(
             select distinct group_concat(concat(
-                en.id,';',en.uri,';',en.is_local,';',en.is_https,';',en.is_rewrite,';',
+                en.id,';',en.uri,';',en.is_local,';',en.is_https,';',en.is_rewrite,';',en.api_version,';',
                 eu.id,';',eu.username,';',eu.email,';',eu.firstname,';',eu.lastname,';',
                     eu.thumb_provider,';',eu.thumb_filename,';',eu.thumb_uri
             ) separator '|')
@@ -187,7 +187,7 @@ class DotMesh_Model_User extends BModelUser
                 and eu.is_blocked=0 and en.is_blocked=0
             limit 10
         )", 'echo_users');
-
+*/
         return $orm;
     }
 

@@ -52,6 +52,25 @@ class DotMesh_Model_Post extends BModel
                 ->select(array('pf.echo', 'pf.star', 'pf.vote_up', 'pf.vote_down', 'pf.flag'));
         }
 
+        $node = DotMesh_Model_Node::table();
+        $user = DotMesh_Model_User::table();
+        $postFeedback = DotMesh_Model_PostFeedback::table();
+
+        // collect users that have echoed and are not globally blocked
+        $orm->select("(
+            select distinct group_concat(concat(
+                en.id,';',en.uri,';',en.is_local,';',en.is_https,';',en.is_rewrite,';',en.api_version,';',
+                eu.id,';',eu.username,';',eu.email,';',eu.firstname,';',eu.lastname,';',
+                    eu.thumb_provider,';',eu.thumb_filename,';',eu.thumb_uri
+            ) separator '|')
+            from {$postFeedback} epf
+            inner join {$user} eu on eu.id=epf.user_id
+            inner join {$node} en on en.id=eu.node_id
+            where epf.post_id=p.id and epf.echo=1
+                and eu.is_blocked=0 and en.is_blocked=0
+            limit 10
+        )", 'echo_users');
+
         return $orm;
     }
 
@@ -119,6 +138,7 @@ class DotMesh_Model_Post extends BModel
             $node = $p->node(array(
                 'id' => $p->node_id,
                 'uri' => $p->node_uri,
+                'api_version' => $p->node_api_version,
                 'is_local' => $p->node_is_local,
                 'is_https' => $p->node_is_https,
                 'is_rewrite' => $p->node_is_rewrite,
@@ -142,19 +162,22 @@ class DotMesh_Model_Post extends BModel
                 $echoUsersStr = array_unique(explode('|', $p->echo_users));
                 foreach ($echoUsersStr as $userStr) {
                     $u = explode(';', $userStr);
+                    if (empty($u[6])) {
+                        continue;
+                    }
                     // en.id,';',en.uri,';',en.is_local,';',en.is_https,';',en.is_rewrite,';',
                     // eu.id,';',eu.username,';',eu.email,';',eu.firstname,';',eu.lastname,';',
                     // eu.thumb_provider,';',eu.thumb_filename,';',eu.thumb_uri
                     $echoUser = $userHlp->create(array(
-                        'id' => $u[5],
+                        'id' => $u[6],
                         'node_id' => $u[0],
-                        'username' => $u[6],
-                        'email' => $u[7],
-                        'firstname' => $u[8],
-                        'lastname' => $u[9],
-                        'thumb_provider' => $u[10],
-                        'thumb_filename' => $u[11],
-                        'thumb_uri' => $u[12],
+                        'username' => $u[7],
+                        'email' => $u[8],
+                        'firstname' => $u[9],
+                        'lastname' => $u[10],
+                        'thumb_provider' => $u[11],
+                        'thumb_filename' => $u[12],
+                        'thumb_uri' => $u[13],
                     ));
                     $echoNode = $echoUser->node(array(
                         'id' => $u[0],
@@ -162,6 +185,7 @@ class DotMesh_Model_Post extends BModel
                         'is_local' => $u[2],
                         'is_https' => $u[3],
                         'is_rewrite' => $u[4],
+                        'api_version' => $u[5],
                     ));
                     $echoUsers[] = $echoUser;
                 }
