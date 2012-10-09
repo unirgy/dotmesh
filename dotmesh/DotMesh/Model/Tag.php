@@ -52,7 +52,6 @@ class DotMesh_Model_Tag extends BModel
             "p.is_private=0".($uId ? " or p.id in (select post_id from {$postUser} where user_id={$uId})" : ''),
             'n.is_blocked=0', // post node is not globally blocked
             'u.is_blocked=0', // post user is not globally blocked
-            'p.echo_user_id is null or eu.is_blocked=0', // post is not echoed by globally blocked user
         ));
         if ($uId) {
             $nodeBlock = DotMesh_Model_NodeBlock::table();

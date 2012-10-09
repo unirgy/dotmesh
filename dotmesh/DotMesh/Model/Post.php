@@ -92,7 +92,7 @@ class DotMesh_Model_Post extends BModel
                 $sort = "(select sum(ifnull(vote_down,0)-ifnull(vote_up,0)) from {$fbTable} where post_id=p.id)";
                 break;
             case 'controversial':
-                $sort = "(select sum(ifnull(vote_up,0)+ifnull(vote_down,0)) from {$fbTable} where post_id=p.id)";
+                $sort = "(select sum(ifnull(vote_up,0))*sum(ifnull(vote_down,0))/sum(ifnull(vote_down,0)+ifnull(vote_up,0)) from {$fbTable} where post_id=p.id)";
                 break;
             default:
                 $sort = '';
@@ -187,7 +187,7 @@ class DotMesh_Model_Post extends BModel
 
         $orm->where(array('AND'=>array(
             "p.id={$threadId} or p.thread_id={$threadId}",
-            "p.user_id={$pubUserId} or p.echo_user_id={$pubUserId}",
+            "p.user_id={$pubUserId}",
             "p.is_private=0".($uId ? " or p.user_id={$uId} or p.id in (select post_id from {$postUser} where user_id={$uId})" : ''),
         )))->select("(p.id={$this->id})", 'expanded');
 
@@ -514,12 +514,10 @@ class DotMesh_Model_Post extends BModel
         if ($this->user()->node()->is_local) {
             $usersToSend[$this->user_id] = $this->user();
         }
-        if ($this->echo_user_id && $this->echoUser()->node()->is_local) {
-            $usersToSend[$this->echo_user_id] = $this->echoUser();
-        }
 
         $remoteNodes = array();
 
+        // mentioned users in the post
         $users = DotMesh_Model_User::i()->orm('u')
             ->join('DotMesh_Model_PostUser', array('pu.user_id','=','u.id'), 'pu')
             ->where('pu.post_id', $this->id)
@@ -527,16 +525,30 @@ class DotMesh_Model_Post extends BModel
         foreach ((array)$users as $user) {
             $node = $user->node();
             if ($node->is_local) {
-                if ($sendRemote) {
-                    $usersToSend[$user->id] = $user;
-                }
+                $usersToSend[$user->id] = $user;
 //TODO: send email notifications
-            } elseif ($sendRemote) {
+            } else {
                 $remoteNodes[$node->id] = $node;
             }
         }
 
         if (!$this->is_private) {
+            // subscribed users
+            $users = DotMesh_Model_User::i()->orm('u')
+                ->join('DotMesh_Model_UserSub', array('us.sub_user_id','=','u.id'), 'us')
+                ->where('us.pub_user_id', $this->user_id)
+                ->find_many();
+            foreach ((array)$users as $user) {
+                $node = $user->node();
+                if ($node->is_local) {
+                    $usersToSend[$user->id] = $user;
+//TODO: send email notifications
+                } else {
+                    $remoteNodes[$node->id] = $node;
+                }
+            }
+
+            // tags in the post
             $tags = DotMesh_Model_Tag::i()->orm('t')
                 ->join('DotMesh_Model_PostTag', array('pt.tag_id','=','t.id'), 'pt')
                 ->where('pt.post_id', $this->id)
@@ -545,19 +557,20 @@ class DotMesh_Model_Post extends BModel
                 $node = $tag->node();
                 if ($node->is_local) {
 //TODO: send email notifications
-                } elseif ($sendRemote) {
+                } else {
                     $remoteNodes[$node->id] = $node;
                 }
             }
         }
 
-        if (!empty($remoteNodes)) {
+        // disabled server to server posting, using CORS
+        if (false && $sendRemote && !empty($remoteNodes)) {
             foreach ($remoteNodes as $node) {
                 $node->apiClient(array('users'=>$usersToSend, 'posts'=>array($this)));
             }
         }
 
-        return $this;
+        return array('nodes'=>$remoteNodes, 'users'=>$usersToSend);
     }
 
     public static function toRss($channel, $posts)

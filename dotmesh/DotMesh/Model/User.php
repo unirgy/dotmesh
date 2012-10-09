@@ -134,7 +134,7 @@ class DotMesh_Model_User extends BModelUser
         $orm = DotMesh_Model_Post::i()->timelineOrm();
 
         $orm->where(array('OR' => array(
-            "p.user_id={$uId} or p.echo_user_id={$uId}", // post is made or echoed by logged in user
+            "p.user_id={$uId}", // post is made by logged in user
             'AND' => array(
                 // post node is not globally blocked
                 'n.is_blocked=0',
@@ -208,7 +208,7 @@ class DotMesh_Model_User extends BModelUser
 
         case 'sent':
             $orm->where(array(
-                "p.user_id={$uId} or p.echo_user_id={$uId}")
+                "p.user_id={$uId}")
             );
             break;
 
@@ -241,7 +241,7 @@ class DotMesh_Model_User extends BModelUser
         $orm = DotMesh_Model_Post::i()->timelineOrm();
 
         $orm->where(array('AND'=>array(
-            "p.user_id={$pubUserId} or p.echo_user_id={$pubUserId}",
+            "p.user_id={$pubUserId}",
             "p.is_private=0".($uId ? " or p.user_id={$uId} or p.id in (select post_id from {$postUser} where user_id={$uId})" : ''),
         )));
 

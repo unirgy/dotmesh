@@ -27,7 +27,7 @@ Features
 * Custom theming (plugin skeleton included)
 * Servers communicate using SSL if supported by either
 * Run multiple nodes from the same code/db instance
-* Supports full i18n
+* Supports i18n
 * Canonical URLs allow SEO for posts (add your own text in URL)
 
 Security measures
@@ -44,9 +44,11 @@ Security measures
 Immediate Roadmap
 =================
 
+* Finish i18n
 * Admin interface (manage nodes and users)
 * Block nodes and users on node level (admin)
 * Block nodes and users on a user level
+* Responsive HTML
 
 Wishlist
 ========
@@ -61,6 +63,7 @@ Wishlist
 * Guest user API
 * Client side AES256 encryption
 * User/tag Karma
+* Most of functionality should work without JS
 * The sky is no limit
 
 Potential Uses

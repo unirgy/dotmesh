@@ -120,6 +120,15 @@ function dotmeshMediaLinks(parent) {
     });
 }
 
+function addMessage(status, message) {
+    var ul = $('.messages-container ul'), li = $('<li></li>').addClass(status).html(message);
+    ul.append(li);
+    setTimeout(function() { removeMessage(li) }, 10000);
+}
+function removeMessage(item) {
+    $(item).fadeOut(function() { $(this).remove() });
+}
+
 $(function() {
     $('#top-password').hide();
     $('#top-password-trigger').on('click', function(event) {
@@ -157,13 +166,12 @@ $(function() {
     });
     $(document).on('click', '.timeline .actions-group-1 button,.timeline .actions-group-3 button', function(event) {
         var el = $(this), form = el.closest('form'), f = el.attr('name');
-console.log(this);
         var postVars = {
             type:'feedback',
             field:f, value:el.val(),
             post_uri:$('input[name=post_uri]', form).val()
         };
-        $.post(form.attr('action')+'/api1.json', postVars, function(response, status, xhr) {
+        $.post(form.attr('action')+'/api1.json', postVars, function(response, status) {
             var parent = el.parent(), i;
             for (i in response.value) {
                 var btn = parent.find('.button-'+i);
@@ -194,7 +202,7 @@ console.log(this);
         ++timelineCurPage;
         timelineLoading = true;
         el.addClass('loading');
-        $.get(uri.replace(/p=PAGE/, 'p='+timelineCurPage), function(response, status, xhr) {
+        $.get(uri.replace(/p=PAGE/, 'p='+timelineCurPage), function(response, status) {
             if (!response.replace(/^\s+|\s+$/, '').length) {
                 el.hide();
             } else {
@@ -224,7 +232,41 @@ console.log(this);
     $('.timeline-loadmore').on('click mouseover', timelineNextPage);
     //$(window).on('scroll resize', checkNextPageAboveFold);
 
-    setTimeout(function() { $('.messages-container').fadeOut(); }, 10000);
-
     $('.tiptip-title').tipTip({delay:0, fadeIn:0, fadeOut:100});
+
+    $('.new-post-block form').on('submit', function(event) {
+        var form = $(event.target), postVars = form.serializeArray();
+        postVars.push({name:'do', value:'new'});
+        $.post(form.attr('action'), postVars, function(response, status) {
+            if (response.remote_nodes) {
+                var nodesCnt = response.remote_nodes.length, corsEl = $('.cors-requests'), apiVars = {
+                    type: 'new',
+                    post_uri: response.post.post_uri,
+                    user_uri: response.post.user_uri,
+                    post: response.post
+                };
+                $(response.remote_nodes).each(function(idx, node) {
+                    var loader = $('<span>Please wait, sending</span>').appendTo(corsEl);
+                    var indicator = $('<span>.</span>').appendTo(corsEl);
+                    apiVars.remote_signature_ip = node.remote_signature_ip;
+                    $.post(node.api_uri, apiVars, function(resp, stat) {
+                        indicator.remove();
+                        nodesCnt--;
+                        if (!nodesCnt) {
+                            loader.remove();
+                        }
+                    });
+                });
+            }
+            $('#user-posts-cnt').html(response.user_posts_cnt);
+            var newHtml = $(response.timeline_html).hide();
+            $('.timeline-container').prepend(newHtml);
+            newHtml.slideDown('slow');
+            addMessage(response.status, response.message);
+            event.target.reset();
+        });
+        return false;
+    });
+
+    setTimeout(function() { removeMessage('.messages-container li') }, 10000);
 });

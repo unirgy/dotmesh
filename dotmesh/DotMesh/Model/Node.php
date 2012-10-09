@@ -188,9 +188,6 @@ class DotMesh_Model_Node extends BModel
                 }
                 $postData = BUtil::maskFields($post->as_array(), 'postname,is_private,is_tweeted,create_dt');
                 $postData['user_uri'] = $post->user()->uri();
-                if ($post->echo_user_id) {
-                    $postData['echo_user_uri'] = $post->echoUser()->uri();
-                }
                 $postData['preview'] = $post->normalizePreviewUsersTags();
                 $postsData[] = $postData;
             }
@@ -347,10 +344,6 @@ class DotMesh_Model_Node extends BModel
                     $user = $userHlp->find($p['user_uri'], true);
                     $data['node_id'] = $remoteNode->id;
                     $data['user_id'] = $user->id;
-                    if (!empty($p['echo_user_uri'])) {
-                        $echoUser = $userHlp->find($p['echo_user_uri'], true);
-                        $data['echo_user_id'] = $echoUser->id;
-                    }
                     $post = $postHlp->receiveRemotePost($data);
                     $p['status'] = 'success';
                 } catch (Exception $e) {

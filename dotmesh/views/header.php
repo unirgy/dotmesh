@@ -3,14 +3,17 @@
 $node = DotMesh_Model_Node::i()->localNode();
 $user = DotMesh_Model_User::i()->sessionUser();
 ?>
+<script>
+localNodeData = <?=BUtil::toJson(BUtil::maskFields($node->as_array(), 'uri,api_version,is_https,is_rewrite'))?>;
+</script>
 <div class="site-header clearfix">
-    <?php if (($status = BRequest::i()->get('status'))): ?>
     <div class="messages-container">
         <ul class="messages">
+<?php if (($status = BRequest::i()->get('status'))): ?>
             <li class="<?=$this->q($status)?>"><?=$this->_(BRequest::i()->get('message'))?></li>
+<?php endif ?>
         </ul>
     </div>
-    <?php endif ?>
     <h1 class="dotmesh-logo"><a href="<?=BApp::href()?>">dotmesh &trade;</a></h1>
 <?php if ($node): ?>
    	<a href="<?=BApp::href('n/')?>" class="node-logo tiptip-title" title="<?=$this->_('Node Public Timeline')?>"><span class="icon"></span><?=$this->q($node->uri())?></a>

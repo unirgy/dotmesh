@@ -27,7 +27,7 @@ class DotMesh_Migrate extends BClass
 {
     public static function run()
     {
-        BMigrate::i()->install('0.1.0', 'DotMesh_Migrate::install');
+        BMigrate::i()->install('0.7.0', 'DotMesh_Migrate::install');
     }
 
     public static function install()

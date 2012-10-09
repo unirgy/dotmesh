@@ -78,7 +78,7 @@ class DotMesh_Controller_Posts extends DotMesh_Controler_Abstract
             $hlp = DotMesh_Model_Post::i();
             $postname = $r->param('postname');
             if ($postname) {
-                if ('REMOTE'===$postname) {
+                if ('_'===$postname) {
                     $post = $hlp->find($r->post('post_uri'));
                 } else {
                     $post = $hlp->load($postname, 'postname');
@@ -99,6 +99,33 @@ class DotMesh_Controller_Posts extends DotMesh_Controler_Abstract
                 if ($post->thread_id) {
                     $redirectUrl = $post->uri(true);
                 }
+
+                if ($r->xhr()) {
+                    $sessUser = DotMesh_Model_User::i()->sessionUser();
+                    $view = BLayout::i()->view('timeline');
+                    $view->set('timeline', array('rows'=>array($post)));
+                    $result['timeline_html'] = (string)$view;
+                    $result['user_posts_cnt'] = $sessUser->postsCnt();
+
+                    $distData = $post->distribute();
+                    if (!empty($distData['nodes'])) {
+                        foreach ($distData['nodes'] as $rNode) {
+                            $uri = $rNode->uri(null, true);
+                            $result['remote_nodes'][] = array(
+                                //'uri' => $uri,
+                                'api_uri' => $uri.'/p/_/api1.json',
+                                'remote_signature' => $sessUser->generateRemoteSignature($rNode),
+                                'remote_signature_ip' => $sessUser->generateRemoteSignature($rNode, true),
+                            );
+                        }
+                        $result['post'] = BUtil::maskFields($post->as_array(), 'postname,is_private,is_tweeted,create_dt');
+                        $result['post']['preview'] = $post->normalizePreviewUsersTags();
+                        $result['post']['post_uri'] = $post->uri();
+                        $result['post']['user_uri'] = $sessUser->uri();
+                    }
+                }
+
+                $result['status'] = 'success';
                 $result['message'] = 'Your post has been submited';
                 break;
 
@@ -108,11 +135,14 @@ class DotMesh_Controller_Posts extends DotMesh_Controler_Abstract
                     throw new BException('Post does not belong to the logged in user');
                 }
                 $post->delete();
+                $result['status'] = 'success';
                 $result['message'] = 'Post has been deleted';
                 break;
+
+            default:
+                throw new BException('Invalid form action');
             }
             //$post->submitFeedback($r->post());
-            $result['status'] = 'success';
         } catch (BException $e) {
             $result = array('status'=>'error', 'message'=>$e->getMessage());
         } catch (Exception $e) {

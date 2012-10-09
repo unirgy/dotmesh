@@ -13,23 +13,24 @@ $now = strtotime(BDb::now());
 ?>
 
 <?php if (!BRequest::i()->xhr()): ?>
-        <div class="sort-by tiptip-title" title="<?=$this->_('Sort messages by')?>">
+<div class="sort-by tiptip-title" title="<?=$this->_('Sort messages by')?>">
 <?php foreach (explode(',', ',hot,best,worst,controversial') as $s): ?>
-            <?=$s ? '<span class="pipe">|</span>' : ''?>
+    <?=$s ? '<span class="pipe">|</span>' : ''?>
 <?php if ($curSort==$s): ?>
-            <strong><?=$s ? $s : 'recent'?></strong>
+    <strong><?=$s ? $s : 'recent'?></strong>
 <?php else: ?>
-            <a href="<?=str_replace('SORT', $s, $sortUri)?>"><?=$s ? $s : 'recent'?></a>
+    <a href="<?=str_replace('SORT', $s, $sortUri)?>"><?=$s ? $s : 'recent'?></a>
 <?php endif // if ($curSort==$s): ?>
 <?php endforeach // foreach (explode(',', ',hot,best,worst,controversial') as $s): ?>
-        </div>
-    <h2 class="timeline-block-title"><?=$this->q($this->title)?>
+</div>
+<h2 class="timeline-block-title"><?=$this->q($this->title)?>
 <?php if ($this->feed_uri): ?>
-        <a href="<?=BUtil::setUrlQuery($this->feed_uri, array('s'=>$curSort))?>" class="rss-link tiptip-title" title="<?=$this->_('RSS Feed for the current timeline')?>">
-            <img src="<?=BApp::src('DotMesh', 'img/rss-icon.png')?>"/>
-        </a>
+<a href="<?=BUtil::setUrlQuery($this->feed_uri, array('s'=>$curSort))?>" class="rss-link tiptip-title" title="<?=$this->_('RSS Feed for the current timeline')?>">
+    <img src="<?=BApp::src('DotMesh', 'img/rss-icon.png')?>"/>
+</a>
 <?php endif // if ($this->feed_uri): ?>
-    </h2>
+</h2>
+<div class="timeline-container">
 <?php endif // if (!BRequest::i()->xhr()): ?>
 
 <?php if (!empty($this->timeline['rows'])): ?>
@@ -124,8 +125,10 @@ $now = strtotime(BDb::now());
 <?php endif // if (!empty($this->timeline['rows'])): ?>
 
 <?php if (!BRequest::i()->xhr()): ?>
+</div>
+
 <div class="timeline-loadmore" data-uri-pattern="<?=BUtil::setUrlQuery(BRequest::currentUrl(), array('p'=>'PAGE'))?>"
-    <?=!empty($this->timeline['rows']) && !empty($this->timeline['is_last_page']) ? 'style="display:none"' : ''?> >
+    <?=!empty($this->timeline['rows']) || !empty($this->timeline['is_last_page']) ? 'style="display:none"' : ''?> >
     <div class="loadmore"><?=$this->_('Load more ...')?></div>
     <div class="loader"><img src="<?=BApp::src('DotMesh', 'img/ajax-loader.gif')?>"/><?=$this->_('Please wait, loading ...')?></div>
 </div>
