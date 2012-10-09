@@ -102,6 +102,7 @@ Installation Instructions
 
 * Clone git repository (https://github.com/unirgy/dotmesh)
 * OR Download as zip (https://github.com/unirgy/dotmesh/zipball/master)
+* Make dotmesh/thumbs folder writable for web service
 * Copy dotmesh/config.php.dist to dotmesh/config.php
 * Edit dotmesh/config.php and follow instructions to configure the instance
 * If running Apache, the rewrites should be handled by .htaccess
