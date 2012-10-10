@@ -165,45 +165,43 @@ class BTwitterAdapter_Controller extends BActionController
 
     public function action_callback()
     {
-        $to = BRequest::i()->get('to');
+        try {
+            $to = BRequest::i()->get('to');
 
-        $sess =& BSession::i()->dataToUpdate();
-        $conf = BConfig::i()->get('modules/BTwitterAdapter');
+            $sess =& BSession::i()->dataToUpdate();
+            $conf = BConfig::i()->get('modules/BTwitterAdapter');
 
-        /* Create TwitteroAuth object with app key/secret and token key/secret from default phase */
-        $connection = new TwitterOAuth($conf['consumer_key'], $conf['consumer_secret'],
-            $sess['twitter']['oauth_token'], $sess['twitter']['oauth_token_secret']);
+            /* Create TwitteroAuth object with app key/secret and token key/secret from default phase */
+            $connection = new TwitterOAuth($conf['consumer_key'], $conf['consumer_secret'],
+                $sess['twitter']['oauth_token'], $sess['twitter']['oauth_token_secret']);
 
-        /* Request access tokens from twitter */
-        $accessToken = $connection->getAccessToken($_REQUEST['oauth_verifier']);
+            /* Request access tokens from twitter */
+            $accessToken = $connection->getAccessToken($_REQUEST['oauth_verifier']);
 
-        /* Remove no longer needed request tokens */
-        unset($sess['twitter']['oauth_token']);
-        unset($sess['twitter']['oauth_token_secret']);
-//var_dump($connection); exit;
+            /* Remove no longer needed request tokens */
+            unset($sess['twitter']['oauth_token']);
+            unset($sess['twitter']['oauth_token_secret']);
+    //var_dump($connection); exit;
 
-        /* If HTTP response is 200 continue otherwise send to connect page to retry */
-        if (200 == $connection->http_code) {
-            $screenName = $accessToken['screen_name'];
-            $twitterData = array(
-                'access_token' => $accessToken,
-                'account' => (array)$connection->get('account/verify_credentials'),
-            );
+            /* If HTTP response is 200 continue otherwise send to connect page to retry */
+            if (200 == $connection->http_code) {
+                $screenName = $accessToken['screen_name'];
+                $twitterData = array(
+                    'access_token' => $accessToken,
+                    'account' => (array)$connection->get('account/verify_credentials'),
+                );
 
-            switch ($to) {
-            case '': case 'login':
-//echo "<pre>"; var_dump($connection->get('account/verify_credentials')); exit;
-                $node = DotMesh_Model_Node::i()->localNode();
-                $user = $node->user($screenName, 'twitter_screenname');
-                if (!$user) {
-                    $user = $node->user($screenName);
-                }
-                if ($user) {
-                    $user->set(array(
-                        'twitter_screenname' => $screenName,
-                        'twitter_data' => BUtil::toJson($twitterData),
-                    ))->save();
-                } else {
+                switch ($to) {
+                case '': case 'login':
+    //echo "<pre>"; var_dump($connection->get('account/verify_credentials')); exit;
+                    $node = DotMesh_Model_Node::i()->localNode();
+                    $user = $node->user($screenName, 'twitter_screenname');
+                    if (!$user) {
+                        $user = $node->user($screenName);
+                    }
+                    if ($user) {
+                        $screenName .= '_';
+                    } 
                     list($firstname, $lastname) = explode(' ', $twitterData['account']['name'], 2)+array('');
                     $data = array(
                         'node_id' => $node->id,
@@ -220,42 +218,43 @@ class BTwitterAdapter_Controller extends BActionController
                     if (($view = BLayout::i()->view('email/admin-new-user'))) {
                         $view->set('user', $user)->email();
                     }
-                }
-                $user->login();
+                    $user->login();
 
-            case 'post':
-                $user = DotMesh_Model_User::i()->sessionUser();
-                //TODO: improve logged in check
-                if (!DotMesh_Model_User::i()->isLoggedIn()) {
-                    echo BLocale::i()->_("Not Logged In");
-                    exit;
+                case 'post':
+                    $user = DotMesh_Model_User::i()->sessionUser();
+                    //TODO: improve logged in check
+                    if (!DotMesh_Model_User::i()->isLoggedIn()) {
+                        echo BLocale::i()->_("Not Logged In");
+                        exit;
+                    }
+                    $sess['twitter']['access_token'] = $accessToken;
+                    $user->set(array(
+                        'twitter_screenname' => $screenName,
+                        'twitter_data' => BUtil::toJson($twitterData),
+                    ))->save();
+                    break;
                 }
-                $sess['twitter']['access_token'] = $accessToken;
-                $user->set(array(
-                    'twitter_screenname' => $screenName,
-                    'twitter_data' => BUtil::toJson($twitterData),
-                ))->save();
-                break;
-            }
 
-            /* The user has been verified and the access tokens can be saved for future use */
-            $sess['twitter']['status'] = 'verified';
-            echo '<script>';
-            switch ($to) {
-            case '': case 'login':
-                echo 'window.opener.location.reload();';
-                break;
-            case 'post':
-                echo 'window.opener.toggleTwitterPost("'.addslashes($screenName).'");';
-                break;
+                /* The user has been verified and the access tokens can be saved for future use */
+                $sess['twitter']['status'] = 'verified';
+                echo '<script>';
+                switch ($to) {
+                case '': case 'login':
+                    echo 'window.opener.location.reload();';
+                    break;
+                case 'post':
+                    echo 'window.opener.toggleTwitterPost("'.addslashes($screenName).'");';
+                    break;
+                }
+                echo 'window.close();</script>';
+            } else {
+                /* Save HTTP status for error dialog on connnect page.*/
+                $sess['twitter']['status_code'] = $connection->http_code;
+                $errMsg = BLocale::i()->_('There was a problem signing in to Twitter');
+                echo '<script>alert("'.$errMsg.'"); window.close();</script>';
             }
-            echo 'window.close();</script>';
-        } else {
-            /* Save HTTP status for error dialog on connnect page.*/
-            $sess['twitter']['status_code'] = $connection->http_code;
-            $errMsg = BLocale::i()->_('There was a problem signing in to Twitter');
-            echo '<script>alert("'.$errMsg.'"); window.close();</script>';
+        } catch (Exception $e) {
+            echo "<script>window.opener.addMessage('error', '".addslashes($e->getMessage())."'); window.close(); </script>";
         }
-
     }
 }
