@@ -199,24 +199,32 @@ class BTwitterAdapter_Controller extends BActionController
                     if (!$user) {
                         $user = $node->user($screenName);
                     }
-                    if ($user) {
+                    if ($user && $user->twitter_screenname!==$screenName) {
                         $screenName .= '_';
-                    } 
-                    list($firstname, $lastname) = explode(' ', $twitterData['account']['name'], 2)+array('');
-                    $data = array(
-                        'node_id' => $node->id,
-                        'username' => $screenName,
-                        'firstname' => $firstname,
-                        'lastname' => $lastname,
-                        'secret_key' => BUtil::randomString(64),
-                        'thumb_provider' => 'link',
-                        'thumb_uri' => $twitterData['account']['profile_image_url_https'],
-                        'twitter_screenname' => $screenName,
-                        'twitter_data' => BUtil::toJson($twitterData),
-                    );
-                    $user = DotMesh_Model_User::i()->create($data)->save();
-                    if (($view = BLayout::i()->view('email/admin-new-user'))) {
-                        $view->set('user', $user)->email();
+                        $user = null;
+                    }
+                    if ($user) {
+                        $user->set(array(
+                            'twitter_screenname' => $screenName,
+                            'twitter_data' => BUtil::toJson($twitterData),
+                        ))->save();
+                    } else {
+                        list($firstname, $lastname) = explode(' ', $twitterData['account']['name'], 2)+array('');
+                        $data = array(
+                            'node_id' => $node->id,
+                            'username' => $screenName,
+                            'firstname' => $firstname,
+                            'lastname' => $lastname,
+                            'secret_key' => BUtil::randomString(64),
+                            'thumb_provider' => 'link',
+                            'thumb_uri' => $twitterData['account']['profile_image_url_https'],
+                            'twitter_screenname' => $screenName,
+                            'twitter_data' => BUtil::toJson($twitterData),
+                        );
+                        $user = DotMesh_Model_User::i()->create($data)->save();
+                        if (($view = BLayout::i()->view('email/admin-new-user'))) {
+                            $view->set('user', $user)->email();
+                        }
                     }
                     $user->login();
 
