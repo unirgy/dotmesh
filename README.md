@@ -2,6 +2,20 @@ DotMesh
 =======
 Open source macroblogging application ready to be deployed on any PHP/MySQL server.
 
+What is DotMesh?
+================
+Dotmesh does not run on a central server. It is by its nature decentralized and crowd-sourced. It is the complete mesh of independent community members of the world that make up the Dotmesh network. It can never be wholly blocked or eliminated, because the global network of Dotmesh nodes are self-sustaining in the absense of one or many others.
+
+It is exciting to see how Dotmesh will be adopted by the community. We understand that the original motivation of the creators does not determine its possible use, and all the creative ways in which it will be used by the community to enrich lives and promote communication can never be predicted.
+
+What prompted the creation of Dotmesh
+=====================================
+We watched the world stage as the undemocratic nations of the world abused their powers against their own citizens.
+
+As recent world events unfolded, it became clear that the law-abiding, honest citizens of the world needed the tool necessary to communicate in privacy, without fear of persecution.
+
+We believe that a tolerating world that promotes peace and freedom of opinion and expression, is the highest aspiration of the common people. Dotmesh is our small contribution in hopes of a tolerant, free world.
+
 See it in action
 ================
 Go to http://dotmesh.org and sign up!

@@ -76,7 +76,7 @@ $now = strtotime(BDb::now());
             </div>
 <?php if ($p->echoUsers()): ?>
             <div class="echoed-by">
-                <span class="icon tiptip-title" title="<?=$this->_("Echoed by users you are subscribed")?>"><?=$this->_('Echoed by:')?></span>
+                <span class="icon tiptip-title" title="<?=$this->_("Echoed by users")?>"><?=$this->_('Echoed by:')?></span>
 <?php foreach ($p->echoUsers() as $eu): ?>
                 <a href="<?=$eu->uri(true)?>" class="tiptip-title" title="<?=$eu->uri()?>"><img src="<?=$eu->thumbUri()?>"/></a>
 <?php endforeach ?>
