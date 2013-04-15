@@ -200,7 +200,7 @@ class DotMesh_Model_Post extends BModel
     {
         $orm = static::timelineOrm();
         $localNode = DotMesh_Model_Node::i()->localNode();
-        $orm->where('p.is_private', 0)
+        $orm->where('p.is_private', 0)->where('u.is_blocked', 0)->where('n.is_blocked', 0)
             ->where('p.node_id', $localNode->id);
         return $orm;
     }

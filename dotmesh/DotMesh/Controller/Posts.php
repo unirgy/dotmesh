@@ -212,6 +212,9 @@ class DotMesh_Controller_Posts extends DotMesh_Controler_Abstract
                     $post->set('is_pinned', 0)->save();
                     $result = array('status'=>'success', 'message'=>'Post is unpinned');
                 } else {
+                    if ($user->is_admin && $request['field']=='flag') {
+                        $post->user()->set('is_blocked', 1)->save();
+                    }
                     $post->submitFeedback(array($request['field']=>$request['value']), $user->id, $remote);
                     $result = array('status'=>'success', 'message'=>'Feedback submitted');
                     $orm = DotMesh_Model_PostFeedback::i()->orm()->where('post_id', $post->id);
