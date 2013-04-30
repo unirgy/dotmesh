@@ -1069,6 +1069,7 @@ exit;
 #echo $query;
             $statement = static::$_db->prepare($query);
             $success = $statement->execute($values);
+            //$success = true;
 #echo '('.(memory_get_usage()-$mem).') ';
 
             // If we've just inserted a new record, set the ID of this object
