@@ -37,7 +37,7 @@ class DotMesh_Controller_Nodes extends DotMesh_Controler_Abstract
 
     public function action_setup()
     {
-        if (DotMesh_Model_Node::i()->localNode()) {
+        if (defined('DOTMESH_CONFIGURED') && DotMesh_Model_Node::i()->localNode()) {
             BResponse::i()->redirect(BApp::href());
         }
         $r = BRequest::i();

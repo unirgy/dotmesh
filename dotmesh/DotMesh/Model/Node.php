@@ -66,6 +66,15 @@ class DotMesh_Model_Node extends BModel
                         break;
                     }
                 }
+                
+                if (!static::$_localNode) {
+                    static::$_localNode = static::create(array(
+                        'uri' => $nodeName,
+                        'is_https' => BRequest::i()->https(),
+                        'is_rewrite' => BRequest::i()->modRewriteEnabled(),
+                        'is_local' => 1,
+                    ))->save();
+                }
             }
         }
         return static::$_localNode;
