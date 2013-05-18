@@ -93,8 +93,12 @@ class DotMesh_Controller_Posts extends DotMesh_Controler_Abstract
                 if (!empty($post)) {
                     throw new BException('Invalid post action');
                 }
-                if (BModuleRegistry::i()->isLoaded('BreCaptcha') && !BreCaptcha::i()->check()) {
-                    throw new BException('Invalid reCAPTCHA response');
+                $sessUser = DotMesh_Model_User::i()->sessionUser();
+                if (BModuleRegistry::i()->isLoaded('BreCaptcha') && !$sessUser->is_verified) {
+                    $resp = BreCaptcha::i()->check();
+                    if ($resp!==true) {
+                        throw new BException('Invalid reCAPTCHA response');
+                    }
                 }
                 $data = $r->post();
                 $post = $hlp->submitNewPost($data);
@@ -104,7 +108,6 @@ class DotMesh_Controller_Posts extends DotMesh_Controler_Abstract
                 }
 
                 if ($r->xhr()) {
-                    $sessUser = DotMesh_Model_User::i()->sessionUser();
                     $view = BLayout::i()->view('timeline');
                     $view->set('timeline', array('rows'=>array($post)));
                     $result['timeline_html'] = (string)$view;
