@@ -4,7 +4,7 @@ $node = DotMesh_Model_Node::i()->localNode();
 $user = DotMesh_Model_User::i()->sessionUser();
 ?>
 <script>
-localNodeData = <?=BUtil::toJson(BUtil::maskFields($node->as_array(), 'uri,api_version,is_https,is_rewrite'))?>;
+localNodeData = <?=$node ? BUtil::toJson(BUtil::maskFields($node->as_array(), 'uri,api_version,is_https,is_rewrite')) : '{}'?>;
 </script>
 <div class="site-header clearfix">
     <div class="messages-container">
