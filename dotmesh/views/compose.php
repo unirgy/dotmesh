@@ -28,6 +28,10 @@
 				<h3><?=$this->post ? $this->_('Compose Reply') : $this->_('Compose New Post')?></h3>
 		        <div class="textarea">
 		        	<textarea id="contents" name="contents" class="post-input" required><?=$this->q($this->contents)?></textarea>
+                    <?php if (BModuleRegistry::i()->isLoaded('BreCaptcha') && !$user->is_verified): ?>
+                        <p>Since you are not a verified user, please complete the CAPTCHA to submit the post:</p>
+                        <?=BreCaptcha::i()->html()?>
+                    <?php endif ?>
 		        </div>
                 <div class="cors-requests"></div>
 		        <div class="buttons-group">

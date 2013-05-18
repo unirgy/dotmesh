@@ -93,6 +93,9 @@ class DotMesh_Controller_Posts extends DotMesh_Controler_Abstract
                 if (!empty($post)) {
                     throw new BException('Invalid post action');
                 }
+                if (BModuleRegistry::i()->isLoaded('BreCaptcha') && !BreCaptcha::i()->check()) {
+                    throw new BException('Invalid reCAPTCHA response');
+                }
                 $data = $r->post();
                 $post = $hlp->submitNewPost($data);
                 $result = $post->result;

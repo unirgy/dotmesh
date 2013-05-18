@@ -27,10 +27,12 @@ class DotMesh_Migrate extends BClass
 {
     public static function run()
     {
-        BMigrate::i()->install('0.7.0', 'DotMesh_Migrate::install');
+        BMigrate::i()->install('0.7.0', array($this, 'install'));
+        BMigrate::i()->upgrade('0.7.0', '0.7.1', array($this, 'upgrade_0_7_1'));
+
     }
 
-    public static function install()
+    public function install()
     {
         BDb::ddlStart();
 
@@ -223,5 +225,12 @@ class DotMesh_Migrate extends BClass
         ));
 
         BDb::ddlFinish();
+    }
+
+    public function upgrade_0_7_1()
+    {
+        BDb::ddlTableColumns(DotMesh_Model_User::table(), array(
+            'is_verified' => 'tinyint not null default 0 after is_confirmed',
+        ));
     }
 }

@@ -24,7 +24,7 @@
 */
 
 BModuleRegistry::i()->addModule('DotMesh', array(
-    'version' => '0.7.0',
+    'version' => '0.7.1',
     'bootstrap' => array('callback'=>'DotMesh::bootstrap'),
     'migrate' => 'DotMesh_Migrate',
 ));

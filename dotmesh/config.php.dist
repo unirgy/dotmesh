@@ -73,6 +73,19 @@ $config['modules']['DotMesh']['timeline_page_size'] = 10;
 $config['modules']['BTwitterAdapter']['consumer_key'] = '';
 $config['modules']['BTwitterAdapter']['consumer_secret'] = '';
 
+
+/*********************** BTwitterAdapter plugin ************************/
+/* Uncomment to disable                                                */
+
+# $config['request']['module_run_level']['BreCaptcha'] = 'DISABLED';
+
+/* Get your keys here: */
+/* https://www.google.com/recaptcha/admin/create */
+
+$config['modules']['BreCaptcha']['public_key'] = '';
+$config['modules']['BreCaptcha']['private_key'] = '';
+
+
 /***********************************************************************/
 /* Uncomment and put IP addresses to limit access                      */
 
